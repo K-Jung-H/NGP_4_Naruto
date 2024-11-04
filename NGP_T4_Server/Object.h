@@ -1,0 +1,93 @@
+#pragma once
+
+struct Key_State 
+{
+	// true == Key_Down
+	// false == Key_Up
+
+	bool up; // w 또는 방향키
+	bool down; // s 또는 방향키
+	bool left; // a 또는 방향키
+	bool right; // d 또는 방향키
+
+	bool normal_attack;	// c 또는 ','
+	bool ranged_attack;	// b  또는 '/'
+	bool skill_attack_1;		// f 또는 l
+	bool skill_attack_2;		// g 또는 ';'
+	bool teleport;			// v 또는 '.'
+
+};
+
+// 형식 통일 필요 없는 구조체
+//=========================================================================
+
+enum class State {
+	Idle,
+	Run,
+	Jump,
+	Attack
+};
+
+// 플레이어 상태 머신 
+class StateMachine
+{
+private:
+	State currentState; // 현재 상태
+
+public:
+	StateMachine() : currentState(State::Idle) {}
+
+	void start();
+
+	void update();
+
+	void handleEvent(int event);
+
+	void draw();
+
+
+private:
+	void changeState(State newState);
+
+	void enterState(State state);
+
+	void exitState(State state);
+
+	void doAction(State state);
+
+	void drawState(State state);
+};
+
+
+class Object
+{
+public:
+	std::string player_ID;
+	Position pos;
+	bool X_Direction;
+
+	virtual void update() {}
+};
+
+class Player : public Object
+{
+private:
+	StateMachine state_machine;
+	Key_State key_state;
+
+public:
+	int hp;
+	int sp;
+	int state;
+
+	void  update() override;
+	void key_update() {};
+};
+
+class Attack : public Object
+{
+public:
+	int attack_type;
+
+	void  update() override;
+};
