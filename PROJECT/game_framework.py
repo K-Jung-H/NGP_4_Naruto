@@ -7,7 +7,8 @@ running = None
 stack = None
 
 # 서버 설정
-SERVER_IP = '196.168.88.227'
+# SERVER_IP = '196.168.88.227'
+SERVER_IP = '127.0.0.1'
 SERVER_PORT = 9000
 
 # 네트워크 클라이언트 초기화 및 연결
@@ -70,24 +71,22 @@ def run(start_mode):
         current_time += frame_time
         # print(f'Frame Time: {frame_time}, Frame Rate: {frame_rate}')
 
-        try:
-            # 메인 게임 루프 (단순화된 예제)
-            while True:
-                # 키가 눌리면 해당 키 값을 서버로 전송
-                event = keyboard.read_event()
-                if event.event_type == keyboard.KEY_DOWN:
-                    key_data = event.name
-                    print(f"게임에서 감지한 키 입력: {key_data}")
-
-                    # 네트워크로 키 입력 데이터를 전송
-                    network_client.send_key_data(key_data)
-
-                    # esc 키가 눌리면 게임 종료
-                    if key_data == 'esc':
-                        break
-        finally:
-            # 게임 종료 시 서버 연결 해제
-            network_client.disconnect()
+        event = keyboard.read_event()
+        # try:
+        #     # 키가 눌리면 해당 키 값을 서버로 전송
+        #     event = keyboard.read_event()
+        #     if event.event_type == keyboard.KEY_DOWN:
+        #         key_data = event.name
+        #         print(f"게임에서 감지한 키 입력: {key_data}")
+        #
+        #         # 네트워크로 키 입력 데이터를 전송
+        #         network_client.send_key_data(key_data)
+        #
+        #         # esc 키가 눌리면 게임 종료
+        #         if key_data == 'esc':
+        #             break
+        # except Exception as e:
+        #     print(f"키보드 입력 오류 발생: {e}")
 
     # repeatedly delete the top of the stack
     while (len(stack) > 0):
