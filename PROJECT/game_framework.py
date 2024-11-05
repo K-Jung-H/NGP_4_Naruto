@@ -7,8 +7,8 @@ running = None
 stack = None
 
 # 서버 설정
-# SERVER_IP = '196.168.88.227'
-SERVER_IP = '127.0.0.1'
+SERVER_IP = '192.168.80.227'
+# SERVER_IP = '127.0.0.1'
 SERVER_PORT = 9000
 
 # 네트워크 클라이언트 초기화 및 연결
@@ -71,7 +71,7 @@ def run(start_mode):
         current_time += frame_time
         # print(f'Frame Time: {frame_time}, Frame Rate: {frame_rate}')
 
-        event = keyboard.read_event()
+
         # try:
         #     # 키가 눌리면 해당 키 값을 서버로 전송
         #     event = keyboard.read_event()
