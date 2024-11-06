@@ -16,6 +16,7 @@ SERVER_PORT = 9000
 network_client = NetworkClient(SERVER_IP, SERVER_PORT)
 network_client.connect()
 
+pressed_keys = set()
 
 # 키 입력을 감지하고 서버로 전송하는 함수
 def key_listener():
@@ -23,14 +24,27 @@ def key_listener():
         event = keyboard.read_event()
         if event.event_type == keyboard.KEY_DOWN:
             key_data = event.name
-            print(f"감지된 키 다운 입력: {key_data}")
-            # 키 입력 데이터를 서버로 전송
-            # network_client.client_socket.sendall(key_data.encode('utf-8'))
+
+            # 키가 처음 눌린 경우에만 서버로 전송
+            if key_data not in pressed_keys:
+                print(f"감지된 키 다운 입력: {key_data}")
+                # 서버로 키 다운 정보 전송
+                # network_client.client_socket.sendall(f"{key_data}_DOWN".encode('utf-8'))
+
+                # 눌린 키로 등록
+                pressed_keys.add(key_data)
+
         elif event.event_type == keyboard.KEY_UP:
             key_data = event.name
-            print(f"감지된 키 업 입력: {key_data}")
-            # 키 입력 데이터를 서버로 전송
-            # network_client.client_socket.sendall(key_data.encode('utf-8'))
+
+            # 키가 처음 떼어진 경우에만 서버로 전송
+            if key_data in pressed_keys:
+                print(f"감지된 키 업 입력: {key_data}")
+                # 서버로 키 업 정보 전송
+                # network_client.client_socket.sendall(f"{key_data}_UP".encode('utf-8'))
+
+                # 눌린 키에서 제거
+                pressed_keys.remove(key_data)
 
 
                 # 키 입력 감지 쓰레드 시작
