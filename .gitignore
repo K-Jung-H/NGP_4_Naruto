@@ -31,4 +31,5 @@
 *.out
 *.app
 
+PROJECT/.idea/
 PROJECT/__pycache__/
