@@ -1,4 +1,5 @@
 # from game_world import objects
+import struct
 import time
 import keyboard
 from network_client import NetworkClient
@@ -7,9 +8,13 @@ import threading
 running = None
 stack = None
 
+TEST = True
+
 # 서버 설정
-# SERVER_IP = '192.168.80.227'
-SERVER_IP = '127.0.0.1'
+if TEST:
+    SERVER_IP = '127.0.0.1'
+else:
+    SERVER_IP = '192.168.81.193'
 SERVER_PORT = 9000
 
 # 네트워크 클라이언트 초기화 및 연결
@@ -17,6 +22,25 @@ network_client = NetworkClient(SERVER_IP, SERVER_PORT)
 network_client.connect()
 
 pressed_keys = set()
+# 키 동작 정의
+KEY_DOWN = 1
+KEY_UP = 2
+
+# key_name에 해당하는 키 코드 매핑 예시
+key_codes = {
+    'a': 65,
+    'd': 68,
+    's': 83,
+    'w': 87
+    # 필요한 키들을 추가로 정의
+}
+
+def send_key_info(key_name, key_action):
+    """키 정보를 패킹하여 서버로 전송"""
+    key_code = key_codes.get(key_name, 0)  # key_name을 key_code로 변환
+    data = struct.pack('ii', key_code, key_action)
+    network_client.client_socket.sendall(data)
+
 
 # 키 입력을 감지하고 서버로 전송하는 함수
 def key_listener():
@@ -28,9 +52,9 @@ def key_listener():
             # 키가 처음 눌린 경우에만 서버로 전송
             if key_data not in pressed_keys:
                 print(f"감지된 키 다운 입력: {key_data}")
-                # 서버로 키 다운 정보 전송
-                # network_client.client_socket.sendall(f"{key_data}_DOWN".encode('utf-8'))
-
+                if not TEST:
+                    # 서버로 키 다운 정보 전송
+                    send_key_info(key_data, KEY_DOWN)
                 # 눌린 키로 등록
                 pressed_keys.add(key_data)
 
@@ -40,9 +64,9 @@ def key_listener():
             # 키가 처음 떼어진 경우에만 서버로 전송
             if key_data in pressed_keys:
                 print(f"감지된 키 업 입력: {key_data}")
-                # 서버로 키 업 정보 전송
-                # network_client.client_socket.sendall(f"{key_data}_UP".encode('utf-8'))
-
+                if not TEST:
+                    # 서버로 키 업 정보 전송
+                    send_key_info(key_data, KEY_UP)  # 키 업 전송
                 # 눌린 키에서 제거
                 pressed_keys.remove(key_data)
 
