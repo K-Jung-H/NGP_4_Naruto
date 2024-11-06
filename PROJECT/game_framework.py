@@ -23,12 +23,15 @@ def key_listener():
         event = keyboard.read_event()
         if event.event_type == keyboard.KEY_DOWN:
             key_data = event.name
-            print(f"감지된 키 입력: {key_data}")
+            print(f"감지된 키 다운 입력: {key_data}")
             # 키 입력 데이터를 서버로 전송
-            network_client.client_socket.sendall(key_data.encode('utf-8'))
+            # network_client.client_socket.sendall(key_data.encode('utf-8'))
+        elif event.event_type == keyboard.KEY_UP:
+            key_data = event.name
+            print(f"감지된 키 업 입력: {key_data}")
+            # 키 입력 데이터를 서버로 전송
+            # network_client.client_socket.sendall(key_data.encode('utf-8'))
 
-            if key_data == 'esc':  # esc 키가 눌리면 종료
-                break
 
                 # 키 입력 감지 쓰레드 시작
 client_IO_thread = threading.Thread(target=key_listener)
