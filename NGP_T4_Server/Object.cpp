@@ -4,45 +4,59 @@
 // 상태 머신
 void StateMachine::start()
 {
-    enterState(currentState);
+    enterState(currentState, 0);
 }
 
-void StateMachine::update() {
+void StateMachine::update() 
+{
     // 현재 상태에 따른 동작을 수행
     doAction(currentState);
+
+    if (currentState == State::Jump)
+    {
+        Sleep(1000);
+        changeState(State::Idle, EVENT_NONE);
+    }
 }
 
-void StateMachine::handleEvent(int event)
+void StateMachine::handleEvent(int key_event)
 {
     switch (currentState)
     {
     case State::Idle:
-        if (event == 1) { // right_down
-            changeState(State::Run);
+        if (key_event == EVENT_MOVE_LEFT_KEY_DOWN || key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
+        { 
+            changeState(State::Run, key_event);
         }
-        else if (event == 2) { // attack_down
-            changeState(State::Attack);
+        else if (key_event == EVENT_MOVE_UP_KEY_DOWN)
+        {
+            changeState(State::Jump, key_event);
         }
         break;
 
+        break;
+
     case State::Run:
-        if (event == 0) { // stop
-            changeState(State::Idle);
+        if (key_event == EVENT_MOVE_LEFT_KEY_UP || key_event == EVENT_MOVE_RIGHT_KEY_UP)
+        { 
+            changeState(State::Idle, key_event);
         }
-        else if (event == 3) { // jump
-            changeState(State::Jump);
+        else if (key_event == EVENT_MOVE_UP_KEY_DOWN)
+        { 
+            changeState(State::Jump, key_event);
         }
         break;
 
     case State::Jump:
-        if (event == 0) { // jump_end
-            changeState(State::Idle);
+        if (key_event == 0) 
+        {
         }
         break;
 
     case State::Attack:
-        if (event == 0) { // attack_end
-            changeState(State::Idle);
+        if (key_event == 0) 
+        { 
+            changeState(State::Idle, key_event);
         }
         break;
 
@@ -50,22 +64,22 @@ void StateMachine::handleEvent(int event)
     }
 }
 
-void StateMachine::draw()
+void StateMachine::changeState(State newState, int key_event)
 {
-    // 현재 상태에 따라 그리기
-    drawState(currentState);
-}
-
-void StateMachine::changeState(State newState)
-{
-    exitState(currentState);
+    exitState(currentState, key_event);
     currentState = newState;
-    enterState(currentState);
+    enterState(currentState, key_event);
 }
 
-void StateMachine::enterState(State state)
+void StateMachine::enterState(State state, int key_event)
 {
-    switch (state) {
+    if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
+        X_Direction = LEFT;
+    else if(key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
+        X_Direction = RIGHT;
+
+    switch (state)
+    {
     case State::Idle:
         std::cout << "Entering Idle State" << std::endl;
         break;
@@ -81,43 +95,30 @@ void StateMachine::enterState(State state)
     }
 }
 
-void StateMachine::exitState(State state)
+void StateMachine::exitState(State state, int key_event)
 {
     // 상태 종료 시 동작 처리
 }
 
 void StateMachine::doAction(State state)
 {
-    switch (state) {
+    switch (state)
+    {
     case State::Idle:
         std::cout << "Doing Idle Action" << std::endl;
         break;
     case State::Run:
-        std::cout << "Doing Run Action" << std::endl;
+        std::cout << "Doing Run Action";
+        if (X_Direction == LEFT)
+            std::cout << " - Left" << std::endl;
+        else
+            std::cout << " - Right" << std::endl;
         break;
     case State::Jump:
         std::cout << "Doing Jump Action" << std::endl;
         break;
     case State::Attack:
         std::cout << "Doing Attack Action" << std::endl;
-        break;
-    }
-}
-
-void StateMachine::drawState(State state)
-{
-    switch (state) {
-    case State::Idle:
-        std::cout << "Drawing Idle State" << std::endl;
-        break;
-    case State::Run:
-        std::cout << "Drawing Run State" << std::endl;
-        break;
-    case State::Jump:
-        std::cout << "Drawing Jump State" << std::endl;
-        break;
-    case State::Attack:
-        std::cout << "Drawing Attack State" << std::endl;
         break;
     }
 }
@@ -131,10 +132,9 @@ void Player::update()
     // 키 검사 우선하기
 }
 
-void Player::key_update()
+void Player::key_update(int key_event)
 {
-
-    state_machine.update();
+    state_machine.handleEvent(key_event);
 }
 
 void Attack::update()

@@ -33,7 +33,8 @@ class StateMachine
 {
 private:
 	State currentState; // 현재 상태
-
+	Position pos;
+	bool X_Direction; // Left: false, Right: true
 public:
 	StateMachine() : currentState(State::Idle) {}
 
@@ -41,21 +42,18 @@ public:
 
 	void update();
 
-	void handleEvent(int event);
-
-	void draw();
+	void handleEvent(int key_event);
 
 
 private:
-	void changeState(State newState);
+	void changeState(State newState, int key_event);
 
-	void enterState(State state);
+	void enterState(State state, int key_event);
 
-	void exitState(State state);
+	void exitState(State state, int key_event);
 
 	void doAction(State state);
 
-	void drawState(State state);
 };
 
 
@@ -64,9 +62,9 @@ class Object
 public:
 	std::string player_ID;
 	Position pos;
-	bool X_Direction;
+	bool X_Direction; // Left: false, Right: true
 
-	virtual void update() {}
+	virtual void update() {};
 };
 
 class Player : public Object
@@ -81,7 +79,7 @@ public:
 	int state;
 
 	void  update() override;
-	void key_update() {};
+	void key_update(int key_event);
 };
 
 class Attack : public Object

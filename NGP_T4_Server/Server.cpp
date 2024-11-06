@@ -1,8 +1,9 @@
 #pragma once
 #include "stdafx.h"
 #include "Server.h"
-#include "Object.h"
 
+
+std::vector<Object*> Public_Object_List(20);
 
 void Server::Update_Server()
 {
@@ -21,42 +22,47 @@ void Server::Update_Server()
 }
 
 
-void err_quit(const char* msg)
+void Server::Decoding(int client_n, Key_Info* key_info)
 {
-	LPVOID lpMsgBuf;
-	FormatMessageA(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL, WSAGetLastError(),
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(char*)&lpMsgBuf, 0, NULL);
-	MessageBoxA(NULL, (const char*)lpMsgBuf, msg, MB_ICONERROR);
-	LocalFree(lpMsgBuf);
-	exit(1);
+	if (key_info->key_action == 0)
+		return;
+
+	int key = EVENT_NONE;
+	switch (key_info->key_name)
+	{
+	case 'a':
+	case 'A':
+		if(key_info->key_action == 1)
+			key = EVENT_MOVE_LEFT_KEY_DOWN;
+		else
+			key = EVENT_MOVE_LEFT_KEY_UP;
+		break;
+
+	default:
+		break;
+	}
+
+	if (client_n == 1 && p1_ptr != NULL)
+		p1_ptr->key_update(key);
+	else if (client_n == 2 && p2_ptr != NULL)
+		p2_ptr->key_update(key);
+
+	//	Key_Info 기반 플레이어들의 키 상태 업데이트
+
 }
 
-
-// 소켓 함수 오류 출력
-void err_display(const char* msg)
+void Server::Delete_Player(int Client)
 {
-	LPVOID lpMsgBuf;
-	FormatMessageA(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL, WSAGetLastError(),
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(char*)&lpMsgBuf, 0, NULL);
-	printf("[%s] %s\n", msg, (char*)lpMsgBuf);
-	LocalFree(lpMsgBuf);
-}
-
-// 소켓 함수 오류 출력
-void err_display(int errcode)
-{
-	LPVOID lpMsgBuf;
-	FormatMessageA(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL, errcode,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(char*)&lpMsgBuf, 0, NULL);
-	printf("[오류] %s\n", (char*)lpMsgBuf);
-	LocalFree(lpMsgBuf);
+	if (Client == 0)
+		return;
+	else if (Client == 1)
+	{
+		delete p1_ptr;
+		p1_ptr = NULL;
+	}
+	else if (Client == 2)
+	{
+		delete p2_ptr;
+		p2_ptr = NULL;
+	}
 }
