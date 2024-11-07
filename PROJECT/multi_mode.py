@@ -10,15 +10,15 @@ from network_client import NetworkClient
 import threading
 import struct
 
-TEST = True
-LOCAL = True
+TEST = False
+LOCAL = False
 
 # 서버 설정
 if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '192.168.81.193'
+        SERVER_IP = '192.168.81.47'
 else:
     SERVER_IP = "0"
 
@@ -55,7 +55,7 @@ def key_listener():
             # 키가 처음 눌린 경우에만 서버로 전송
             if key_data not in pressed_keys:
                 print(f"감지된 키 다운 입력: {key_data}")
-                if not TEST:
+                if TEST:
                     # 서버로 키 다운 정보 전송
                     send_key_info(key_data, KEY_DOWN)
                 # 눌린 키로 등록
@@ -65,13 +65,13 @@ def key_listener():
             key_data = event.name
 
             # 키가 처음 떼어진 경우에만 서버로 전송
-            if key_data in pressed_keys:
-                print(f"감지된 키 업 입력: {key_data}")
-                if not TEST:
-                    # 서버로 키 업 정보 전송
-                    send_key_info(key_data, KEY_UP)  # 키 업 전송
-                # 눌린 키에서 제거
-                pressed_keys.remove(key_data)
+            # if key_data in pressed_keys:
+            print(f"감지된 키 업 입력: {key_data}")
+            if TEST:
+                # 서버로 키 업 정보 전송
+                send_key_info(key_data, KEY_UP)  # 키 업 전송
+            # 눌린 키에서 제거
+            pressed_keys.remove(key_data)
 #
 # if __name__ == "__main__":
 #
@@ -82,10 +82,9 @@ def init():
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
         network_client.connect()
 
-    if TEST:
-        # 키 입력 감지 쓰레드 시작
-        client_IO_thread = threading.Thread(target=key_listener)
-        client_IO_thread.start()
+    # 키 입력 감지 쓰레드 시작
+    client_IO_thread = threading.Thread(target=key_listener)
+    client_IO_thread.start()
 
     pass
 def finish():
