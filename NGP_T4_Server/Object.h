@@ -63,6 +63,7 @@ public:
 	std::string player_ID;
 	Position pos;
 	bool X_Direction; // Left: false, Right: true
+	int sprite_index;
 
 	virtual void update() {};
 };
@@ -77,6 +78,8 @@ public:
 	int hp;
 	int sp;
 	int state;
+	int selected_character_type;
+
 
 	void  update() override;
 	void key_update(int key_event);

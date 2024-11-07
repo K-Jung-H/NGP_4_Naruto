@@ -149,9 +149,9 @@ DWORD WINAPI ServerMain(LPVOID arg)
 
 
 		// 서버에 연결될 플레이어 2명으로 제한 // 서버에서는 player_N 1 or 2만 처리함
-		if (server_program.p1_ptr == NULL)
+		if (server_program.Get_Player(1) == NULL)
 			client_info->player_N = 1;
-		else if (server_program.p2_ptr == NULL)
+		else if (server_program.Get_Player(2) == NULL)
 			client_info->player_N = 2;
 
 
@@ -166,6 +166,8 @@ DWORD WINAPI ServerMain(LPVOID arg)
 		EnterCriticalSection(&cs_server_program);
 
 		server_program.Update_Server();
+		server_program.Update_Collision();
+		Game_Data* sending_data = server_program.Encoding();
 
 		LeaveCriticalSection(&cs_server_program);
 	}
@@ -178,68 +180,61 @@ DWORD WINAPI ServerMain(LPVOID arg)
 	return 0;
 }
 
-// 클라이언트와 데이터 통신 쓰레드
 DWORD WINAPI ProcessClient(LPVOID arg)
 {
 	Client_Info* clientInfo = (Client_Info*)arg;
 
-	// clientInfo가 nullptr이거나 잘못된 값이면 스레드를 종료
-	if (clientInfo == nullptr) 
-		return 1;  
-	else if (clientInfo->player_N == 0)
+	// clientInfo가 잘못된 값이면 스레드를 종료
+	if (clientInfo == nullptr || clientInfo->player_N == 0)
 	{
 		delete clientInfo;
 		return 1;
 	}
-	//=================================================
-	int retval;
+
 	int addrlen;
 	char addr[INET_ADDRSTRLEN];
-
 	struct sockaddr_in clientaddr;
 	SOCKET client_sock = clientInfo->socket;
 	Key_Info keyInfo;
-
 
 	// 클라이언트 정보 얻기
 	addrlen = sizeof(clientaddr);
 	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
 	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
 
-
-
 	int Client_N = clientInfo->player_N;
-	if (Client_N != 0)
-	{
-		DisplayText("%dP 클라이언트 연결됨: IP 주소=%s, 포트 번호=%d\r\n", Client_N, addr, ntohs(clientaddr.sin_port));
-		Object* player = new Player();
+	DisplayText("%dP 클라이언트 연결됨: IP 주소=%s, 포트 번호=%d\r\n", Client_N, addr, ntohs(clientaddr.sin_port));
 
-		EnterCriticalSection(&cs_server_program);
+	Object* player = new Player();
 
-		if (Client_N == 1)
-			server_program.Add_P1(player);
-		else if (Client_N == 2)
-			server_program.Add_P2(player);
+	EnterCriticalSection(&cs_server_program);
 
-		LeaveCriticalSection(&cs_server_program);
-	}
+	if (Client_N == 1)
+		server_program.Add_P1(player);
+	else if (Client_N == 2)
+		server_program.Add_P2(player);
 
-	while (true) 
+	server_program.Add_Client_Socket(client_sock, Client_N);
+
+	LeaveCriticalSection(&cs_server_program);
+
+	while (true)
 	{
 		// Key_Info 단위로 데이터 받기
 		int retval = recv(client_sock, (char*)&keyInfo, sizeof(Key_Info), 0);
-		if (retval == SOCKET_ERROR) 
+		if (retval == SOCKET_ERROR)
 		{
-			std::cerr << "recv() error" << std::endl;
+			int error = WSAGetLastError();
+			std::cerr << "recv() error: " << error << std::endl;
 			break;
 		}
-		else if (retval == 0) 
+		else if (retval == 0)
 		{
 			// 클라이언트가 연결 종료
-			DisplayText("%d P Disconnected\n", Client_N);
+			DisplayText("%dP Disconnected\n", Client_N);
 			break;
 		}
-		else if (retval > 0) 
+		else if (retval > 0)
 		{
 			// 전달받은 Key_Info 정보 출력
 			DisplayText("Player: %d, Received KeyCode: %c, ActionType: %s\r\n", Client_N,
@@ -248,28 +243,28 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
 			// 키 업데이트 호출
 			EnterCriticalSection(&cs_server_program);
-
 			server_program.Decoding(Client_N, &keyInfo);
-
 			LeaveCriticalSection(&cs_server_program);
 		}
 	}
 
-	// 소켓 닫기
+	// 소켓 닫기 및 클라이언트 연결 해제
 	closesocket(client_sock);
-	DisplayText("%d P Disconnected\n", Client_N);
+	DisplayText("%dP Disconnected\n", Client_N);
 	DisplayText("클라이언트 종료: IP 주소=%s, 포트 번호=%d\r\n", addr, ntohs(clientaddr.sin_port));
-	
+
 	EnterCriticalSection(&cs_server_program);
 
-	server_program.Delete_Player(Client_N);
+	server_program.Remove_Player(Client_N);
+	server_program.Remove_Client_Socket(Client_N);
 
 	LeaveCriticalSection(&cs_server_program);
 
 	// 동적 할당된 메모리 해제
-	delete clientInfo;  
+	delete clientInfo;
 	return 0;
 }
+
 
 
 

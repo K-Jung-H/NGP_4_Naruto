@@ -13,6 +13,8 @@
 
 #include <string>
 #include <vector>
+#include <array>
+#include <algorithm>
 #include <iostream>
 #pragma comment(lib, "ws2_32") // ws2_32.lib 링크
 
@@ -47,21 +49,27 @@
 #define LEFT false
 #define RIGHT true
 
-
+#define MAX_PLAYERS 2
+#define MAX_ATTACKS 18
+#define OBJECT_MAX_LEN (MAX_PLAYERS + MAX_ATTACKS)
+ 
 struct Position
 {
 	float x;
 	float y;
+	Position() : x(0), y(0) {}
 };
 
 struct Player_Info
 {
-	std::string player_ID;
+	std::string player_ID = "";
 	Position pos;
-	bool X_Direction; // Left: false, Right: true
-	int player_state;
-	int selected_character;
-	int sprite_index;
+	bool X_Direction = false; // Left: false, Right: true
+	int player_state = 0;
+	int selected_character = 0;
+	int sprite_index = 0;
+
+	Player_Info() : player_ID("Unknown"), pos(), X_Direction(false), player_state(0), selected_character(0), sprite_index(0) {}
 };
 
 
@@ -72,6 +80,8 @@ struct Attack_Info
 	bool X_Direction;		// Left: false, Right: true
 	int attack_type;			// 스킬 1, 스킬 2, 투사체, 기본 공격
 	int sprite_index;
+
+	Attack_Info() : player_ID("Unknown"), pos(), X_Direction(false), attack_type(0), sprite_index(0) {}
 };
 
 struct ETC_Info
@@ -83,7 +93,17 @@ struct ETC_Info
 	int player2_sp; // 차크라
 
 	int game_time;
+
+	ETC_Info() : player1_hp(0), player1_sp(0), player2_hp(0), player2_sp(0), game_time(0) {}
+
 };
+
+struct Game_Data {
+	std::array<Player_Info, MAX_PLAYERS> players;
+	std::array<Attack_Info, MAX_ATTACKS> attacks;
+	ETC_Info etc;
+};
+
 
 struct Key_Info
 {
