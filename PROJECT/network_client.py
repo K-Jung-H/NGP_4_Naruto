@@ -1,6 +1,5 @@
 # network_client.py
 import socket
-import threading
 
 class NetworkClient:
     def __init__(self, server_ip, server_port):

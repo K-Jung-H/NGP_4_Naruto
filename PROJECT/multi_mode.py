@@ -72,15 +72,44 @@ def key_listener():
                 send_key_info(key_data, KEY_UP)  # 키 업 전송
             # 눌린 키에서 제거
             pressed_keys.remove(key_data)
-#
-# if __name__ == "__main__":
-#
+
+# struct 포맷: 'ff?iii' -> float 2개, bool 1개, int 3개
+player_info_format = 'ff?iii'
+data_size = struct.calcsize(player_info_format)
+
+def receive_player_info(client_socket):
+    # 서버에서 Player_Info 구조체 크기만큼 데이터 수신
+    data = client_socket.recv(data_size)
+    if len(data) != data_size:
+        print("수신된 데이터 크기가 올바르지 않습니다.")
+        return None
+
+    # 데이터 언패킹
+    x, y, direction, state, character, sprite_index = struct.unpack(player_info_format, data)
+
+    # 언패킹된 데이터를 딕셔너리 형태로 반환
+    return {
+        "position": {"x": x, "y": y},
+        "direction": direction,
+        "state": state,
+        "character": character,
+        "sprite_index": sprite_index
+    }
+
+def data_receiver(client_socket):
+    while True:
+        player_info = receive_player_info(client_socket)
+        if player_info:
+            print(player_info)
+
 def init():
     global network_client
     if TEST:
         # 네트워크 클라이언트 초기화 및 연결
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
         network_client.connect()
+        receiver_thread = threading.Thread(target=data_receiver, args=(network_client.client_socket))
+        receiver_thread.start()
 
     # 키 입력 감지 쓰레드 시작
     client_IO_thread = threading.Thread(target=key_listener)
