@@ -2,6 +2,7 @@ from pico2d import *
 
 import charactor_choose_mode
 import game_framework
+import game_world
 import play_mode
 import single_character_choice_mode
 import mode_choose_mode
@@ -9,6 +10,9 @@ import keyboard
 from network_client import NetworkClient
 import threading
 import struct
+from map import Map
+from sasuke import SASUKE
+from naruto import NARUTO
 
 TEST = False
 LOCAL = False
@@ -65,13 +69,13 @@ def key_listener():
             key_data = event.name
 
             # 키가 처음 떼어진 경우에만 서버로 전송
-            # if key_data in pressed_keys:
-            print(f"감지된 키 업 입력: {key_data}")
-            if TEST:
-                # 서버로 키 업 정보 전송
-                send_key_info(key_data, KEY_UP)  # 키 업 전송
-            # 눌린 키에서 제거
-            pressed_keys.remove(key_data)
+            if key_data in pressed_keys:
+                print(f"감지된 키 업 입력: {key_data}")
+                if TEST:
+                    # 서버로 키 업 정보 전송
+                    send_key_info(key_data, KEY_UP)  # 키 업 전송
+                # 눌린 키에서 제거
+                pressed_keys.remove(key_data)
 
 # struct 포맷: 'ff?iii' -> float 2개, bool 1개, int 3개
 player_info_format = 'ff?iii'
@@ -104,6 +108,9 @@ def data_receiver(client_socket):
 
 def init():
     global network_client
+    global p1
+    global p2
+    global map
     if TEST:
         # 네트워크 클라이언트 초기화 및 연결
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
@@ -115,10 +122,43 @@ def init():
     client_IO_thread = threading.Thread(target=key_listener)
     client_IO_thread.start()
 
+    map = Map()
+    game_world.add_object(map, 1)
+
+    p1 = SASUKE(1)
+    game_world.add_object(p1, 1)
+
+    p2 = NARUTO(2)
+    game_world.add_object(p2, 1)
+
+    p1.set_background(map)
+    p2.set_background(map)
+
+    p1.x = 1200
+    p1.dir = -1
+    p2.x = 400
+    p1.y, p2.y = 400, 400
+    p1.frame, p2.frame = 2, 2
+
+    game_world.add_collision_pair('p1:p2_attack', p1, None)
+    game_world.add_collision_pair('p1:p2_shuriken', p1, None)
+    game_world.add_collision_pair('p1:p2_skill1', p1, None)
+    game_world.add_collision_pair('p1:p2_skill2', p1, None)
+
+    game_world.add_collision_pair('p2:p1_attack', p2, None)
+    game_world.add_collision_pair('p2:p1_shuriken', p2, None)
+    game_world.add_collision_pair('p2:p1_skill1', p2, None)
+    game_world.add_collision_pair('p2:p1_skill2', p2, None)
+
     pass
 def finish():
     if TEST:
         network_client.disconnect()
+    game_world.remove_object(p1)
+    game_world.remove_object(p2)
+    game_world.remove_object(map)
+    game_world.objects[2] = []
+    game_world.collision_pairs = {}
     pass
 def handle_events():
     events = get_events()
@@ -135,7 +175,10 @@ def running():
     pass
 def draw():
     clear_canvas()
+    game_world.render()
     update_canvas()
 
 def update():
+    game_world.update()
+    game_world.handle_collisions()
     pass

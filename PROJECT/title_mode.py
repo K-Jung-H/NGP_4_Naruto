@@ -41,10 +41,10 @@ def handle_events():
             # game_framework.change_mode(charactor_choose_mode)
             # game_framework.change_mode(single_character_choice_mode)
             game_framework.change_mode(mode_choose_mode)
-        elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_F1):
-            # game_framework.change_mode(charactor_choose_mode)
-            # game_framework.change_mode(single_character_choice_mode)
-            game_framework.change_mode(multi_mode)
+        # elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_z):
+        #     # game_framework.change_mode(charactor_choose_mode)
+        #     # game_framework.change_mode(single_character_choice_mode)
+        #     game_framework.change_mode(mode_choose_mode)
 
 def running():
     pass

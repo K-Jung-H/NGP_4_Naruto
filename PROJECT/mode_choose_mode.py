@@ -5,6 +5,7 @@ import game_framework
 import play_mode
 import single_character_choice_mode
 import title_mode
+import multi_mode
 
 character_count = 3
 
@@ -60,6 +61,8 @@ def handle_events():
                 game_framework.change_mode(single_character_choice_mode)
             elif mode_choose == '2p':
                 game_framework.change_mode(charactor_choose_mode)
+            elif mode_choose == 'multi':
+                game_framework.change_mode(multi_mode)
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()
@@ -73,6 +76,8 @@ def handle_events():
             mode_choose = '2p'
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_z:
+            mode_choose = 'multi'
 
 def running():
     pass
