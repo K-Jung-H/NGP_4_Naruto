@@ -19,6 +19,8 @@ from naruto import NARUTO
 TEST = False
 LOCAL = False
 
+Input_thread_running = True
+
 # 서버 설정
 if TEST:
     if LOCAL:
@@ -53,7 +55,8 @@ def send_key_info(key_name, key_action):
 
 # 키 입력을 감지하고 서버로 전송하는 함수
 def key_listener():
-    while True:
+    global Input_thread_running
+    while Input_thread_running:
         event = keyboard.read_event()
         if event.event_type == keyboard.KEY_DOWN:
             key_data = event.name
@@ -121,8 +124,8 @@ def init():
         receiver_thread.start()
 
     # 키 입력 감지 쓰레드 시작
-    client_IO_thread = threading.Thread(target=key_listener)
-    client_IO_thread.start()
+    client_Input_thread = threading.Thread(target=key_listener)
+    client_Input_thread.start()
 
     map = Map()
     game_world.add_object(map, 1)
@@ -154,6 +157,7 @@ def init():
 
     pass
 def finish():
+    global Input_thread_running
     if TEST:
         network_client.disconnect()
     game_world.remove_object(p1)
@@ -161,7 +165,8 @@ def finish():
     game_world.remove_object(map)
     game_world.objects[2] = []
     game_world.collision_pairs = {}
-    pass
+    Input_thread_running = False
+
 def handle_events():
     events = get_events()
     for event in events:
