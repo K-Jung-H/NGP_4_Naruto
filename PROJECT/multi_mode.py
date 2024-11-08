@@ -7,6 +7,8 @@ import play_mode
 import single_character_choice_mode
 import mode_choose_mode
 import keyboard
+
+import title_mode
 from network_client import NetworkClient
 import threading
 import struct
@@ -170,6 +172,8 @@ def handle_events():
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
             # game_framework.change_mode(mode_choose_mode)
             pass
+        elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_F1):
+            game_framework.change_mode(title_mode)
 
 def running():
     pass
