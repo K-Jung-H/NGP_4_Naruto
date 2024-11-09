@@ -183,6 +183,10 @@ def handle_events():
             p2.x = 500
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_a):
             p2.x = 100
+        elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_t):
+            # p1.hit_state = 'hard'
+            # p1.dir = 1
+            p1.frame = 0
 
 def running():
     pass
