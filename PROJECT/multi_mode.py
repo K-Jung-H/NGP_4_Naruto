@@ -179,6 +179,10 @@ def handle_events():
             pass
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_F1):
             game_framework.change_mode(title_mode)
+        elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_d):
+            p2.x = 500
+        elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_a):
+            p2.x = 100
 
 def running():
     pass
