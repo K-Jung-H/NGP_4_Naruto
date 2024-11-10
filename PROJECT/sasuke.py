@@ -723,6 +723,20 @@ class StateMachine:
                            right_down: Skill_motion, left_down: Skill_motion},
             Win: {stop: Idle}, Lose: {stop: Idle}
         }
+        self.states = {
+            'Idle': Idle,
+            'Run': Run,
+            'Jump': Jump,
+            'Teleport': Teleport,
+            'Attack': Attack,
+            'Run_Attack': Run_Attack,
+            'Jump_Attack': Jump_Attack,
+            'Easy_hit': Easy_hit,
+            'Hard_hit': Hard_hit,
+            'Skill_motion': Skill_motion,
+            'Win': Win,
+            'Lose': Lose
+        }
 
     def start(self):
         self.cur_state.enter(self.p1, ('NONE', 0))
@@ -737,8 +751,25 @@ class StateMachine:
                 self.cur_state = next_state
                 self.cur_state.enter(self.p1, e)
                 return True
-
         return False
+
+    def force_state(self, target_state_name, event=None):
+        """문자열 상태 이름을 받아서 상태 전환을 수행"""
+        # 상태 이름을 실제 상태로 변환
+        target_state = self.states.get(target_state_name)
+
+        if target_state is not None:
+            # 현재 상태의 exit 처리
+            self.cur_state.exit(self.p1, event)
+
+            # 새로운 상태로 전환
+            self.cur_state = target_state
+
+            # 새로운 상태의 enter 처리
+            self.cur_state.enter(self.p1, event)
+            print(f"강제 상태 전환: {target_state_name}로 전환되었습니다.")
+        else:
+            print(f"오류: '{target_state_name}' 상태가 정의되어 있지 않습니다.")
 
     def draw(self):
         self.cur_state.draw(self.p1)

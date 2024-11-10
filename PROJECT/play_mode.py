@@ -189,6 +189,7 @@ def update():
         p2.win = True
     if p2.hp <= 0:
         p1.win = True
+    # print(game_world.objects)
 
 def draw():
     clear_canvas()

@@ -93,6 +93,7 @@ def receive_player_info(client_socket):
         print("수신된 데이터 크기가 올바르지 않습니다.")
         return None
 
+    # 플레이어 info인 경우
     # 데이터 언패킹
     x, y, direction, state, character, sprite_index = struct.unpack(player_info_format, data)
 
@@ -105,7 +106,7 @@ def receive_player_info(client_socket):
         "sprite_index": sprite_index
     }
 
-def data_receiver(client_socket):
+def Decoding(client_socket):
     while True:
         player_info = receive_player_info(client_socket)
         if player_info:
@@ -120,7 +121,7 @@ def init():
         # 네트워크 클라이언트 초기화 및 연결
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
         network_client.connect()
-        receiver_thread = threading.Thread(target=data_receiver, args=(network_client.client_socket))
+        receiver_thread = threading.Thread(target=Decoding, args=(network_client.client_socket))
         receiver_thread.start()
 
     # 키 입력 감지 쓰레드 시작
@@ -186,7 +187,12 @@ def handle_events():
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_t):
             # p1.hit_state = 'hard'
             # p1.dir = 1
-            p1.frame = 0
+            # p1.frame = 0
+            # p1.skill_num = 'skill1'
+            (event.type, event.key) = (SDL_KEYDOWN, SDLK_LEFT)
+            # p1의 상태를 변경하기 위해 handle_event에 e 전달
+            p1.handle_event(event)
+            pass
 
 def running():
     pass
