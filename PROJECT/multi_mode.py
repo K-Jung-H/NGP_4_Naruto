@@ -103,6 +103,7 @@ def receive_game_data(client_socket):
         data += packet
     # 데이터 언패킹
     unpacked_data = struct.unpack(game_data_format, data)
+    # print("Unpacked data:", unpacked_data)  # 디버깅용
 
     # 데이터 매핑
     game_data = {
@@ -151,7 +152,11 @@ def Decoding(client_socket):
         game_data = receive_game_data(client_socket)
         if game_data:
             #print(game_data)
+            print("Player 1 Name:", game_data["players"][0]["player_ID"])
             print("Player 1 Position:", game_data["players"][0]["position"])
+            print("Player 2 Name:", game_data["players"][1]["player_ID"])
+            print("Player 2 Position:", game_data["players"][1]["position"])
+            pass
         else:
             print("데이터 없음")
 
