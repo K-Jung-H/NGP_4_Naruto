@@ -94,11 +94,13 @@ data_size = struct.calcsize(game_data_format)
 
 
 def receive_game_data(client_socket):
-    data = client_socket.recv(data_size)
-    if len(data) != data_size:
-        print("수신된 데이터 크기가 올바르지 않습니다.")
-        return None
-
+    data = b""
+    while len(data) < data_size:
+        packet = client_socket.recv(data_size - len(data))
+        if not packet:
+            print("연결이 종료되었습니다.")
+            return None
+        data += packet
     # 데이터 언패킹
     unpacked_data = struct.unpack(game_data_format, data)
 
@@ -106,7 +108,8 @@ def receive_game_data(client_socket):
     game_data = {
         "players": [
             {
-                "player_ID": unpacked_data[0].decode().strip("\x00"),
+                # player_ID를 ASCII로 디코딩, 예외 발생 시 기본값으로 대체
+                "player_ID": unpacked_data[0].decode('ascii', errors='ignore').strip("\x00"),
                 "position": {"x": unpacked_data[1], "y": unpacked_data[2]},
                 "X_Direction": unpacked_data[3],
                 "player_state": unpacked_data[4],
@@ -114,7 +117,7 @@ def receive_game_data(client_socket):
                 "sprite_index": unpacked_data[6]
             },
             {
-                "player_ID": unpacked_data[7].decode().strip("\x00"),
+                "player_ID": unpacked_data[7].decode('ascii', errors='ignore').strip("\x00"),
                 "position": {"x": unpacked_data[8], "y": unpacked_data[9]},
                 "X_Direction": unpacked_data[10],
                 "player_state": unpacked_data[11],
@@ -124,7 +127,7 @@ def receive_game_data(client_socket):
         ],
         "attacks": [
             {
-                "player_ID": unpacked_data[i].decode().strip("\x00"),
+                "player_ID": unpacked_data[i].decode('ascii', errors='ignore').strip("\x00"),
                 "position": {"x": unpacked_data[i + 1], "y": unpacked_data[i + 2]},
                 "X_Direction": unpacked_data[i + 3],
                 "attack_type": unpacked_data[i + 4],
@@ -161,7 +164,7 @@ def init():
         # 네트워크 클라이언트 초기화 및 연결
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
         network_client.connect()
-        receiver_thread = threading.Thread(target=Decoding, args=(network_client.client_socket))
+        receiver_thread = threading.Thread(target=Decoding, args=(network_client.client_socket,))
         receiver_thread.start()
 
     # 키 입력 감지 쓰레드 시작
