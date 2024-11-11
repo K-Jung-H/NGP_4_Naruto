@@ -2,6 +2,27 @@
 #include "stdafx.h"
 #include "Server.h"
 
+void Server::EnqueueKeyInput(const Key_Info& keyInfo)
+{
+	EnterCriticalSection(&cs_key_queue);
+	keyQueue.push(keyInfo);  // 큐에 키 입력 추가
+	LeaveCriticalSection(&cs_key_queue);
+}
+
+// 키 입력 처리 함수 (큐에서 꺼내기)
+bool Server::DequeueKeyInput(Key_Info& keyInfo)
+{
+	EnterCriticalSection(&cs_key_queue);
+	if (!keyQueue.empty()) {
+		keyInfo = keyQueue.front();  // 큐의 첫 번째 항목을 가져옴
+		keyQueue.pop();  // 항목 제거
+		LeaveCriticalSection(&cs_key_queue);
+		return true;
+	}
+	LeaveCriticalSection(&cs_key_queue);
+	return false;
+}
+
 bool Server::Add_Client_Socket(SOCKET clientSocket, int playerNum) 
 {
 	if (playerNum == 1 && client1_socket == INVALID_SOCKET) 
@@ -35,14 +56,20 @@ void Server::Remove_Client_Socket(int playerNum)
 
 void Server::Update_Server()
 {
-	if(p1_ptr)
+	if (p1_ptr)
+	{
+		std::cout << "1P - ";
 		p1_ptr->update();
-	if(p2_ptr)
+	}
+	if (p2_ptr)
+	{
+		std::cout << "2P - ";
 		p2_ptr->update();
-
+	}
 	for (Object* obj_ptr : Stage_Attack_Object_List)
 	{
-		obj_ptr->update();
+		if(obj_ptr != NULL)
+			obj_ptr->update();
 	}
 	    //오브젝트 전부 다 업데이트
 		// 플레이어는 서버에 저장된 키 상태 기반 업데이트
@@ -97,7 +124,7 @@ Game_Data* Server::Encoding()
 			temp_info.pos = temp_player->pos;
 			temp_info.X_Direction = temp_player->X_Direction;
 
-			temp_info.player_ID = temp_player->player_ID;
+			std::memcpy(temp_info.player_ID, temp_player->player_ID, sizeof(temp_info.player_ID));
 			temp_info.selected_character = temp_player->selected_character_type;
 			temp_info.player_state = temp_player->state;
 			temp_info.sprite_index = temp_player->sprite_index;
@@ -116,7 +143,7 @@ Game_Data* Server::Encoding()
 			temp_info.pos = temp_attack->pos;
 			temp_info.X_Direction = temp_attack->X_Direction;
 
-			temp_info.player_ID = temp_attack->player_ID;
+			std::memcpy(temp_info.player_ID, temp_attack->player_ID, sizeof(temp_info.player_ID));
 			temp_info.attack_type = temp_attack->attack_type;
 			temp_info.sprite_index = temp_attack->sprite_index;
 		}
@@ -146,6 +173,22 @@ Game_Data* Server::Encoding()
 
 	// 동적으로 할당된 포인터 반환
 	return sending_data;  
+}
+
+void Server::Broadcast_GameData_All(Game_Data* data)
+{
+	if (client1_socket != INVALID_SOCKET)
+	{
+		send(client1_socket, (char*)data, sizeof(Game_Data), 0);
+		std::cout << "1P - send()" << std::endl;
+	}
+	if (client2_socket != INVALID_SOCKET)
+	{
+		send(client2_socket, (char*)data, sizeof(Game_Data), 0);
+		std::cout << "2P - send()" << std::endl;
+	}
+
+	delete data;
 }
 
 Player* Server::Get_Player(int Client)

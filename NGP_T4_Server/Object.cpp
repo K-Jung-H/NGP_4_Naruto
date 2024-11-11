@@ -34,8 +34,6 @@ void StateMachine::handleEvent(int key_event)
         }
         break;
 
-        break;
-
     case State::Run:
         if (key_event == EVENT_MOVE_LEFT_KEY_UP || key_event == EVENT_MOVE_RIGHT_KEY_UP)
         { 
@@ -107,10 +105,13 @@ void StateMachine::doAction(State state)
     case State::Idle:
         std::cout << "Doing Idle Action" << std::endl;
         break;
+
     case State::Run:
         std::cout << "Doing Run Action";
         if (X_Direction == LEFT)
+        {
             std::cout << " - Left" << std::endl;
+        }
         else
             std::cout << " - Right" << std::endl;
         break;
@@ -128,8 +129,8 @@ void StateMachine::doAction(State state)
 void Player::update()
 {
     state_machine.update();
-    // 상태에 따른 업데이트 
-    // 키 검사 우선하기
+    this->pos = state_machine.Get_Pos();
+    this->state = state_machine.Get_State();
 }
 
 void Player::key_update(int key_event)

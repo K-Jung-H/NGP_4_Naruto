@@ -33,9 +33,10 @@ class StateMachine
 {
 private:
 	State currentState; // 현재 상태
+public:
 	Position pos;
 	bool X_Direction; // Left: false, Right: true
-public:
+
 	StateMachine() : currentState(State::Idle) {}
 
 	void start();
@@ -44,7 +45,8 @@ public:
 
 	void handleEvent(int key_event);
 
-
+	Position Get_Pos() { return pos; };
+	int  Get_State() { return 1; };
 private:
 	void changeState(State newState, int key_event);
 
@@ -60,7 +62,7 @@ private:
 class Object
 {
 public:
-	std::string player_ID;
+	char player_ID[32] = { 0, };
 	Position pos;
 	bool X_Direction; // Left: false, Right: true
 	int sprite_index;

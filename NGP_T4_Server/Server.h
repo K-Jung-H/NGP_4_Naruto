@@ -7,6 +7,9 @@
 class Server
 {
 private:
+	std::queue<Key_Info> keyQueue;
+	CRITICAL_SECTION cs_key_queue; // 키 입력 저장 큐에 대한 임계 영역
+
 	std::array<Attack*, MAX_ATTACKS> Stage_Attack_Object_List; 
 
 	SOCKET client1_socket = INVALID_SOCKET;
@@ -16,6 +19,12 @@ private:
 	Player* p2_ptr = NULL;
 
 public:
+	Server() { InitializeCriticalSection(&cs_key_queue); }
+	~Server() { DeleteCriticalSection(&cs_key_queue); }
+
+	void EnqueueKeyInput(const Key_Info& keyInfo);
+	bool DequeueKeyInput(Key_Info& keyInfo);
+
 	bool Add_Client_Socket(SOCKET clientSocket, int playerNum);
 	void Remove_Client_Socket(int playerNum);
 
@@ -24,11 +33,14 @@ public:
 
 	void Update_Server();
 	void Update_Collision() {};
+	void Broadcast_GameData_All(Game_Data* data);
 
 	void Add_P1(Object* p_ptr) { p1_ptr = static_cast<Player*>(p_ptr); }
 	void Add_P2(Object* p_ptr) { p2_ptr = static_cast<Player*>(p_ptr); }
 
 	Player* Get_Player(int Client);
 	void Remove_Player(int Client);
+
+
 };
 
