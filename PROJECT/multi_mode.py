@@ -16,7 +16,7 @@ from map import Map
 from sasuke import SASUKE
 from naruto import NARUTO
 
-TEST = False
+TEST = True
 LOCAL = False
 
 Input_thread_running = True
@@ -26,7 +26,7 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '192.168.81.47'
+        SERVER_IP = '192.168.81.17'
 else:
     SERVER_IP = "0"
 
@@ -82,35 +82,75 @@ def key_listener():
                 # 눌린 키에서 제거
                 pressed_keys.remove(key_data)
 
-# struct 포맷: 'ff?iii' -> float 2개, bool 1개, int 3개
-player_info_format = 'ff?iii'
-data_size = struct.calcsize(player_info_format)
+# 각 구조체의 포맷 정의
+position_format = "2f"  # Position 구조체
+player_info_format = "32s2f?3i"  # Player_Info 구조체
+attack_info_format = "32s2f?2i"  # Attack_Info 구조체
+etc_info_format = "5i"  # ETC_Info 구조체
+game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_format}"  # Game_Data 전체 포맷
 
-def receive_player_info(client_socket):
-    # 서버에서 Player_Info 구조체 크기만큼 데이터 수신
+# 데이터 크기 계산
+data_size = struct.calcsize(game_data_format)
+
+
+def receive_game_data(client_socket):
     data = client_socket.recv(data_size)
     if len(data) != data_size:
         print("수신된 데이터 크기가 올바르지 않습니다.")
         return None
 
-    # 플레이어 info인 경우
     # 데이터 언패킹
-    x, y, direction, state, character, sprite_index = struct.unpack(player_info_format, data)
+    unpacked_data = struct.unpack(game_data_format, data)
 
-    # 언패킹된 데이터를 딕셔너리 형태로 반환
-    return {
-        "position": {"x": x, "y": y},
-        "direction": direction,
-        "state": state,
-        "character": character,
-        "sprite_index": sprite_index
+    # 데이터 매핑
+    game_data = {
+        "players": [
+            {
+                "player_ID": unpacked_data[0].decode().strip("\x00"),
+                "position": {"x": unpacked_data[1], "y": unpacked_data[2]},
+                "X_Direction": unpacked_data[3],
+                "player_state": unpacked_data[4],
+                "selected_character": unpacked_data[5],
+                "sprite_index": unpacked_data[6]
+            },
+            {
+                "player_ID": unpacked_data[7].decode().strip("\x00"),
+                "position": {"x": unpacked_data[8], "y": unpacked_data[9]},
+                "X_Direction": unpacked_data[10],
+                "player_state": unpacked_data[11],
+                "selected_character": unpacked_data[12],
+                "sprite_index": unpacked_data[13]
+            }
+        ],
+        "attacks": [
+            {
+                "player_ID": unpacked_data[i].decode().strip("\x00"),
+                "position": {"x": unpacked_data[i + 1], "y": unpacked_data[i + 2]},
+                "X_Direction": unpacked_data[i + 3],
+                "attack_type": unpacked_data[i + 4],
+                "sprite_index": unpacked_data[i + 5]
+            }
+            for i in range(14, 14 + 18 * 6, 6)
+        ],
+        "etc": {
+            "player1_hp": unpacked_data[-5],
+            "player1_sp": unpacked_data[-4],
+            "player2_hp": unpacked_data[-3],
+            "player2_sp": unpacked_data[-2],
+            "game_time": unpacked_data[-1]
+        }
     }
+
+    return game_data
 
 def Decoding(client_socket):
     while True:
-        player_info = receive_player_info(client_socket)
-        if player_info:
-            print(player_info)
+        game_data = receive_game_data(client_socket)
+        if game_data:
+            #print(game_data)
+            print("Player 1 Position:", game_data["players"][0]["position"])
+        else:
+            print("데이터 없음")
 
 def init():
     global network_client
