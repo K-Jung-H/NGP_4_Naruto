@@ -59,6 +59,22 @@
 
 #define MAX_INPUT_PER_FRAME 10
 
+#define CHARACTER_NARUTO 1
+#define CHARACTER_SASUKE 2
+#define CHARACTER_ITACHI 3
+
+#define STATE_IDLE 0
+#define STATE_RUN 1
+#define STATE_JUMP 2
+#define STATE_ATTACK_NORMAL 3
+#define STATE_ATTACK_SKILL_1 4
+#define STATE_ATTACK_SKILL_2 5
+#define STATE_ATTACK_SKILL_3 6
+#define STATE_HIT_EASY 7
+#define STATE_HIT_HARD 8
+#define STATE_WIN 9
+#define STATE_LOSE 10
+
 
 struct Position
 {
@@ -116,7 +132,7 @@ struct Key_Info
 {
 //	int client_info;			// 클라이언트 식별
 	int key_name;			// 키 정보
-	int key_action;			// 키 상태 
+	int key_action;			// 키 상태  down : 1, up : 2
 };
 
 struct Client_Info

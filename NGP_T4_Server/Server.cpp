@@ -2,15 +2,15 @@
 #include "stdafx.h"
 #include "Server.h"
 
-void Server::EnqueueKeyInput(const Key_Info& keyInfo)
+void Server::EnqueueKeyInput(int client_n, const Key_Info& keyInfo)
 {
 	EnterCriticalSection(&cs_key_queue);
-	keyQueue.push(keyInfo);  // 큐에 키 입력 추가
+	keyQueue.push(std::make_pair(client_n, keyInfo));  // 큐에 키 입력 추가
 	LeaveCriticalSection(&cs_key_queue);
 }
 
 // 키 입력 처리 함수 (큐에서 꺼내기)
-bool Server::DequeueKeyInput(Key_Info& keyInfo)
+bool Server::DequeueKeyInput(std::pair<int, Key_Info>& keyInfo)
 {
 	EnterCriticalSection(&cs_key_queue);
 	if (!keyQueue.empty()) {
@@ -78,20 +78,32 @@ void Server::Update_Server()
 
 
 
-void Server::Decoding(int client_n, Key_Info* key_info)
+void Server::Decoding(std::pair<int, Key_Info>* key_info)
 {
-	if (key_info->key_action == 0)
+	int client_n = key_info->first;
+	Key_Info key_value = key_info->second;
+
+	if (key_value.key_action == 0)
 		return;
 
 	int key = EVENT_NONE;
-	switch (key_info->key_name)
+
+	switch (key_value.key_name)
 	{
 	case 'a':
 	case 'A':
-		if(key_info->key_action == 1)
+		if(key_value.key_action == 1)
 			key = EVENT_MOVE_LEFT_KEY_DOWN;
 		else
 			key = EVENT_MOVE_LEFT_KEY_UP;
+		break;
+
+	case 'd':
+	case 'D':
+		if (key_value.key_action == 1)
+			key = EVENT_MOVE_RIGHT_KEY_DOWN;
+		else
+			key = EVENT_MOVE_RIGHT_KEY_UP;
 		break;
 
 	default:
@@ -103,7 +115,6 @@ void Server::Decoding(int client_n, Key_Info* key_info)
 	else if (client_n == 2 && p2_ptr != NULL)
 		p2_ptr->key_update(key);
 
-	//	Key_Info 기반 플레이어들의 키 상태 업데이트
 
 }
 
@@ -128,6 +139,8 @@ Game_Data* Server::Encoding()
 			temp_info.selected_character = temp_player->selected_character_type;
 			temp_info.player_state = temp_player->state;
 			temp_info.sprite_index = temp_player->sprite_index;
+			temp_info.X_Direction = temp_player->X_Direction;
+
 		}
 		sending_data->players[i] = temp_info;
 	}

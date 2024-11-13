@@ -127,6 +127,8 @@ DWORD WINAPI ServerMain(LPVOID arg)
 DWORD WINAPI ServerUpdateThread(LPVOID arg)
 {
     const int updateInterval = 16; // 60fps (16ms)
+    //const int updateInterval = 300; // 60fps (16ms)
+
 
     while (true)
     {
@@ -139,12 +141,12 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
         }
 
         // 큐에 저장된 키 입력 처리
-        Key_Info keyInfo;
+        std::pair<int, Key_Info> keyInfo;
         int processedCount = 0;
 
         while (server_program.DequeueKeyInput(keyInfo) && processedCount < MAX_INPUT_PER_FRAME)
         {
-            server_program.Decoding(keyInfo.key_action, &keyInfo);
+            server_program.Decoding(&keyInfo);
             processedCount++;
         }
 
@@ -187,10 +189,12 @@ DWORD WINAPI ProcessClient(LPVOID arg)
     Object* player = new Player();
 
     if (Client_N == 1)
-        server_program.Add_P1(player);
+        server_program.Add_P1(player, CHARACTER_NARUTO);
     else if (Client_N == 2)
-        server_program.Add_P2(player);
+        server_program.Add_P2(player, CHARACTER_SASUKE);
+
     server_program.Add_Client_Socket(client_sock, Client_N);
+    
     std::cout << Client_N << "P 클라이언트 연결됨: IP 주소=" << addr << ", 포트 번호=" << ntohs(clientaddr.sin_port) << "\r\n";
 
 
@@ -220,7 +224,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
                 << "\r\n";
 
                 // 키 업데이트 호출
-                server_program.EnqueueKeyInput(keyInfo);
+                server_program.EnqueueKeyInput(Client_N, keyInfo);
         }
     }
 
