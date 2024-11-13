@@ -16,9 +16,9 @@ import struct
 from map import Map
 from sasuke import SASUKE
 from naruto import NARUTO
-from multi_player_render import SASUKE_MULTI, NARUTO_MULTI, Idle, Run, Jump
+from multi_player_render import SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump
 
-TEST = True
+TEST = False
 LOCAL = False
 
 Input_thread_running = True
@@ -249,8 +249,10 @@ def init():
 
         p1 = SASUKE_MULTI(1)
         game_world.add_object(p1, 1)
+
         p2 = NARUTO_MULTI(2)
         game_world.add_object(p2, 1)
+
         p1.x = 1200
         p1.dir = -1
         p2.x = 400
@@ -260,10 +262,12 @@ def init():
         p1.set_background(map)
         p2.set_background(map)
     else:
-        p1 = SASUKE_MULTI(1)
+        # p1 = NARUTO_MULTI(1)
+        # p1 = SASUKE_MULTI(1)
+        p1 = ITACHI_MULTI(1)
         game_world.add_object(p1, 1)
-
-        p2 = NARUTO_MULTI(2)
+        # p2 = NARUTO_MULTI(2)
+        p2 = SASUKE_MULTI(2)
         game_world.add_object(p2, 1)
 
         p1.x = 1200
