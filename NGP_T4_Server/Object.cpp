@@ -14,7 +14,6 @@ void StateMachine::update()
 
     if (currentState == State::Jump)
     {
-        Sleep(1000);
         changeState(State::Idle, EVENT_NONE);
     }
 }
@@ -24,28 +23,46 @@ void StateMachine::handleEvent(int key_event)
     switch (currentState)
     {
     case State::Idle:
-        if (key_event == EVENT_MOVE_LEFT_KEY_DOWN || key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
-        { 
+    {
+        if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
+            Move_Left = true;
+        else if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
+            Move_Right = true;
+        else if (key_event == EVENT_MOVE_LEFT_KEY_UP)
+            Move_Left = false;
+        else if (key_event == EVENT_MOVE_RIGHT_KEY_UP)
+            Move_Right = false;
+
+        if (Move_Left || Move_Right)
             changeState(State::Run, key_event);
-        }
-        else if (key_event == EVENT_MOVE_UP_KEY_DOWN)
+        
+        if (key_event == EVENT_MOVE_UP_KEY_DOWN)
         {
             changeState(State::Jump, key_event);
         }
-        break;
-
-        break;
+    }
+    break;
 
     case State::Run:
-        if (key_event == EVENT_MOVE_LEFT_KEY_UP || key_event == EVENT_MOVE_RIGHT_KEY_UP)
-        { 
+    {
+        if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
+            Move_Left = true;
+        else if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
+            Move_Right = true;
+        else if (key_event == EVENT_MOVE_LEFT_KEY_UP)
+            Move_Left = false;
+        else if (key_event == EVENT_MOVE_RIGHT_KEY_UP)
+            Move_Right = false;
+
+        if ((Move_Left && Move_Right) || !Move_Left && !Move_Right)
             changeState(State::Idle, key_event);
-        }
-        else if (key_event == EVENT_MOVE_UP_KEY_DOWN)
-        { 
+
+        if (key_event == EVENT_MOVE_UP_KEY_UP)
+        {
             changeState(State::Jump, key_event);
         }
-        break;
+    }
+    break;
 
     case State::Jump:
         if (key_event == 0) 
@@ -53,14 +70,15 @@ void StateMachine::handleEvent(int key_event)
         }
         break;
 
-    case State::Attack:
+    case State::Attack_Normal:
         if (key_event == 0) 
         { 
             changeState(State::Idle, key_event);
         }
         break;
 
-      
+    default:
+        break;
     }
 }
 
@@ -73,68 +91,152 @@ void StateMachine::changeState(State newState, int key_event)
 
 void StateMachine::enterState(State state, int key_event)
 {
-    if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
-        X_Direction = LEFT;
-    else if(key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
-        X_Direction = RIGHT;
 
     switch (state)
     {
     case State::Idle:
-        std::cout << "Entering Idle State" << std::endl;
         break;
     case State::Run:
-        std::cout << "Entering Run State" << std::endl;
         break;
     case State::Jump:
-        std::cout << "Entering Jump State" << std::endl;
         break;
-    case State::Attack:
-        std::cout << "Entering Attack State" << std::endl;
+
+    default:
         break;
     }
 }
 
 void StateMachine::exitState(State state, int key_event)
 {
-    // 상태 종료 시 동작 처리
+    sprite_index = 0;
 }
 
 void StateMachine::doAction(State state)
 {
-    switch (state)
+}
+
+int  StateMachine::Get_State()
+{
+    switch (currentState)
     {
     case State::Idle:
-        std::cout << "Doing Idle Action" << std::endl;
+        return STATE_IDLE;
         break;
     case State::Run:
-        std::cout << "Doing Run Action";
-        if (X_Direction == LEFT)
-            std::cout << " - Left" << std::endl;
-        else
-            std::cout << " - Right" << std::endl;
+        return STATE_RUN;
         break;
     case State::Jump:
-        std::cout << "Doing Jump Action" << std::endl;
+        return STATE_JUMP;
         break;
-    case State::Attack:
-        std::cout << "Doing Attack Action" << std::endl;
+    case State::Attack_Normal:
+        return STATE_ATTACK_NORMAL;
+        break;
+    case State::Attack_Skill_1:
+        return STATE_ATTACK_SKILL_1;
+        break;
+    case State::Attack_Skill_2:
+        return STATE_ATTACK_SKILL_2;
+        break;
+    case State::Hit_Easy:
+        return STATE_HIT_EASY;
+        break;
+    case State::Hit_Hard:
+        return STATE_HIT_HARD;
+        break;
+    case State::Win:
+        return STATE_WIN;
+        break;
+    case State::Lose:
+        return STATE_LOSE;
+        break;
+
+    default:
         break;
     }
 }
 
+void StateMachine::Set_Draw_Direction()
+{
+    if (Move_Left && Move_Right)
+        return;
+
+    if (Move_Left)
+        X_Direction = LEFT;
+    if (Move_Right)
+        X_Direction = RIGHT;
+
+    return;
+}
 //========================================================
+void Naruto_StateMachine::doAction(State state)
+{
+    switch (state)
+    {
+    case State::Idle:
+        sprite_index = (sprite_index + 1) % 6;
+        break;
+
+    case State::Run:
+    {
+        sprite_index = (sprite_index + 1) % 6;
+        if (Move_Left)
+            pos.x -= 10;
+        else if (Move_Right)
+            pos.x += 10;
+
+    }
+    break;
+
+    case State::Jump:
+        break;
+
+    default:
+        break;
+    }
+    Set_Draw_Direction();
+}
+
+void Sasuke_StateMachine::doAction(State state)
+{
+}
+
+void Itachi_StateMachine::doAction(State state)
+{
+}
+//========================================================
+
+void Player::Set_Character(int n)
+{
+    selected_character_type = n;
+
+    if (n == CHARACTER_NARUTO)
+        state_machine = new Naruto_StateMachine();
+    else if (n == CHARACTER_SASUKE)
+        state_machine = new Naruto_StateMachine();
+    else if (n == CHARACTER_ITACHI)
+        state_machine = new Naruto_StateMachine();
+}
+
+void Player::synchronize_state_machine()
+{
+    this->pos = state_machine->Get_Pos();
+    this->state = state_machine->Get_State();
+    this->sprite_index = state_machine->sprite_index;
+    this->X_Direction = state_machine->X_Direction;
+}
 
 void Player::update()
 {
-    state_machine.update();
-    // 상태에 따른 업데이트 
-    // 키 검사 우선하기
+    if (state_machine != NULL)
+    {
+        state_machine->update();
+        synchronize_state_machine();
+    }
 }
 
 void Player::key_update(int key_event)
 {
-    state_machine.handleEvent(key_event);
+    state_machine->handleEvent(key_event);
 }
 
 void Attack::update()
