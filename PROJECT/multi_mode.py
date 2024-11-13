@@ -16,9 +16,9 @@ import struct
 from map import Map
 from sasuke import SASUKE
 from naruto import NARUTO
-from multi_player_render import SASUKE_MULTI, Idle, Run, Jump
+from multi_player_render import SASUKE_MULTI, NARUTO_MULTI, Idle, Run, Jump
 
-TEST = False
+TEST = True
 LOCAL = False
 
 Input_thread_running = True
@@ -28,7 +28,7 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '192.168.81.17'
+        SERVER_IP = '192.168.82.89'
 else:
     SERVER_IP = "0"
 
@@ -149,6 +149,22 @@ def receive_game_data(client_socket):
 
     return game_data
 
+# CHARACTER_NARUTO  = 1
+# CHARACTER_SASUKE = 2
+# CHARACTER_ITACHI = 3
+
+STATE_IDLE = 0
+STATE_RUN = 1
+STATE_JUMP = 2
+STATE_ATTACK_NORMAL = 3
+STATE_ATTACK_SKILL_1 = 4
+STATE_ATTACK_SKILL_2 = 5
+STATE_ATTACK_SKILL_3 = 6
+STATE_HIT_EASY = 7
+STATE_HIT_HARD = 8
+STATE_WIN = 9
+STATE_HARD = 10
+
 def Decoding(client_socket):
     while True:
         game_data = receive_game_data(client_socket)
@@ -158,6 +174,15 @@ def Decoding(client_socket):
             print("Player 1 Position:", game_data["players"][0]["position"])
             p1.x = game_data["players"][0]["position"]["x"]
             p1.y = game_data["players"][0]["position"]["y"]
+            p1_state = game_data["players"][0]["player_state"]
+            if p1_state == STATE_IDLE:
+                p1.cur_state = Idle
+            elif p1_state == STATE_RUN:
+                p1.cur_state = Run
+            elif p1_state == STATE_JUMP:
+                p1.cur_state = Jump
+            p1.frame = game_data["players"][0]["sprite_index"]
+
             print("Player 2 Name:", game_data["players"][1]["player_ID"])
             print("Player 2 Position:", game_data["players"][1]["position"])
             pass
@@ -169,16 +194,7 @@ def init():
     global p1
     global p2
     global map
-    if TEST:
-        # 네트워크 클라이언트 초기화 및 연결
-        network_client = NetworkClient(SERVER_IP, SERVER_PORT)
-        network_client.connect()
-        receiver_thread = threading.Thread(target=Decoding, args=(network_client.client_socket,))
-        receiver_thread.start()
 
-    # 키 입력 감지 쓰레드 시작
-    client_Input_thread = threading.Thread(target=key_listener)
-    client_Input_thread.start()
 
     map = Map()
     game_world.add_object(map, 1)
@@ -189,7 +205,10 @@ def init():
     p1 = SASUKE_MULTI(1)
     game_world.add_object(p1, 1)
 
-    p2 = NARUTO(2)
+    # p2 = NARUTO(2)
+    # game_world.add_object(p2, 1)
+
+    p2 = NARUTO_MULTI(2)
     game_world.add_object(p2, 1)
 
     p1.set_background(map)
@@ -210,6 +229,17 @@ def init():
     game_world.add_collision_pair('p2:p1_shuriken', p2, None)
     game_world.add_collision_pair('p2:p1_skill1', p2, None)
     game_world.add_collision_pair('p2:p1_skill2', p2, None)
+
+    if TEST:
+        # 네트워크 클라이언트 초기화 및 연결
+        network_client = NetworkClient(SERVER_IP, SERVER_PORT)
+        network_client.connect()
+        receiver_thread = threading.Thread(target=Decoding, args=(network_client.client_socket,))
+        receiver_thread.start()
+
+    # 키 입력 감지 쓰레드 시작
+    client_Input_thread = threading.Thread(target=key_listener)
+    client_Input_thread.start()
 
     pass
 def finish():
