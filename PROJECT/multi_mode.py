@@ -18,7 +18,7 @@ from sasuke import SASUKE
 from naruto import NARUTO
 from multi_player_render import SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump
 
-TEST = False
+TEST = True
 LOCAL = False
 
 Input_thread_running = True
@@ -205,6 +205,7 @@ def Decoding(client_socket):
             elif p1_state == STATE_JUMP:
                 p1.cur_state = Jump
             p1.frame = game_data["players"][0]["sprite_index"]
+            print("Player 1 Dir:", game_data["players"][0]["X_Direction"])
             if game_data["players"][0]["X_Direction"]:
                 p1.dir = 1
             else:
@@ -334,5 +335,5 @@ def draw():
 
 def update():
     game_world.update()
-    game_world.handle_collisions()
+    # game_world.handle_collisions()
     pass
