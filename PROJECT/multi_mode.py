@@ -44,8 +44,11 @@ key_codes = {
     'a': 65,
     'd': 68,
     's': 83,
-    'w': 87
-    # 필요한 키들을 추가로 정의
+    'w': 87,
+    'left': 65,
+    'right': 68,
+    'down': 83,
+    'up': 87
 }
 
 def send_key_info(key_name, key_action):
@@ -149,9 +152,9 @@ def receive_game_data(client_socket):
 
     return game_data
 
-# CHARACTER_NARUTO  = 1
-# CHARACTER_SASUKE = 2
-# CHARACTER_ITACHI = 3
+CHARACTER_NARUTO = 1
+CHARACTER_SASUKE = 2
+CHARACTER_ITACHI = 3
 
 STATE_IDLE = 0
 STATE_RUN = 1
@@ -166,6 +169,26 @@ STATE_WIN = 9
 STATE_HARD = 10
 
 def Decoding(client_socket):
+    global game_data
+    global p1, p2
+    # game_data = receive_game_data(client_socket)
+    # if game_data["players"][0]["selected_character"] == CHARACTER_NARUTO:
+    #     p1 = NARUTO_MULTI(1)
+    #     game_world.add_object(p1, 1)
+    #     p1.set_background(map)
+    # elif game_data["players"][0]["selected_character"] == CHARACTER_SASUKE:
+    #     p1 = SASUKE_MULTI(1)
+    #     game_world.add_object(p1, 1)
+    #     p1.set_background(map)
+
+    # if game_data["players"][1]["selected_character"] == CHARACTER_NARUTO:
+    #     p2 = NARUTO_MULTI(2)
+    #     game_world.add_object(p2, 1)
+    #     p2.set_background(map)
+    # elif game_data["players"][1]["selected_character"] == CHARACTER_SASUKE:
+    #     p2 = SASUKE_MULTI(2)
+    #     game_world.add_object(p2, 1)
+    #     p2.set_background(map)
     while True:
         game_data = receive_game_data(client_socket)
         if game_data:
@@ -182,10 +205,28 @@ def Decoding(client_socket):
             elif p1_state == STATE_JUMP:
                 p1.cur_state = Jump
             p1.frame = game_data["players"][0]["sprite_index"]
+            if game_data["players"][0]["X_Direction"]:
+                p1.dir = 1
+            else:
+                p1.dir = -1
 
-            print("Player 2 Name:", game_data["players"][1]["player_ID"])
-            print("Player 2 Position:", game_data["players"][1]["position"])
-            pass
+            # if p2:
+            #     print("Player 2 Name:", game_data["players"][1]["player_ID"])
+            #     print("Player 2 Position:", game_data["players"][1]["position"])
+            #     p2.x = game_data["players"][1]["position"]["x"]
+            #     p2.y = game_data["players"][1]["position"]["y"]
+            #     p2_state = game_data["players"][1]["player_state"]
+            #     if p2_state == STATE_IDLE:
+            #         p2.cur_state = Idle
+            #     elif p2_state == STATE_RUN:
+            #         p2.cur_state = Run
+            #     elif p2_state == STATE_JUMP:
+            #         p2.cur_state = Jump
+            #     p2.frame = game_data["players"][1]["sprite_index"]
+            #     if game_data["players"][1]["X_Direction"]:
+            #         p2.dir = 1
+            #     else:
+            #         p2.dir = -1
         else:
             print("데이터 없음")
 
@@ -194,41 +235,10 @@ def init():
     global p1
     global p2
     global map
-
+    global game_data
 
     map = Map()
     game_world.add_object(map, 1)
-
-    # p1 = SASUKE(1)
-    # game_world.add_object(p1, 1)
-
-    p1 = SASUKE_MULTI(1)
-    game_world.add_object(p1, 1)
-
-    # p2 = NARUTO(2)
-    # game_world.add_object(p2, 1)
-
-    p2 = NARUTO_MULTI(2)
-    game_world.add_object(p2, 1)
-
-    p1.set_background(map)
-    p2.set_background(map)
-
-    p1.x = 1200
-    p1.dir = -1
-    p2.x = 400
-    p1.y, p2.y = 400, 400
-    p1.frame, p2.frame = 2, 2
-
-    game_world.add_collision_pair('p1:p2_attack', p1, None)
-    game_world.add_collision_pair('p1:p2_shuriken', p1, None)
-    game_world.add_collision_pair('p1:p2_skill1', p1, None)
-    game_world.add_collision_pair('p1:p2_skill2', p1, None)
-
-    game_world.add_collision_pair('p2:p1_attack', p2, None)
-    game_world.add_collision_pair('p2:p1_shuriken', p2, None)
-    game_world.add_collision_pair('p2:p1_skill1', p2, None)
-    game_world.add_collision_pair('p2:p1_skill2', p2, None)
 
     if TEST:
         # 네트워크 클라이언트 초기화 및 연결
@@ -236,6 +246,34 @@ def init():
         network_client.connect()
         receiver_thread = threading.Thread(target=Decoding, args=(network_client.client_socket,))
         receiver_thread.start()
+
+        p1 = SASUKE_MULTI(1)
+        game_world.add_object(p1, 1)
+        p2 = NARUTO_MULTI(2)
+        game_world.add_object(p2, 1)
+        p1.x = 1200
+        p1.dir = -1
+        p2.x = 400
+        p1.y, p2.y = 400, 400
+        p1.frame, p2.frame = 2, 2
+
+        p1.set_background(map)
+        p2.set_background(map)
+    else:
+        p1 = SASUKE_MULTI(1)
+        game_world.add_object(p1, 1)
+
+        p2 = NARUTO_MULTI(2)
+        game_world.add_object(p2, 1)
+
+        p1.x = 1200
+        p1.dir = -1
+        p2.x = 400
+        p1.y, p2.y = 400, 400
+        p1.frame, p2.frame = 2, 2
+
+        p1.set_background(map)
+        p2.set_background(map)
 
     # 키 입력 감지 쓰레드 시작
     client_Input_thread = threading.Thread(target=key_listener)
@@ -266,9 +304,11 @@ def handle_events():
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_F1):
             game_framework.change_mode(title_mode)
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_d):
-            p2.x = 500
+            # p2.x = 500
+            pass
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_a):
-            p2.x = 100
+            # p2.x = 100
+            pass
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_t):
             # p1.hit_state = 'hard'
             # p1.dir = 1
