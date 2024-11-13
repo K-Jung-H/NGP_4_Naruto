@@ -1,6 +1,85 @@
 from pico2d import *
 
-class SASUKE:
+class Idle:
+
+    @staticmethod
+    def enter(p1, e):
+        pass
+
+    @staticmethod
+    def exit(p1, e):
+        pass
+
+    @staticmethod
+    def do(p1):
+        pass
+
+    @staticmethod
+    def draw(p1):
+        if p1.dir == -1:
+            p1.idle.clip_composite_draw(int(p1.frame) * 32, 0, 32, 64, 0, 'h', p1.sx+10, p1.sy, 100, 200)
+        elif p1.dir == 1:
+            p1.idle.clip_composite_draw(int(p1.frame) * 32, 0, 32, 64, 0, '', p1.sx-10, p1.sy, 100, 200)
+
+class Run:
+
+    @staticmethod
+    def enter(p2, e):
+        pass
+    @staticmethod
+    def exit(p2, e):
+        pass
+
+    @staticmethod
+    def do(p2):
+        pass
+    @staticmethod
+    def draw(p2):
+        if p2.char_name == 'naruto':
+            if p2.dir == -1:
+                p2.run.clip_composite_draw(int(p2.frame) * 48, 0, 48, 48, 0, 'h', p2.sx, p2.sy-15, 135, 135)
+            elif p2.dir == 1:
+                p2.run.clip_composite_draw(int(p2.frame) * 48, 0, 48, 48, 0, '', p2.sx, p2.sy-15, 135, 135)
+        elif p2.char_name == 'sasuke':
+            if p2.dir == -1:
+                p2.run.clip_composite_draw(int(p2.frame) * 64, 0, 64, 32, 0, 'h', p2.sx, p2.sy - 15, 200, 100)
+            elif p2.dir == 1:
+                p2.run.clip_composite_draw(int(p2.frame) * 64, 0, 64, 32, 0, '', p2.sx, p2.sy - 15, 200, 100)
+
+
+class Jump:
+    @staticmethod
+    def enter(p2, e):
+        pass
+
+    @staticmethod
+    def exit(p2, e):
+        pass
+
+    @staticmethod
+    def do(p2):
+        pass
+
+    @staticmethod
+    def draw(p2):
+        if p2.char_name == 'naruto':
+            if p2.dir == -1:
+                if int(p2.frame) < 2:
+                    p2.jump.clip_composite_draw(int(p2.frame) * 32, 0, 32, 48, 0, 'h', p2.sx, p2.sy, 90, 135)
+                else:
+                    p2.jump.clip_composite_draw(64 + (int(p2.frame) - 2) * 40, 0, 40, 48, 0, 'h', p2.sx, p2.sy, 112, 135)
+            elif p2.dir == 1:
+                if int(p2.frame) < 2:
+                    p2.jump.clip_composite_draw(int(p2.frame) * 32, 0, 32, 48, 0, '', p2.sx, p2.sy, 90, 135)
+                else:
+                    p2.jump.clip_composite_draw(64 + (int(p2.frame) - 2) * 40, 0, 40, 48, 0, '', p2.sx, p2.sy, 112, 135)
+        elif p2.char_name == 'sasuke':
+            if p2.dir == -1:
+                p2.jump.clip_composite_draw(int(p2.frame) * 32, 0, 32, 64, 0, 'h', p2.sx, p2.sy, 100, 200)
+            elif p2.dir == 1:
+                p2.jump.clip_composite_draw(int(p2.frame) * 32, 0, 32, 64, 0, '', p2.sx, p2.sy, 100, 200)
+
+class SASUKE_MULTI:
     global skill_num
     def __init__(self, p_num):
         self.x, self.y = 400, 0
@@ -42,10 +121,6 @@ class SASUKE:
         self.skill2_s_e.set_volume(10)
         self.win_s = load_wav('sound/sasuke_win.wav')
         self.win_s.set_volume(20)
-        self.state_machine = StateMachine(self)
-        self.state_machine.start()
-        self.jump_move = False
-        self.jump_state = False
         self.right = False
         self.left = False
         self.up_tele = False
@@ -62,22 +137,14 @@ class SASUKE:
         self.win = False
         self.hit_state = 0
         self.sx, self.sy = 0, 0
+        self.cur_state = Idle
+        self.char_name = 'sasuke'
 
 
     def skill(self):
         pass
 
     def attack(self):
-        # attack_range = Attack_range(self.x, self.y, self.dir, self.attack_num)
-        # game_world.add_object(attack_range, 2)
-        # if self.attack_num == 2 or self.attack_num == 'jump':
-        #     self.attack_s_1.play()
-        # if self.attack_num == 4 or self.attack_num == 'run':
-        #     self.attack_s_2.play()
-        # if player_num == 1:
-        #     game_world.add_collision_pair('p2:p1_attack', None, attack_range)
-        # elif player_num == 2:
-        #     game_world.add_collision_pair('p1:p2_attack', None, attack_range)
         pass
 
     def set_background(self, bg):
@@ -85,38 +152,15 @@ class SASUKE:
         # self.x = self.bg.w / 2
         # self.y = self.bg.h / 2
     def update(self):
-        # if self.hit_state == 'hard':
-        #     if not self.state_machine.cur_state == Hard_hit:
-        #         self.hard_hit_s.play()
-        #     self.state_machine.cur_state = Hard_hit
-        #     self.hit_state = 0
-        # if self.hit_state == 'easy':
-        #     self.easy_hit_s.play()
-        #     self.state_machine.cur_state = Easy_hit
-        #     self.hit_state = 0
-        # self.state_machine.update()
-        # if self.chakra <= 100:
-        #     self.chakra += 4 * game_framework.frame_time
-        # self.x = clamp(50.0, self.x, self.bg.w - 50.0)
-        # self.y = clamp(50.0, self.y, self.bg.h - 50.0)
         pass
 
 
     def handle_event(self, event):
-        # self.state_machine.handle_event(('INPUT', event))
-        # if right_up(('INPUT', event)):
-        #     self.right = False
-        # if left_up(('INPUT', event)):
-        #     self.left = False
-        # if right_down(('INPUT', event)):
-        #     self.right = True
-        # if left_down(('INPUT', event)):
-        #     self.left = True
         pass
 
     def draw(self):
         self.sx, self.sy = self.x - self.bg.window_left, self.y - self.bg.window_bottom
-        self.state_machine.draw()
+        self.cur_state.draw(self)
         # draw_rectangle(*self.get_bb())
 
     def get_bb(self):

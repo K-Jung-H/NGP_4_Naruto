@@ -9,14 +9,16 @@ import mode_choose_mode
 import keyboard
 
 import title_mode
+
 from network_client import NetworkClient
 import threading
 import struct
 from map import Map
 from sasuke import SASUKE
 from naruto import NARUTO
+from multi_player_render import SASUKE_MULTI, Idle, Run, Jump
 
-TEST = True
+TEST = False
 LOCAL = False
 
 Input_thread_running = True
@@ -154,6 +156,8 @@ def Decoding(client_socket):
             #print(game_data)
             print("Player 1 Name:", game_data["players"][0]["player_ID"])
             print("Player 1 Position:", game_data["players"][0]["position"])
+            p1.x = game_data["players"][0]["position"]["x"]
+            p1.y = game_data["players"][0]["position"]["y"]
             print("Player 2 Name:", game_data["players"][1]["player_ID"])
             print("Player 2 Position:", game_data["players"][1]["position"])
             pass
@@ -179,7 +183,10 @@ def init():
     map = Map()
     game_world.add_object(map, 1)
 
-    p1 = SASUKE(1)
+    # p1 = SASUKE(1)
+    # game_world.add_object(p1, 1)
+
+    p1 = SASUKE_MULTI(1)
     game_world.add_object(p1, 1)
 
     p2 = NARUTO(2)
@@ -237,9 +244,11 @@ def handle_events():
             # p1.dir = 1
             # p1.frame = 0
             # p1.skill_num = 'skill1'
-            (event.type, event.key) = (SDL_KEYDOWN, SDLK_LEFT)
-            # p1의 상태를 변경하기 위해 handle_event에 e 전달
-            p1.handle_event(event)
+            # (event.type, event.key) = (SDL_KEYDOWN, SDLK_LEFT)
+            # # p1의 상태를 변경하기 위해 handle_event에 e 전달
+            # p1.handle_event(event)
+            # p1.cur_state = Run
+            p1.cur_state = Jump
             pass
 
 def running():
