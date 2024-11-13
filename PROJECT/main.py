@@ -1,5 +1,4 @@
 import pico2d
-
 import game_framework
 
 import title_mode as start_mode

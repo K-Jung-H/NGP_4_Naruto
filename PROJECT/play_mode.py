@@ -53,6 +53,9 @@ def handle_events():
             elif mode_choose_mode.mode_choose_result() == '2p' and (p1.win or p2.win):
                 game_framework.change_mode(result_mode)
                 pass
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_j:
+            # p1.handle_event(left_down)
+            pass
             # exit(1)
         # elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
         #     game_framework.
@@ -186,6 +189,7 @@ def update():
         p2.win = True
     if p2.hp <= 0:
         p1.win = True
+    # print(game_world.objects)
 
 def draw():
     clear_canvas()
