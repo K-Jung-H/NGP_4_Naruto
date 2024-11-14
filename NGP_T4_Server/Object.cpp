@@ -7,68 +7,66 @@ void StateMachine::start()
     enterState(currentState, 0);
 }
 
-void StateMachine::update() 
+void StateMachine::update(float Elapsed_time)
 {
     // 현재 상태에 따른 동작을 수행
-    doAction(currentState);
-
-    if (currentState == State::Jump)
-    {
-        changeState(State::Idle, EVENT_NONE);
-    }
+    doAction(currentState, Elapsed_time);
 }
 
 void StateMachine::handleEvent(int key_event)
 {
+    if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
+        Move_Left = true;
+    else if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
+        Move_Right = true;
+    else if (key_event == EVENT_MOVE_LEFT_KEY_UP)
+        Move_Left = false;
+    else if (key_event == EVENT_MOVE_RIGHT_KEY_UP)
+        Move_Right = false;
+
     switch (currentState)
     {
     case State::Idle:
     {
-        if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
-            Move_Left = true;
-        else if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
-            Move_Right = true;
-        else if (key_event == EVENT_MOVE_LEFT_KEY_UP)
-            Move_Left = false;
-        else if (key_event == EVENT_MOVE_RIGHT_KEY_UP)
-            Move_Right = false;
-
-        if (Move_Left || Move_Right)
+        if (Move_Left != Move_Right)
             changeState(State::Run, key_event);
         
         if (key_event == EVENT_MOVE_UP_KEY_DOWN)
-        {
             changeState(State::Jump, key_event);
-        }
+
     }
     break;
 
     case State::Run:
     {
-        if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
-            Move_Left = true;
-        else if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
-            Move_Right = true;
-        else if (key_event == EVENT_MOVE_LEFT_KEY_UP)
-            Move_Left = false;
-        else if (key_event == EVENT_MOVE_RIGHT_KEY_UP)
-            Move_Right = false;
-
-        if ((Move_Left && Move_Right) || !Move_Left && !Move_Right)
+        if (Move_Left == Move_Right)
             changeState(State::Idle, key_event);
 
-        if (key_event == EVENT_MOVE_UP_KEY_UP)
-        {
+        if (key_event == EVENT_MOVE_UP_KEY_DOWN)
             changeState(State::Jump, key_event);
-        }
+
     }
     break;
 
     case State::Jump:
-        if (key_event == 0) 
+    {
+        if(key_event == EVENT_MOVE_UP_KEY_DOWN)
+            changeState(State::Jump, key_event);
+
+        if (is_air == false)
         {
+            if (Move_Left != Move_Right)
+                changeState(State::Idle, key_event);
+            else 
+                changeState(State::Run, key_event);
         }
-        break;
+        else if (key_event == EVENT_RANGED_ATTACK_KEY_DOWN)
+        {
+            //        changeState(State::Idle, key_event); 원거리 공격 상태
+            break;
+        }
+    }
+    break;
 
     case State::Attack_Normal:
         if (key_event == 0) 
@@ -99,6 +97,7 @@ void StateMachine::enterState(State state, int key_event)
     case State::Run:
         break;
     case State::Jump:
+        is_air = true;
         break;
 
     default:
@@ -109,10 +108,33 @@ void StateMachine::enterState(State state, int key_event)
 void StateMachine::exitState(State state, int key_event)
 {
     sprite_index = 0;
+    sprite_frame_value = 0.0f;
 }
 
-void StateMachine::doAction(State state)
+void StateMachine::doAction(State state, float Elapsed_time)
 {
+}
+
+int StateMachine::Get_Sprite_Index(float Elapsed_time, int sprite_range, bool index_loop = true)
+{
+    int draw_index = 0;
+
+    sprite_frame_value += Elapsed_time * 6;
+
+    if (index_loop)
+    {
+        draw_index = int(sprite_frame_value) % sprite_range;
+
+        if (sprite_frame_value > float(sprite_range))
+            sprite_frame_value = 0.0f;
+    }
+    else
+    {
+        draw_index = int(sprite_frame_value) % sprite_range;
+        if (sprite_frame_value > float(sprite_range))
+            draw_index = sprite_range - 1;
+    }
+    return draw_index;
 }
 
 int  StateMachine::Get_State()
@@ -168,27 +190,55 @@ void StateMachine::Set_Draw_Direction()
     return;
 }
 //========================================================
-void Naruto_StateMachine::doAction(State state)
+void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 {
     switch (state)
     {
     case State::Idle:
-        sprite_index = (sprite_index + 1) % 6;
+         sprite_index = Get_Sprite_Index(ElapsedTime, 6);
         break;
 
     case State::Run:
     {
-        sprite_index = (sprite_index + 1) % 6;
-        if (Move_Left)
-            pos.x -= 10;
-        else if (Move_Right)
-            pos.x += 10;
-
+        sprite_index = Get_Sprite_Index(ElapsedTime, 6);
+        if (Move_Left) // 왼쪽으로 이동
+            pos.x -= RUN_SPEED_PPS * ElapsedTime;  
+        else if (Move_Right) // 오른쪽으로 이동
+            pos.x += RUN_SPEED_PPS * ElapsedTime;  
     }
     break;
 
     case State::Jump:
-        break;
+    {
+        if (is_air)
+        {
+            if(sprite_index < 4) // 점프 애니메이션은 반복되면 안됨 
+                sprite_index = Get_Sprite_Index(ElapsedTime, 4, false);
+
+            pos.y += 1.2 * RUN_SPEED_PPS * ElapsedTime * (2 - sprite_index);
+
+            // 움직이게 될 때
+            if (Move_Left != Move_Right)
+            {
+                if (Move_Left) // 왼쪽으로 이동
+                    pos.x -= 0.8f * RUN_SPEED_PPS * ElapsedTime;
+                else if (Move_Right) // 오른쪽으로 이동
+                    pos.x += 0.8f * RUN_SPEED_PPS * ElapsedTime;
+            }
+        }
+
+        if (pos.y > Ground_Y)
+            is_air = true;
+        else if (pos.y <= Ground_Y)
+        {
+            is_air = false;
+            pos.y = float(Ground_Y);
+            sprite_index = 0;
+        }
+    
+    }
+
+    break;
 
     default:
         break;
@@ -196,11 +246,11 @@ void Naruto_StateMachine::doAction(State state)
     Set_Draw_Direction();
 }
 
-void Sasuke_StateMachine::doAction(State state)
+void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
 {
 }
 
-void Itachi_StateMachine::doAction(State state)
+void Itachi_StateMachine::doAction(State state, float ElapsedTime)
 {
 }
 //========================================================
@@ -225,11 +275,11 @@ void Player::synchronize_state_machine()
     this->X_Direction = state_machine->X_Direction;
 }
 
-void Player::update()
+void Player::update(float Elapsed_time)
 {
     if (state_machine != NULL)
     {
-        state_machine->update();
+        state_machine->update(Elapsed_time);
         synchronize_state_machine();
     }
 }
@@ -239,7 +289,7 @@ void Player::key_update(int key_event)
     state_machine->handleEvent(key_event);
 }
 
-void Attack::update()
+void Attack::update(float Elapsed_time)
 {
     // 위치 이동
 }
