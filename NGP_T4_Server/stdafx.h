@@ -16,9 +16,10 @@
 #include <array>
 #include <algorithm>
 #include <iostream>
-
+#include <chrono>
+#include <thread>
 #include <queue>
-#include <mutex>
+
 
 #pragma comment(lib, "ws2_32") // ws2_32.lib ¸µÅ©
 
@@ -75,6 +76,14 @@
 #define STATE_WIN 9
 #define STATE_LOSE 10
 
+
+#define Ground_Y 120
+
+static float PIXEL_PER_METER = (10.0 / 0.3); // 10 pixel 30 cm
+static float  RUN_SPEED_KMPH = 50.0f; // Km / Hour
+static float RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0);
+static float RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0);
+static float RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER);
 
 struct Position
 {

@@ -54,22 +54,22 @@ void Server::Remove_Client_Socket(int playerNum)
 	}
 }
 
-void Server::Update_Server()
+void Server::Update_Server(float Elapsed_time)
 {
 	if (p1_ptr)
 	{
 		std::cout << "1P - ";
-		p1_ptr->update();
+		p1_ptr->update(Elapsed_time);
 	}
 	if (p2_ptr)
 	{
 		std::cout << "2P - ";
-		p2_ptr->update();
+		p2_ptr->update(Elapsed_time);
 	}
 	for (Object* obj_ptr : Stage_Attack_Object_List)
 	{
 		if(obj_ptr != NULL)
-			obj_ptr->update();
+			obj_ptr->update(Elapsed_time);
 	}
 	    //오브젝트 전부 다 업데이트
 		// 플레이어는 서버에 저장된 키 상태 기반 업데이트
@@ -104,6 +104,14 @@ void Server::Decoding(std::pair<int, Key_Info>* key_info)
 			key = EVENT_MOVE_RIGHT_KEY_DOWN;
 		else
 			key = EVENT_MOVE_RIGHT_KEY_UP;
+		break;
+
+	case 'w':
+	case 'W':
+		if (key_value.key_action == 1)
+			key = EVENT_MOVE_UP_KEY_DOWN;
+		else
+			key = EVENT_MOVE_UP_KEY_UP;
 		break;
 
 	default:

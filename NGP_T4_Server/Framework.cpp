@@ -126,37 +126,53 @@ DWORD WINAPI ServerMain(LPVOID arg)
 // 서버 업데이트 스레드
 DWORD WINAPI ServerUpdateThread(LPVOID arg)
 {
-    const int updateInterval = 16; // 60fps (16ms)
-    //const int updateInterval = 300; // 60fps (16ms)
-
-
+    int target_fps =120;  // 목표 FPS 설정 (60FPS)
+    server_program.Set_FrameRate(target_fps);  // 서버 타이머 시작
+    
     while (true)
     {
         // 플레이어가 하나라도 연결되면 서버 업데이트
         if (server_program.Get_Player(1) == NULL && server_program.Get_Player(2) == NULL)
         {
             // 연결된 플레이어가 없으면 업데이트 안 함
-            Sleep(updateInterval);
+            float ElapsedTime = server_program.Get_ElapsedTime();
             continue;
         }
 
         // 큐에 저장된 키 입력 처리
         std::pair<int, Key_Info> keyInfo;
-        int processedCount = 0;
 
-        while (server_program.DequeueKeyInput(keyInfo) && processedCount < MAX_INPUT_PER_FRAME)
+        // 큐에 저장된 키 입력이 없다면
+        if (server_program.Get_Key_Input_Buffer_size() == 0)
         {
+            keyInfo.first = 1;
+            keyInfo.second.key_action = 1;
+            keyInfo.second.key_name = 0;
             server_program.Decoding(&keyInfo);
-            processedCount++;
+
+            keyInfo.first = 2;
+            server_program.Decoding(&keyInfo);
+        }
+        else
+        {
+            int processedCount = 0;
+            while (server_program.DequeueKeyInput(keyInfo) && processedCount < MAX_INPUT_PER_FRAME)
+            {
+                server_program.Decoding(&keyInfo);
+                processedCount++;
+            }
         }
 
-        server_program.Update_Server();
+        // float로 경과 시간 받기
+        float ElapsedTime = server_program.Get_ElapsedTime();
+
+        server_program.Update_Server(ElapsedTime);
         server_program.Update_Collision();
         Game_Data* sending_data = server_program.Encoding();
         server_program.Broadcast_GameData_All(sending_data);
 
-        // 서버 업데이트 주기를 60fps
-        Sleep(updateInterval); // 16ms마다 서버 업데이트 실행
+        // 경과 시간 후 FPS에 맞춰 대기
+        server_program.Wait();
     }
 
     return 0;

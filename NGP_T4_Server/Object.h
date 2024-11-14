@@ -45,7 +45,9 @@ public:
 	bool X_Direction; // Left: false, Right: true
 	bool Move_Left = false;
 	bool Move_Right = false;
+
 	int sprite_index = 0;
+	float sprite_frame_value = 0.0f;
 
 	int jump_value = 0;
 	bool Y_Direction = false; // Down: false, Up: true
@@ -54,15 +56,17 @@ public:
 	StateMachine() : currentState(State::Idle) { 
 		sprite_index = 0;
 		pos.x = 500;
-		pos.y = 300;
+		pos.y = Ground_Y;
 	}
 
 	void start();
 
-	void update();
+	void update(float Elapsed_time);
 
 	void handleEvent(int key_event);
 	void changeState(State newState, int key_event);
+
+	int Get_Sprite_Index(float Elapsed_time, int sprite_range, bool index_loop);
 
 	Position Get_Pos() { return pos; };
 	int  Get_State();
@@ -74,7 +78,7 @@ private:
 
 	void exitState(State state, int key_event);
 
-	virtual void doAction(State state);
+	virtual void doAction(State state, float Elapsed_time);
 
 };
 
@@ -85,10 +89,10 @@ public:
 		currentState = State::Idle; 
 		sprite_index = 0;
 		pos.x = 500;
-		pos.y = 300;
+		pos.y = Ground_Y;
 	}
 
-	void doAction(State state) override;
+	void doAction(State state, float Elapsed_time) override;
 };
 
 class Sasuke_StateMachine : public StateMachine
@@ -98,10 +102,10 @@ public:
 		currentState = State::Idle; 
 		sprite_index = 0;
 		pos.x = 500;
-		pos.y = 300;
+		pos.y = Ground_Y;
 	}
 
-	void doAction(State state) override;
+	void doAction(State state, float Elapsed_time) override;
 };
 
 class Itachi_StateMachine : public StateMachine
@@ -111,10 +115,10 @@ public:
 		currentState = State::Idle; 
 		sprite_index = 0;
 		pos.x = 500;
-		pos.y = 300;
+		pos.y = Ground_Y;
 	}
 
-	void doAction(State state) override;
+	void doAction(State state, float Elapsed_time) override;
 };
 
 class Object
@@ -125,7 +129,7 @@ public:
 	bool X_Direction; // Left: false, Right: true
 	int sprite_index;
 
-	virtual void update() {};
+	virtual void update(float Elapsed_time) {};
 };
 
 class Player : public Object
@@ -141,7 +145,7 @@ public:
 	int selected_character_type;
 
 	void Set_Character(int n);
-	void  update() override;
+	void  update(float Elapsed_time) override;
 	void key_update(int key_event);
 	void synchronize_state_machine();
 };
@@ -151,5 +155,5 @@ class Attack : public Object
 public:
 	int attack_type;
 
-	void  update() override;
+	void  update(float Elapsed_time) override;
 };
