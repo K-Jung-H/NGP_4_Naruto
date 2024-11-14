@@ -28,7 +28,7 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '192.168.82.89'
+        SERVER_IP = '192.168.81.159'
 else:
     SERVER_IP = "0"
 
@@ -198,6 +198,7 @@ def Decoding(client_socket):
             p1.x = game_data["players"][0]["position"]["x"]
             p1.y = game_data["players"][0]["position"]["y"]
             p1_state = game_data["players"][0]["player_state"]
+            print(game_data["players"][0]["sprite_index"])
             if p1_state == STATE_IDLE:
                 p1.cur_state = Idle
             elif p1_state == STATE_RUN:
@@ -242,17 +243,18 @@ def init():
     game_world.add_object(map, 1)
 
     if TEST:
+        # p1 = SASUKE_MULTI(1)
+        p1 = NARUTO_MULTI(1)
+        game_world.add_object(p1, 1)
+
+        p2 = NARUTO_MULTI(2)
+        # p1 = ITACHI_MULTI(1)
+        game_world.add_object(p2, 1)
         # 네트워크 클라이언트 초기화 및 연결
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
         network_client.connect()
         receiver_thread = threading.Thread(target=Decoding, args=(network_client.client_socket,))
         receiver_thread.start()
-
-        p1 = SASUKE_MULTI(1)
-        game_world.add_object(p1, 1)
-
-        p2 = NARUTO_MULTI(2)
-        game_world.add_object(p2, 1)
 
         p1.x = 1200
         p1.dir = -1
