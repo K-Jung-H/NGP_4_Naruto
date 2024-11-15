@@ -16,7 +16,7 @@ import struct
 from map import Map
 from sasuke import SASUKE
 from naruto import NARUTO
-from multi_player_render import SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump
+from multi_player_render import SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump, Attack
 
 TEST = True
 LOCAL = False
@@ -28,7 +28,7 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '192.168.63.101'
+        SERVER_IP = '192.168.80.240'
 else:
     SERVER_IP = "0"
 
@@ -48,7 +48,8 @@ key_codes = {
     'left': 65,
     'right': 68,
     'down': 83,
-    'up': 87
+    'up': 87,
+    ',': 44
 }
 
 def send_key_info(key_name, key_action):
@@ -193,41 +194,44 @@ def Decoding(client_socket):
         game_data = receive_game_data(client_socket)
         if game_data:
             #print(game_data)
-            print("Player 1 Name:", game_data["players"][0]["player_ID"])
-            print("Player 1 Position:", game_data["players"][0]["position"])
+            # print("Player 1 Name:", game_data["players"][0]["player_ID"])
+            # print("Player 1 Position:", game_data["players"][0]["position"])
             p1.x = game_data["players"][0]["position"]["x"]
             p1.y = game_data["players"][0]["position"]["y"]
             p1_state = game_data["players"][0]["player_state"]
-            print(game_data["players"][0]["sprite_index"])
+            # print(game_data["players"][0]["sprite_index"])
+            print(game_data["players"][0]["player_state"])
             if p1_state == STATE_IDLE:
                 p1.cur_state = Idle
             elif p1_state == STATE_RUN:
                 p1.cur_state = Run
             elif p1_state == STATE_JUMP:
                 p1.cur_state = Jump
+            elif p1_state == STATE_ATTACK_NORMAL:
+                p1.cur_state = Attack
             p1.frame = game_data["players"][0]["sprite_index"]
-            print("Player 1 Dir:", game_data["players"][0]["X_Direction"])
+            # print("Player 1 Dir:", game_data["players"][0]["X_Direction"])
             if game_data["players"][0]["X_Direction"]:
                 p1.dir = 1
             else:
                 p1.dir = -1
 
-            print("Player 2 Name:", game_data["players"][1]["player_ID"])
-            print("Player 2 Position:", game_data["players"][1]["position"])
-            p2.x = game_data["players"][1]["position"]["x"]
-            p2.y = game_data["players"][1]["position"]["y"]
-            p2_state = game_data["players"][1]["player_state"]
-            if p2_state == STATE_IDLE:
-                p2.cur_state = Idle
-            elif p2_state == STATE_RUN:
-                p2.cur_state = Run
-            elif p2_state == STATE_JUMP:
-                p2.cur_state = Jump
-            p2.frame = game_data["players"][1]["sprite_index"]
-            if game_data["players"][1]["X_Direction"]:
-                p2.dir = 1
-            else:
-                p2.dir = -1
+            # print("Player 2 Name:", game_data["players"][1]["player_ID"])
+            # print("Player 2 Position:", game_data["players"][1]["position"])
+            # p2.x = game_data["players"][1]["position"]["x"]
+            # p2.y = game_data["players"][1]["position"]["y"]
+            # p2_state = game_data["players"][1]["player_state"]
+            # if p2_state == STATE_IDLE:
+            #     p2.cur_state = Idle
+            # elif p2_state == STATE_RUN:
+            #     p2.cur_state = Run
+            # elif p2_state == STATE_JUMP:
+            #     p2.cur_state = Jump
+            # p2.frame = game_data["players"][1]["sprite_index"]
+            # if game_data["players"][1]["X_Direction"]:
+            #     p2.dir = 1
+            # else:
+            #     p2.dir = -1
         else:
             print("데이터 없음")
 
