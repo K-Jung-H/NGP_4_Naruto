@@ -16,7 +16,8 @@ import struct
 from map import Map
 from sasuke import SASUKE
 from naruto import NARUTO
-from multi_player_render import SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump, Attack
+from multi_player_render import (SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump, Attack,
+                                 Skill_motion, Easy_hit, Hard_hit, Win, Lose)
 
 TEST = True
 LOCAL = False
@@ -170,40 +171,18 @@ STATE_ATTACK_SKILL_3 = 9
 STATE_HIT_EASY = 10
 STATE_HIT_HARD = 11
 STATE_WIN = 12
-STATE_HARD = 13
+STATE_LOSE = 13
 
 def Decoding(client_socket):
     global game_data
     global p1, p2
-    # game_data = receive_game_data(client_socket)
-    # if game_data["players"][0]["selected_character"] == CHARACTER_NARUTO:
-    #     p1 = NARUTO_MULTI(1)
-    #     game_world.add_object(p1, 1)
-    #     p1.set_background(map)
-    # elif game_data["players"][0]["selected_character"] == CHARACTER_SASUKE:
-    #     p1 = SASUKE_MULTI(1)
-    #     game_world.add_object(p1, 1)
-    #     p1.set_background(map)
-
-    # if game_data["players"][1]["selected_character"] == CHARACTER_NARUTO:
-    #     p2 = NARUTO_MULTI(2)
-    #     game_world.add_object(p2, 1)
-    #     p2.set_background(map)
-    # elif game_data["players"][1]["selected_character"] == CHARACTER_SASUKE:
-    #     p2 = SASUKE_MULTI(2)
-    #     game_world.add_object(p2, 1)
-    #     p2.set_background(map)
     while True:
         game_data = receive_game_data(client_socket)
         if game_data:
             #print(game_data)
-            # print("Player 1 Name:", game_data["players"][0]["player_ID"])
-            # print("Player 1 Position:", game_data["players"][0]["position"])
             p1.x = game_data["players"][0]["position"]["x"]
             p1.y = game_data["players"][0]["position"]["y"]
             p1_state = game_data["players"][0]["player_state"]
-            # print(game_data["players"][0]["sprite_index"])
-            print(game_data["players"][0]["player_state"])
             if p1_state == STATE_IDLE:
                 p1.cur_state = Idle
             elif p1_state == STATE_RUN:
@@ -222,6 +201,24 @@ def Decoding(client_socket):
             elif p1_state == STATE_ATTACK_NORMAL_4:
                 p1.cur_state = Attack
                 p1.attack_num = 4
+            elif p1_state == STATE_ATTACK_SKILL_1:
+                p1.cur_state = Skill_motion
+                p1.skill_num = 'skill1'
+            elif p1_state == STATE_ATTACK_SKILL_2:
+                p1.cur_state = Skill_motion
+                p1.skill_num = 'skill2'
+            elif p1_state == STATE_ATTACK_SKILL_3:
+                p1.cur_state = Skill_motion
+                p1.skill_num = 'shuriken'
+            elif p1_state == STATE_HIT_EASY:
+                p1.cur_state = Easy_hit
+            elif p1_state == STATE_HIT_HARD:
+                p1.cur_state = Hard_hit
+            elif p1_state == STATE_WIN:
+                p1.cur_state = Win
+            elif p1_state == STATE_LOSE:
+                p1.cur_state = Lose
+
             p1.frame = game_data["players"][0]["sprite_index"]
             # print("Player 1 Dir:", game_data["players"][0]["X_Direction"])
             if game_data["players"][0]["X_Direction"]:
