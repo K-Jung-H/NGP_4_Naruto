@@ -28,7 +28,7 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '192.168.81.159'
+        SERVER_IP = '192.168.80.240'
 else:
     SERVER_IP = "0"
 
@@ -212,23 +212,22 @@ def Decoding(client_socket):
             else:
                 p1.dir = -1
 
-            # if p2:
-            #     print("Player 2 Name:", game_data["players"][1]["player_ID"])
-            #     print("Player 2 Position:", game_data["players"][1]["position"])
-            #     p2.x = game_data["players"][1]["position"]["x"]
-            #     p2.y = game_data["players"][1]["position"]["y"]
-            #     p2_state = game_data["players"][1]["player_state"]
-            #     if p2_state == STATE_IDLE:
-            #         p2.cur_state = Idle
-            #     elif p2_state == STATE_RUN:
-            #         p2.cur_state = Run
-            #     elif p2_state == STATE_JUMP:
-            #         p2.cur_state = Jump
-            #     p2.frame = game_data["players"][1]["sprite_index"]
-            #     if game_data["players"][1]["X_Direction"]:
-            #         p2.dir = 1
-            #     else:
-            #         p2.dir = -1
+            print("Player 2 Name:", game_data["players"][1]["player_ID"])
+            print("Player 2 Position:", game_data["players"][1]["position"])
+            p2.x = game_data["players"][1]["position"]["x"]
+            p2.y = game_data["players"][1]["position"]["y"]
+            p2_state = game_data["players"][1]["player_state"]
+            if p2_state == STATE_IDLE:
+                p2.cur_state = Idle
+            elif p2_state == STATE_RUN:
+                p2.cur_state = Run
+            elif p2_state == STATE_JUMP:
+                p2.cur_state = Jump
+            p2.frame = game_data["players"][1]["sprite_index"]
+            if game_data["players"][1]["X_Direction"]:
+                p2.dir = 1
+            else:
+                p2.dir = -1
         else:
             print("데이터 없음")
 
