@@ -160,14 +160,17 @@ CHARACTER_ITACHI = 3
 STATE_IDLE = 0
 STATE_RUN = 1
 STATE_JUMP = 2
-STATE_ATTACK_NORMAL = 3
-STATE_ATTACK_SKILL_1 = 4
-STATE_ATTACK_SKILL_2 = 5
-STATE_ATTACK_SKILL_3 = 6
-STATE_HIT_EASY = 7
-STATE_HIT_HARD = 8
-STATE_WIN = 9
-STATE_HARD = 10
+STATE_ATTACK_NORMAL_1 = 3
+STATE_ATTACK_NORMAL_2 = 4
+STATE_ATTACK_NORMAL_3 = 5
+STATE_ATTACK_NORMAL_4 = 6
+STATE_ATTACK_SKILL_1 = 7
+STATE_ATTACK_SKILL_2 = 8
+STATE_ATTACK_SKILL_3 = 9
+STATE_HIT_EASY = 10
+STATE_HIT_HARD = 11
+STATE_WIN = 12
+STATE_HARD = 13
 
 def Decoding(client_socket):
     global game_data
@@ -207,8 +210,18 @@ def Decoding(client_socket):
                 p1.cur_state = Run
             elif p1_state == STATE_JUMP:
                 p1.cur_state = Jump
-            elif p1_state == STATE_ATTACK_NORMAL:
+            elif p1_state == STATE_ATTACK_NORMAL_1:
                 p1.cur_state = Attack
+                p1.attack_num = 1
+            elif p1_state == STATE_ATTACK_NORMAL_2:
+                p1.cur_state = Attack
+                p1.attack_num = 2
+            elif p1_state == STATE_ATTACK_NORMAL_3:
+                p1.cur_state = Attack
+                p1.attack_num = 3
+            elif p1_state == STATE_ATTACK_NORMAL_4:
+                p1.cur_state = Attack
+                p1.attack_num = 4
             p1.frame = game_data["players"][0]["sprite_index"]
             # print("Player 1 Dir:", game_data["players"][0]["X_Direction"])
             if game_data["players"][0]["X_Direction"]:
