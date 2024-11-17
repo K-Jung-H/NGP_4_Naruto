@@ -126,7 +126,7 @@ DWORD WINAPI ServerMain(LPVOID arg)
 // 서버 업데이트 스레드
 DWORD WINAPI ServerUpdateThread(LPVOID arg)
 {
-    int target_fps =120;  // 목표 FPS 설정 (60FPS)
+    int target_fps =60;  // 목표 FPS 설정 (60FPS)
     server_program.Set_FrameRate(target_fps);  // 서버 타이머 시작
     
     while (true)
@@ -135,7 +135,6 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
         if (server_program.Get_Player(1) == NULL && server_program.Get_Player(2) == NULL)
         {
             // 연결된 플레이어가 없으면 업데이트 안 함
-            float ElapsedTime = server_program.Get_ElapsedTime();
             continue;
         }
 
@@ -165,7 +164,6 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
 
         // float로 경과 시간 받기
         float ElapsedTime = server_program.Get_ElapsedTime();
-
         server_program.Update_Server(ElapsedTime);
         server_program.Update_Collision();
         Game_Data* sending_data = server_program.Encoding();
@@ -208,6 +206,8 @@ DWORD WINAPI ProcessClient(LPVOID arg)
         server_program.Add_P1(player, CHARACTER_NARUTO);
     else if (Client_N == 2)
         server_program.Add_P2(player, CHARACTER_SASUKE);
+    else
+        std::cout << "Client_N 에서 오류 발생" << std::endl;
 
     server_program.Add_Client_Socket(client_sock, Client_N);
     
