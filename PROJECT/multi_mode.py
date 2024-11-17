@@ -18,6 +18,7 @@ from sasuke import SASUKE
 from naruto import NARUTO
 from multi_player_render import (SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump, Attack,
                                  Skill_motion, Easy_hit, Hard_hit, Win, Lose)
+from multi_skill_render import SkillObject
 
 TEST = True
 LOCAL = False
@@ -243,6 +244,18 @@ def Decoding(client_socket):
             #     p2.dir = 1
             # else:
             #     p2.dir = -1
+
+            for i, attack in enumerate(game_data["attacks"]):
+                if attack["attack_type"] > 0:  # 유효한 스킬 데이터만 활성화
+                    skills[i].activate(
+                        skill_type=attack["attack_type"],
+                        x=attack["position"]["x"],
+                        y=attack["position"]["y"],
+                        dir=attack["X_Direction"],
+                        sprite_index=attack["sprite_index"]
+                    )
+                else:
+                    skills[i].deactivate()
         else:
             print("데이터 없음")
 
@@ -252,6 +265,7 @@ def init():
     global p2
     global map
     global game_data
+    global skills
 
     map = Map()
     game_world.add_object(map, 1)
@@ -295,6 +309,9 @@ def init():
 
         p1.set_background(map)
         p2.set_background(map)
+
+    SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
+    skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
 
     # 키 입력 감지 쓰레드 시작
     client_Input_thread = threading.Thread(target=key_listener)
@@ -346,7 +363,11 @@ def running():
     pass
 def draw():
     clear_canvas()
+    # 게임 월드에 추가까지 해서 그렸어야 했나? 그냥 여기서 그리는거랑 차이가 있나?
     game_world.render()
+    # 테스트 필요
+    for skill in skills:
+        skill.draw()
     update_canvas()
 
 def update():
