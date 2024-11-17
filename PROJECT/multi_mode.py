@@ -117,6 +117,7 @@ def receive_game_data(client_socket):
         "players": [
             {
                 # player_ID를 ASCII로 디코딩, 예외 발생 시 기본값으로 대체
+                # 플레이어 ID는 왜 필요하지? 서버에서 1p 2p 설정되있는거 아닌가?
                 "player_ID": unpacked_data[0].decode('ascii', errors='ignore').strip("\x00"),
                 "position": {"x": unpacked_data[1], "y": unpacked_data[2]},
                 "X_Direction": unpacked_data[3],
@@ -135,6 +136,7 @@ def receive_game_data(client_socket):
         ],
         "attacks": [
             {
+                # 플레이어 ID는 왜 필요하지?
                 "player_ID": unpacked_data[i].decode('ascii', errors='ignore').strip("\x00"),
                 "position": {"x": unpacked_data[i + 1], "y": unpacked_data[i + 2]},
                 "X_Direction": unpacked_data[i + 3],
@@ -151,7 +153,6 @@ def receive_game_data(client_socket):
             "game_time": unpacked_data[-1]
         }
     }
-
     return game_data
 
 CHARACTER_NARUTO = 1
