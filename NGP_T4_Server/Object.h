@@ -146,6 +146,7 @@ public:
 
 
 	virtual void update(float Elapsed_time) {};
+	virtual	 void Print_info() {};
 };
 
 class Player : public Object
@@ -180,7 +181,7 @@ private:
 	float sprite_frame_value = 0.0f;
 
 public:
-	int selected_character_type = 0;;
+	int selected_character_type = 0;
 	int attack_type = 0; // 1. 수리검, 2. 스킬 1, 3. 스킬 2
 
 	Attack(const char player_id[32], int c_t, int a_t, Position p, bool x_dir)
@@ -194,4 +195,6 @@ public:
 
 	void  update(float Elapsed_time) override;
 	int Get_Sprite_Index(float Elapsed_time, int sprite_range, bool index_loop);
+
+	void Print_info();
 };

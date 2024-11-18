@@ -76,26 +76,61 @@ void Server::Add_Skill_Object(Object* skill_ptr)
 	
 }
 
-void Server::Update_Server(float Elapsed_time)
+void Server::Update_Server(float elapsed_time)
 {
-	//system("cls");
-	if (p1_ptr)
+	static int debug_tick = 0;
+	constexpr int DEBUG_TICK_INTERVAL = 10; // 디버깅 간격
+	++debug_tick;
+
+	// 콘솔 화면을 지우는 대신 상단 고정 위치에 출력
+	std::cout << "\033[2J\033[H"; // ANSI escape 코드로 화면 지우기 및 커서 이동
+
+	// 플레이어 업데이트
+	if (p1_ptr) 
+		p1_ptr->update(elapsed_time);
+
+	if (p2_ptr) 
+		p2_ptr->update(elapsed_time);
+
+	// 공격 객체 업데이트
+	for (Object* obj_ptr : Stage_Attack_Object_List) 
+		if (obj_ptr) 
+			obj_ptr->update(elapsed_time);
+	
+
+	// 출력 (업데이트와 분리)
+	std::cout << "=== Debug Info ===\n";
+
+	// 플레이어 정보 출력
+	if (p1_ptr && debug_tick > DEBUG_TICK_INTERVAL) 
 	{
-		p1_ptr->update(Elapsed_time);
 		p1_ptr->Print_info();
 	}
-	if (p2_ptr)
+
+	if (p2_ptr && debug_tick > DEBUG_TICK_INTERVAL)
 	{
-		p2_ptr->update(Elapsed_time);
 		p2_ptr->Print_info();
 	}
-	for (Object* obj_ptr : Stage_Attack_Object_List)
+
+	// 공격 객체 정보 출력
+	int i = 0;
+	for (Object* obj_ptr : Stage_Attack_Object_List) 
 	{
-		if(obj_ptr != NULL)
-			obj_ptr->update(Elapsed_time);
+		if (obj_ptr) 
+		{
+			std::cout << "Attack_Info " << i << ": ";
+			obj_ptr->Print_info();
+		}
+		++i;
 	}
 
+	// 디버그 틱 초기화
+	if (debug_tick > DEBUG_TICK_INTERVAL) 
+	{
+		debug_tick = 0;
+	}
 }
+
 
 
 
@@ -149,6 +184,7 @@ void Server::Decoding(std::pair<int, Key_Info>* key_info)
 			key = EVENT_RANGED_ATTACK_KEY_UP;
 		break;
 
+	case 'L':
 	case 'l':
 		if (key_value.key_action == 1)
 			key = EVENT_SKILL_ATTACK_1_KEY_DOWN;
@@ -209,13 +245,11 @@ Game_Data* Server::Encoding()
 		Attack_Info temp_info;
 		Attack* temp_attack = Stage_Attack_Object_List[i];
 
-		if (temp_attack != NULL)
+		if (temp_attack != nullptr)
 		{
 			temp_info.pos = temp_attack->pos;
 			temp_info.X_Direction = temp_attack->X_Direction;
-
-			temp_info.selected_character = temp_attack->selected_character_type;
-			temp_info.attack_type = temp_attack->attack_type;
+			temp_info.attack_type = (temp_attack->selected_character_type * 10) + temp_attack->attack_type;
 			temp_info.sprite_index = temp_attack->sprite_index;
 		}
 		sending_data->attacks[i] = temp_info;

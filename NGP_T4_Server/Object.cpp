@@ -422,13 +422,13 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
     case State::Attack_Skill_1:
     {
-        // 스킬 애니메이션은 0~5까지 있음, 6이 되면 종료하기
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 7, false);
+        // 스킬 애니메이션은 0~10까지 있음, 11이 되면 종료하기
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 12, false);
 
         // 스킬 애니메이션 끝나면
-        if (sprite_index == 6)
+        if (sprite_index == 11)
         {
-            sprite_index = 5;
+            sprite_index = 10;
             attack_action = false;
 
             Object* skill_1_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SKILL_1, pos, X_Direction);
@@ -439,13 +439,13 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
     case State::Attack_Skill_2:
     {
-        // 스킬 애니메이션은 0~10까지 있음, 11이 되면 종료하기
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 12, false);
+        // 스킬 애니메이션은 0~5까지 있음, 6이 되면 종료하기
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 7, false);
 
         // 스킬 애니메이션 끝나면
-        if (sprite_index == 11)
+        if (sprite_index == 6)
         {
-            sprite_index = 10;
+            sprite_index = 5;
             attack_action = false;
 
             Object* skill_2_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SKILL_2, pos, X_Direction);
@@ -463,6 +463,187 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
 void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
 {
+    switch (state)
+    {
+    case State::Idle:
+    {
+        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 6);
+
+        // 공격이 끝나고 1초 이상 공격을 재입력 안하면
+        if (attack_combo)
+        {
+            if (attack_after_time > Player_Attack_Combo_Time_Limit)
+            {
+                attack_combo = false;
+                attack_after_time = 0.0f;
+                combo_stack = 0;
+            }
+            else
+                attack_after_time += ElapsedTime;
+        }
+    }
+    break;
+
+    case State::Run:
+    {
+        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 6);
+        if (Move_Left) // 왼쪽으로 이동
+            pos.x -= RUN_SPEED_PPS * ElapsedTime;
+        else if (Move_Right) // 오른쪽으로 이동
+            pos.x += RUN_SPEED_PPS * ElapsedTime;
+    }
+    break;
+
+    case State::Jump:
+    {
+        if (is_air)
+        {
+            if (sprite_index < 4) // 점프 애니메이션은 반복되면 안됨 
+                sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 4, false);
+
+            if (sprite_index < 2)
+                Y_Direction = true; // 상승
+            else
+                Y_Direction = false; // 하강
+
+            pos.y += 1.2 * RUN_SPEED_PPS * ElapsedTime * (2 - sprite_index);
+
+            // 움직이게 될 때
+            if (Move_Left != Move_Right)
+            {
+                if (Move_Left) // 왼쪽으로 이동
+                    pos.x -= 0.8f * RUN_SPEED_PPS * ElapsedTime;
+                else if (Move_Right) // 오른쪽으로 이동
+                    pos.x += 0.8f * RUN_SPEED_PPS * ElapsedTime;
+            }
+        }
+
+        if (pos.y > Ground_Y)
+            is_air = true;
+        else if (pos.y <= Ground_Y)
+        {
+            is_air = false;
+            pos.y = float(Ground_Y);
+            sprite_index = 0;
+        }
+
+    }
+    break;
+
+    case State::Attack_Normal:
+    {
+        // 공격 애니메이션은 4, 5, 7, 6
+        if (combo_stack == 1)
+            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false);
+        else if (combo_stack == 2)
+            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 6, false);
+        else if (combo_stack == 3)
+            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 8, false);
+        else if (combo_stack == 4)
+            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 7, false);
+        else
+            sprite_index = 0;
+
+        // 한대 때리는 애니메이션 끝나면
+        if (combo_stack == 1 && sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        else if (combo_stack == 2 && sprite_index == 5)
+        {
+            sprite_index = 4;
+            attack_action = false;
+        }
+        else if (combo_stack == 3 && sprite_index == 7)
+        {
+            sprite_index = 6;
+            attack_action = false;
+        }
+        else if (combo_stack == 4 && sprite_index == 6)
+        {
+            sprite_index = 5;
+            attack_action = false;
+        }
+
+    }
+    break;
+
+    case State::Attack_Shuriken:
+    {
+        if (is_air)
+        {
+            pos.y += (Y_Direction ? 1 : -1) * 0.5 * RUN_SPEED_PPS * ElapsedTime;
+
+            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false); // 스프라이트 0~3 까지 있음, 4이 되면 종료하도록
+            if (sprite_index == 4)
+            {
+                sprite_index = 3;
+                attack_action = false;
+
+                Object* shuriken_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
+                server_ptr->Add_Skill_Object(shuriken_obj);
+            }
+        }
+        else
+        {
+            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false); // 스프라이트 0~3 까지 있음, 4가 되면 종료하도록
+            if (sprite_index == 4)
+            {
+                sprite_index = 3;
+                attack_action = false;
+
+                Object* shuriken_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
+                server_ptr->Add_Skill_Object(shuriken_obj);
+            }
+        }
+    }
+    break;
+
+    case State::Attack_Skill_1:
+    {
+        // 스킬 애니메이션은 0~11까지 있음, 12이 되면 종료하기
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 13, false);
+
+        // 스킬 애니메이션 끝나면
+        if (sprite_index == 12)
+        {
+            sprite_index = 11;
+            attack_action = false;
+
+            Object* skill_1_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SKILL_1, pos, X_Direction);
+            server_ptr->Add_Skill_Object(skill_1_obj);
+        }
+    }
+    break;
+
+    case State::Attack_Skill_2: // 사스케 0 ~ 18, 치도리 0 ~ 17
+    {
+        // 스킬 애니메이션은 0~18까지 있음, 19이 되면 종료하기
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 20, false);
+
+        // 스킬 애니메이션 끝나면
+        if (sprite_index == 19)
+        {
+            sprite_index = 18;
+            attack_action = false;
+        }
+
+        if (sprite_index == 1)
+        {
+            sprite_frame_value += 0.5f;
+            Object* skill_2_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SKILL_2, pos, X_Direction);
+            server_ptr->Add_Skill_Object(skill_2_obj);
+        }
+
+    }
+    break;
+
+
+    default:
+        break;
+    }
+    Set_Draw_Direction();
 }
 
 void Itachi_StateMachine::doAction(State state, float ElapsedTime)
@@ -477,9 +658,9 @@ void Player::Set_Character(int n, Server* server_ptr)
     if (n == CHARACTER_NARUTO)
         state_machine = new Naruto_StateMachine();
     else if (n == CHARACTER_SASUKE)
-        state_machine = new Naruto_StateMachine();
+        state_machine = new Sasuke_StateMachine();
     else if (n == CHARACTER_ITACHI)
-        state_machine = new Naruto_StateMachine();
+        state_machine = new Itachi_StateMachine();
 
     if (state_machine != NULL)
     {
@@ -547,7 +728,15 @@ void Player::Print_info()
     case 6:
         state = "STATE_ATTACK_NORMAL_4";
         break;
-
+    case 7:
+        state = "STATE_ATTACK_SHURIKEN";
+        break;
+    case 8:
+        state = "STATE_ATTACK_SKILL_1";
+        break;
+    case 9:
+        state = "STATE_ATTACK_SKILL_2";
+        break;
     default:
         break;
     }
@@ -578,6 +767,10 @@ int Attack::Get_Sprite_Index(float Elapsed_time, int sprite_range, bool index_lo
     return draw_index;
 }
 
+// selected_character_type 1. 나루토, 2. 사스케, 3.이타치
+// attack_type 1. 수리검
+// attack_type 2. 나선환 / 화둔 / 화둔
+// attack_type 3. 구미 / 치도리 / 아마테라스
 
 void Attack::update(float Elapsed_time)
 {
@@ -594,7 +787,10 @@ void Attack::update(float Elapsed_time)
         case 1: // Naruto - 나선환
         {
             if (sprite_index < 5)
+            {
                 sprite_index = Get_Sprite_Index(Elapsed_time * 6.0f, 6, false); // 0, 1, 2, 3, 4
+                pos.x += (X_Direction * 2 - 1) * Elapsed_time * sprite_index * RUN_SPEED_PPS / 5;
+            }
             else if (sprite_index >= 5)
             {
                 // 인덱스 범위 바꿀때, 기존 값 초기화
@@ -631,12 +827,18 @@ void Attack::update(float Elapsed_time)
         {
         case 1: // Naruto - 구미
             // 제자리
+            sprite_index = Get_Sprite_Index(Elapsed_time * 6.0f, 10, false);
             break;
 
         case 2: // Sasuke - 치도리
+        {
+            // 스킬 애니메이션은 0~17까지 있음, 18이 되면 종료
+            sprite_index = Get_Sprite_Index(Elapsed_time * 12.0f, 19, false);
+
             // 전진
             pos.x += (X_Direction * 2 - 1) * RUN_SPEED_PPS * Elapsed_time;
-            break;
+        }
+        break;
 
         case 3: // Itachi - 아마테라스
             // 따라가기
@@ -646,3 +848,55 @@ void Attack::update(float Elapsed_time)
     }
 }
 
+void Attack::Print_info()
+{
+    int pos_x = this->pos.x;
+    int pos_y = this->pos.y;
+
+    std::string direction = "";
+    if (this->X_Direction == false)
+        direction = "left";
+    else
+        direction = "right";
+
+    int sprite_index = this->sprite_index;
+
+    int n = selected_character_type;
+    int m = attack_type;
+    int value = n * 10 + m;
+
+    std::string attack_name = "";
+    switch (value)
+    {
+    case 11:
+        attack_name = "나루토 수리검";
+        break;
+    case 12:
+        attack_name = "나루토 스킬 1";
+        break;
+    case 13:
+        attack_name = "나루토 스킬 2";
+        break;
+    case 21:
+        attack_name = "사스케 수리검";
+        break;
+    case 22:
+        attack_name = "사스케 스킬 1";
+        break;
+    case 23:
+        attack_name = "사스케 스킬 2";
+        break;
+    case 31:
+        attack_name = "이타치 수리검";
+        break;
+    case 32:
+        attack_name = "이타치 스킬 1";
+        break;
+    case 33:
+        attack_name = "이타치 스킬 2";
+        break;
+    }
+
+    std::cout << "pos x: " << pos_x << ", pos y: " << pos_y << ", " "Direction: " << direction
+        << ", " << "Type: " << attack_name << ", " << "Sprite_index: " << sprite_index << std::endl;
+}

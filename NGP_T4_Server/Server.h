@@ -55,7 +55,11 @@ private:
 	Player* p1_ptr = NULL;
 	Player* p2_ptr = NULL;
 public:
-	Server() { InitializeCriticalSection(&cs_key_queue); }
+	Server() 
+	{ 
+		InitializeCriticalSection(&cs_key_queue); 
+		Stage_Attack_Object_List.fill(nullptr);
+	}
 	~Server() { DeleteCriticalSection(&cs_key_queue); }
 
 	void EnqueueKeyInput(int client_n, const Key_Info& keyInfo);

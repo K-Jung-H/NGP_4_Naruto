@@ -111,15 +111,17 @@ struct Player_Info
 
 struct Attack_Info
 {
-	// char player_ID[32];
+
 	Position  pos;
 	bool X_Direction;		// Left: false, Right: true
 	
-	int selected_character = 0; // 추가 됨
-	int attack_type;			// 스킬 1, 스킬 2, 투사체, 기본 공격
+	// 10의 자리: 1. 나루토, 2. 사스케, 3. 이타치
+	// 1의 자리: 1. 투사체, 2. 스킬_1 , 2. 스킬_2
+
+	int attack_type;			
 	int sprite_index;
 
-	Attack_Info() : pos(), X_Direction(false), selected_character(0), attack_type(0), sprite_index(0) {}
+	Attack_Info() : pos(), X_Direction(false), attack_type(0), sprite_index(0) {}
 };
 
 struct ETC_Info
