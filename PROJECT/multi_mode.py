@@ -53,7 +53,9 @@ key_codes = {
     'up': 87,
     ',': 44,
     'l': 76,
-    ';': 59
+    ':': 58,
+    ';': 59,
+    '/': 47
 }
 
 def send_key_info(key_name, key_action):
@@ -207,13 +209,13 @@ def Decoding(client_socket):
                 p1.attack_num = 4
             elif p1_state == STATE_ATTACK_SKILL_1:
                 p1.cur_state = Skill_motion
-                p1.skill_num = 'skill1'
+                p1.skill_num = 'shuriken'
             elif p1_state == STATE_ATTACK_SKILL_2:
                 p1.cur_state = Skill_motion
                 p1.skill_num = 'skill2'
             elif p1_state == STATE_ATTACK_SKILL_3:
                 p1.cur_state = Skill_motion
-                p1.skill_num = 'shuriken'
+                p1.skill_num = 'skill1'
             elif p1_state == STATE_HIT_EASY:
                 p1.cur_state = Easy_hit
             elif p1_state == STATE_HIT_HARD:
@@ -225,10 +227,7 @@ def Decoding(client_socket):
 
             p1.frame = game_data["players"][0]["sprite_index"]
             # print("Player 1 Dir:", game_data["players"][0]["X_Direction"])
-            if game_data["players"][0]["X_Direction"]:
-                p1.dir = 1
-            else:
-                p1.dir = -1
+            p1.dir = game_data["players"][0]["X_Direction"]
 
             # print("Player 2 Name:", game_data["players"][1]["player_ID"])
             # print("Player 2 Position:", game_data["players"][1]["position"])
@@ -275,11 +274,10 @@ def init():
     map = Map()
     game_world.add_object(map, 1)
 
-
-
     if TEST:
-        # p1 = SASUKE_MULTI(1)
-        p1 = NARUTO_MULTI(1)
+        p1 = SASUKE_MULTI(1)
+        # p1 = NARUTO_MULTI(1)
+        # p1 = ITACHI_MULTI(1)
         game_world.add_object(p1, 1)
 
         p2 = NARUTO_MULTI(2)
@@ -290,6 +288,7 @@ def init():
         skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
         for skill in skills:
             game_world.add_object(skill, 2)
+            skill.set_background(map)
         # game_world.add_object(skills, 2)
 
         # 네트워크 클라이언트 초기화 및 연결
