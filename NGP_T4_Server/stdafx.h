@@ -67,17 +67,21 @@
 #define STATE_IDLE 0
 #define STATE_RUN 1
 #define STATE_JUMP 2
-#define STATE_ATTACK_NORMAL 3
-#define STATE_ATTACK_SKILL_1 4
-#define STATE_ATTACK_SKILL_2 5
-#define STATE_ATTACK_SKILL_3 6
-#define STATE_HIT_EASY 7
-#define STATE_HIT_HARD 8
-#define STATE_WIN 9
-#define STATE_LOSE 10
+#define STATE_ATTACK_NORMAL_1 3
+#define STATE_ATTACK_NORMAL_2 4
+#define STATE_ATTACK_NORMAL_3 5
+#define STATE_ATTACK_NORMAL_4 6
+#define STATE_ATTACK_SKILL_1 7
+#define STATE_ATTACK_SKILL_2 8
+#define STATE_ATTACK_SKILL_3 9
+#define STATE_HIT_EASY 10
+#define STATE_HIT_HARD 11
+#define STATE_WIN 12
+#define STATE_LOSE 13
 
 
 #define Ground_Y 120
+#define Player_Attack_Combo_Time_Limit 1.0f
 
 static float PIXEL_PER_METER = (10.0 / 0.3); // 10 pixel 30 cm
 static float  RUN_SPEED_KMPH = 50.0f; // Km / Hour
@@ -107,13 +111,17 @@ struct Player_Info
 
 struct Attack_Info
 {
-	char player_ID[32];
+
 	Position  pos;
 	bool X_Direction;		// Left: false, Right: true
-	int attack_type;			// 스킬 1, 스킬 2, 투사체, 기본 공격
+	
+	// 10의 자리: 1. 나루토, 2. 사스케, 3. 이타치
+	// 1의 자리: 1. 투사체, 2. 스킬_1 , 2. 스킬_2
+
+	int attack_type;			
 	int sprite_index;
 
-	Attack_Info() : player_ID("Unknown_Attack"), pos(), X_Direction(false), attack_type(0), sprite_index(0) {}
+	Attack_Info() : pos(), X_Direction(false), attack_type(0), sprite_index(0) {}
 };
 
 struct ETC_Info

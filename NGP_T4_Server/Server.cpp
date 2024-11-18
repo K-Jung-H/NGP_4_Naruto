@@ -54,27 +54,83 @@ void Server::Remove_Client_Socket(int playerNum)
 	}
 }
 
-void Server::Update_Server(float Elapsed_time)
+void Server::Add_P1(Object* p_ptr, int n) 
 {
-	if (p1_ptr)
-	{
-		std::cout << "1P - ";
-		p1_ptr->update(Elapsed_time);
-	}
-	if (p2_ptr)
-	{
-		std::cout << "2P - ";
-		p2_ptr->update(Elapsed_time);
-	}
-	for (Object* obj_ptr : Stage_Attack_Object_List)
-	{
-		if(obj_ptr != NULL)
-			obj_ptr->update(Elapsed_time);
-	}
-	    //오브젝트 전부 다 업데이트
-		// 플레이어는 서버에 저장된 키 상태 기반 업데이트
-		// 공격 정보는 그냥 업데이트	
+	p1_ptr = static_cast<Player*>(p_ptr);
+	p1_ptr->Set_Character(n, this);
 }
+void Server::Add_P2(Object* p_ptr, int n) 
+{
+	p2_ptr = static_cast<Player*>(p_ptr);
+	p2_ptr->Set_Character(n, this);
+}
+
+void Server::Add_Skill_Object(Object* skill_ptr)
+{
+	auto empty_space = std::find(Stage_Attack_Object_List.begin(), Stage_Attack_Object_List.end(), static_cast<Attack*>(nullptr));
+
+	if (empty_space != Stage_Attack_Object_List.end()) 
+		*empty_space = static_cast<Attack*>(skill_ptr);
+	else
+		std::cout << "No space for skill_object in game world" << std::endl;
+	
+}
+
+void Server::Update_Server(float elapsed_time)
+{
+	static int debug_tick = 0;
+	constexpr int DEBUG_TICK_INTERVAL = 10; // 디버깅 간격
+	++debug_tick;
+
+	// 콘솔 화면을 지우는 대신 상단 고정 위치에 출력
+	std::cout << "\033[2J\033[H"; // ANSI escape 코드로 화면 지우기 및 커서 이동
+
+	// 플레이어 업데이트
+	if (p1_ptr) 
+		p1_ptr->update(elapsed_time);
+
+	if (p2_ptr) 
+		p2_ptr->update(elapsed_time);
+
+	// 공격 객체 업데이트
+	for (Object* obj_ptr : Stage_Attack_Object_List) 
+		if (obj_ptr) 
+			obj_ptr->update(elapsed_time);
+	
+
+	// 출력 (업데이트와 분리)
+	std::cout << "=== Debug Info ===\n";
+
+	// 플레이어 정보 출력
+	if (p1_ptr && debug_tick > DEBUG_TICK_INTERVAL) 
+	{
+		p1_ptr->Print_info();
+	}
+
+	if (p2_ptr && debug_tick > DEBUG_TICK_INTERVAL)
+	{
+		p2_ptr->Print_info();
+	}
+
+	// 공격 객체 정보 출력
+	int i = 0;
+	for (Object* obj_ptr : Stage_Attack_Object_List) 
+	{
+		if (obj_ptr) 
+		{
+			std::cout << "Attack_Info " << i << ": ";
+			obj_ptr->Print_info();
+		}
+		++i;
+	}
+
+	// 디버그 틱 초기화
+	if (debug_tick > DEBUG_TICK_INTERVAL) 
+	{
+		debug_tick = 0;
+	}
+}
+
 
 
 
@@ -113,6 +169,36 @@ void Server::Decoding(std::pair<int, Key_Info>* key_info)
 		else
 			key = EVENT_MOVE_UP_KEY_UP;
 		break;
+
+	case ',':
+		if (key_value.key_action == 1)
+			key = EVENT_NORMAL_ATTACK_KEY_DOWN;
+		else
+			key = EVENT_NORMAL_ATTACK_KEY_UP;
+		break;
+
+	case '/':
+		if (key_value.key_action == 1)
+			key = EVENT_RANGED_ATTACK_KEY_DOWN;
+		else
+			key = EVENT_RANGED_ATTACK_KEY_UP;
+		break;
+
+	case 'L':
+	case 'l':
+		if (key_value.key_action == 1)
+			key = EVENT_SKILL_ATTACK_1_KEY_DOWN;
+		else
+			key = EVENT_SKILL_ATTACK_1_KEY_UP;
+		break;
+
+	case ';':
+		if (key_value.key_action == 1)
+			key = EVENT_SKILL_ATTACK_2_KEY_DOWN;
+		else
+			key = EVENT_SKILL_ATTACK_2_KEY_UP;
+		break;
+
 
 	default:
 		break;
@@ -159,13 +245,11 @@ Game_Data* Server::Encoding()
 		Attack_Info temp_info;
 		Attack* temp_attack = Stage_Attack_Object_List[i];
 
-		if (temp_attack != NULL)
+		if (temp_attack != nullptr)
 		{
 			temp_info.pos = temp_attack->pos;
 			temp_info.X_Direction = temp_attack->X_Direction;
-
-			std::memcpy(temp_info.player_ID, temp_attack->player_ID, sizeof(temp_info.player_ID));
-			temp_info.attack_type = temp_attack->attack_type;
+			temp_info.attack_type = (temp_attack->selected_character_type * 10) + temp_attack->attack_type;
 			temp_info.sprite_index = temp_attack->sprite_index;
 		}
 		sending_data->attacks[i] = temp_info;
@@ -198,28 +282,39 @@ Game_Data* Server::Encoding()
 
 void Server::Broadcast_GameData_All(Game_Data* data)
 {
+	std::string result_message = "";
 	if (client1_socket != INVALID_SOCKET)
 	{
 		send(client1_socket, (char*)data, sizeof(Game_Data), 0);
-		std::cout << "1P - send()" << std::endl;
+		result_message += "1P - ";
 	}
 	if (client2_socket != INVALID_SOCKET)
 	{
 		send(client2_socket, (char*)data, sizeof(Game_Data), 0);
-		std::cout << "2P - send()" << std::endl;
+		result_message += "2P - ";
 	}
 
+	//if(result_message.length() > 0)
+	//	std::cout << result_message << " send_success" << std::endl;
 	delete data;
 }
 
 Player* Server::Get_Player(int Client)
 {
 	if (Client == 1)
-		return p1_ptr;
+	{
+		if (p1_ptr != NULL)
+			if (p1_ptr->Get_StateMachine() != NULL)
+				return p1_ptr;
+	}
 	else if (Client == 2)
-		return p2_ptr;
-	else
-		return NULL;
+	{
+		if (p2_ptr != NULL)
+			if (p2_ptr->Get_StateMachine() != NULL)
+				return p2_ptr;
+	}
+	
+	return NULL;
 }
 
 void Server::Remove_Player(int Client)

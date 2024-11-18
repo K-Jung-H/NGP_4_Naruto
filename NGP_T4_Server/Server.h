@@ -55,7 +55,11 @@ private:
 	Player* p1_ptr = NULL;
 	Player* p2_ptr = NULL;
 public:
-	Server() { InitializeCriticalSection(&cs_key_queue); }
+	Server() 
+	{ 
+		InitializeCriticalSection(&cs_key_queue); 
+		Stage_Attack_Object_List.fill(nullptr);
+	}
 	~Server() { DeleteCriticalSection(&cs_key_queue); }
 
 	void EnqueueKeyInput(int client_n, const Key_Info& keyInfo);
@@ -64,22 +68,18 @@ public:
 	bool Add_Client_Socket(SOCKET clientSocket, int playerNum);
 	void Remove_Client_Socket(int playerNum);
 
+	void Add_P1(Object* p_ptr, int n);
+	void Add_P2(Object* p_ptr, int n);
+
+	void Add_Skill_Object(Object* skill_ptr);
+
 	void Decoding(std::pair<int, Key_Info>* key_info);
 	Game_Data* Encoding();
 
 	void Update_Server(float Elapsed_time);
 	void Update_Collision() {};
 	void Broadcast_GameData_All(Game_Data* data);
-
-	void Add_P1(Object* p_ptr, int n) {
-		p1_ptr = static_cast<Player*>(p_ptr);
-		p1_ptr->Set_Character(n);
-	}
-	void Add_P2(Object* p_ptr, int n) { 
-		p2_ptr = static_cast<Player*>(p_ptr);
-		p2_ptr->Set_Character(n);
-	}
-
+	
 	int Get_Key_Input_Buffer_size() { return keyQueue.size(); }
 	void Set_FrameRate(int n) { timer.start(n); }
 	float Get_ElapsedTime() { return timer.getElapsedTime(); }
