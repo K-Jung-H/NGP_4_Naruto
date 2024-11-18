@@ -93,7 +93,7 @@ def key_listener():
 # 각 구조체의 포맷 정의
 position_format = "2f"  # Position 구조체
 player_info_format = "32s2f?3i"  # Player_Info 구조체
-attack_info_format = "32s2f?2i"  # Attack_Info 구조체
+attack_info_format = "2f?2i"  # Attack_Info 구조체
 etc_info_format = "5i"  # ETC_Info 구조체
 game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_format}"  # Game_Data 전체 포맷
 
@@ -137,14 +137,14 @@ def receive_game_data(client_socket):
         ],
         "attacks": [
             {
-                # 플레이어 ID는 왜 필요하지?
-                "player_ID": unpacked_data[i].decode('ascii', errors='ignore').strip("\x00"),
-                "position": {"x": unpacked_data[i + 1], "y": unpacked_data[i + 2]},
-                "X_Direction": unpacked_data[i + 3],
-                "attack_type": unpacked_data[i + 4],
-                "sprite_index": unpacked_data[i + 5]
+                "position": {"x": unpacked_data[i], "y": unpacked_data[i + 1]},
+                "X_Direction": unpacked_data[i + 2],
+                # "selected_character": unpacked_data[i + 3],
+                "attack_type": unpacked_data[i + 3],
+                "sprite_index": unpacked_data[i + 4]
             }
-            for i in range(14, 14 + 18 * 6, 6)
+            for i in range(14, 14 + 18 * 5, 5)
+            # for i in range(14, 14 + 18 * 6, 6)
         ],
         "etc": {
             "player1_hp": unpacked_data[-5],
@@ -181,7 +181,7 @@ def Decoding(client_socket):
     while True:
         game_data = receive_game_data(client_socket)
         if game_data:
-            #print(game_data)
+            print(game_data)
             p1.x = game_data["players"][0]["position"]["x"]
             p1.y = game_data["players"][0]["position"]["y"]
             p1_state = game_data["players"][0]["player_state"]
