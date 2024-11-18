@@ -248,7 +248,9 @@ def Decoding(client_socket):
             #     p2.dir = -1
             # print(game_data["attacks"])
             for i, attack in enumerate(game_data["attacks"]):
+                # print(attack["attack_type"])
                 if attack["attack_type"] > 0:  # 유효한 스킬 데이터만 활성화
+                    # print(attack)
                     skills[i].activate(
                         skill_type=attack["attack_type"],
                         x=attack["position"]["x"],
@@ -256,7 +258,7 @@ def Decoding(client_socket):
                         dir=attack["X_Direction"],
                         sprite_index=attack["sprite_index"]
                     )
-                    print(skills[i])
+                    # print(i, skills[i].skill_type, skills[i].x, skills[i].y, skills[i].dir, skills[i].sprite_index)
                 else:
                     skills[i].deactivate()
         else:
@@ -273,8 +275,7 @@ def init():
     map = Map()
     game_world.add_object(map, 1)
 
-    SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
-    skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
+
 
     if TEST:
         # p1 = SASUKE_MULTI(1)
@@ -284,6 +285,13 @@ def init():
         p2 = NARUTO_MULTI(2)
         # p1 = ITACHI_MULTI(1)
         game_world.add_object(p2, 1)
+
+        SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
+        skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
+        for skill in skills:
+            game_world.add_object(skill, 2)
+        # game_world.add_object(skills, 2)
+
         # 네트워크 클라이언트 초기화 및 연결
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
         network_client.connect()
@@ -367,12 +375,14 @@ def handle_events():
 def running():
     pass
 def draw():
+    global skills
     clear_canvas()
     # 게임 월드에 추가까지 해서 그렸어야 했나? 그냥 여기서 그리는거랑 차이가 있나?
     game_world.render()
+    # print(game_world.objects)
     # 테스트 필요
-    for skill in skills:
-        skill.draw()
+    # for skill in skills:
+    #     skill.draw()
     update_canvas()
 
 def update():

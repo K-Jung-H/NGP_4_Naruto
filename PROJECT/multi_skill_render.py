@@ -18,7 +18,7 @@ class SkillObject:
     def load_sprites(cls):
         cls.skill_sprites[1] = [load_image('resource/shuriken3.png')]  # 나루토 수리검
         cls.skill_sprites[2] = [load_image('resource/naruto_skill1_effect.png')]  # 나루토 꼬리 공격
-        cls.skill_sprites[3] = [load_image('resource/naruto_skill2_effect.png')]  # 나루토 나선환
+        cls.skill_sprites[12] = [load_image('resource/naruto_skill2_effect.png')]  # 나루토 나선환
         cls.skill_sprites[4] = [load_image('resource/shuriken1.png')]  # 사스케, 이타치 수리검
         cls.skill_sprites[5] = [load_image('resource/sasuke_skill1_effect.png')]  # 사스케, 이타치 화둔
         cls.skill_sprites[6] = [  # 사스케 치도리, 2개의 이미지 사용
@@ -41,9 +41,15 @@ class SkillObject:
     def deactivate(self):
         self.active = False
 
+    def update(self):
+        pass
+
     def draw(self):
-        self.sx, self.sy = self.x - multi_mode.map.window_left, self.y - multi_mode.map.window_bottom
-        if self.active and self.skill_type in self.skill_sprites:
+        if self.active:
+            self.sx, self.sy = self.x - multi_mode.map.window_left, self.y - multi_mode.map.window_bottom
+            print(self.sx, self.sy)
+            print(self.x, self.y)
+            # if self.active and self.skill_type in self.skill_sprites:
             sprite_list = self.skill_sprites[self.skill_type]  # 스킬 타입에 해당하는 이미지 리스트 가져오기
 
             if self.skill_type == 11:  # 나루토 수리검
@@ -57,13 +63,14 @@ class SkillObject:
                     sprite_list[0].clip_composite_draw(
                         int(self.sprite_index) * 193, 0, 193, 136, 0, 'h', self.sx, self.sy + 20, 543, 382)
             elif self.skill_type == 12:  # 나루토 나선환
-                if self.sprite_index >= 7:
-                    if self.dir == 1:
-                        sprite_list[0].clip_composite_draw(
-                            (int(self.sprite_index) - 7) * 159, 0, 159, 88, 0, '', self.sx, self.sy, 447, 247)
-                    elif self.dir == -1:
-                        sprite_list[0].clip_composite_draw(
-                            (int(self.sprite_index) - 7) * 159, 0, 159, 88, 0, 'h', self.sx, self.sy, 447, 247)
+                if self.dir == 1:
+                    # print("draw")
+                    sprite_list[0].clip_composite_draw(
+                        (int(self.sprite_index)) * 159, 0, 159, 88, 0, '', self.sx, self.sy, 447, 247)
+                elif self.dir == -1:
+                    # print("draw")
+                    sprite_list[0].clip_composite_draw(
+                        (int(self.sprite_index)) * 159, 0, 159, 88, 0, 'h', self.sx, self.sy, 447, 247)
             elif self.skill_type == 21:  # 사스케, 이타치 수리검
                 sprite_list[0].clip_composite_draw(int(self.sprite_index) * 44, 0, 44, 35, 0, '', self.sx,
                                                    self.sy, 44 * 1.5, 35 * 1.5)
