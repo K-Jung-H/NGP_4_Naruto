@@ -212,20 +212,20 @@ class Skill_motion:
                     p1.skill2.clip_composite_draw(int(p1.frame) * 83, 0, 83, 50, 0, '', p1.sx + 20, p1.sy - 15, 233,
                                                   140)
             elif p1.skill_num == 'shuriken':
-                if p1.jump_state:
-                    if p1.dir == -1:
-                        p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, 'h', p1.sx, p1.sy - 30,
-                                                             112, 180)
-                    elif p1.dir == 1:
-                        p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, '', p1.sx, p1.sy - 30,
-                                                             112, 180)
-                else:
-                    if p1.dir == -1:
-                        p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 40, 0, 40, 48, 0, 'h', p1.sx - 10,
-                                                              p1.sy - 15, 112, 135)
-                    elif p1.dir == 1:
-                        p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 40, 0, 40, 48, 0, '', p1.sx + 10,
-                                                              p1.sy - 15, 112, 135)
+                # if p1.jump_state:
+                #     if p1.dir == -1:
+                #         p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, 'h', p1.sx, p1.sy - 30,
+                #                                              112, 180)
+                #     elif p1.dir == 1:
+                #         p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, '', p1.sx, p1.sy - 30,
+                #                                              112, 180)
+                # else:
+                if p1.dir == -1:
+                    p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 40, 0, 40, 48, 0, 'h', p1.sx - 10,
+                                                          p1.sy - 15, 112, 135)
+                elif p1.dir == 1:
+                    p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 40, 0, 40, 48, 0, '', p1.sx + 10,
+                                                          p1.sy - 15, 112, 135)
         elif p1.char_name == 'sasuke':
             if p1.skill_num == 'skill1':
                 if p1.dir == -1:
@@ -238,16 +238,16 @@ class Skill_motion:
                 elif p1.dir == 1:
                     p1.skill2.clip_composite_draw(int(p1.frame) * 104, 0, 104, 77, 0, '', p1.sx, p1.sy+41, 325, 241)
             elif p1.skill_num == 'shuriken':
-                if p1.jump_state:
-                    if p1.dir == -1:
-                        p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, 'h', p1.sx, p1.sy, 125, 200)
-                    elif p1.dir == 1:
-                        p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, '', p1.sx, p1.sy, 125, 200)
-                else:
-                    if p1.dir == -1:
-                        p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, 'h', p1.sx, p1.sy, 125, 200)
-                    elif p1.dir == 1:
-                        p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, '', p1.sx, p1.sy, 125, 200)
+                # if p1.jump_state:
+                #     if p1.dir == -1:
+                #         p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, 'h', p1.sx, p1.sy, 125, 200)
+                #     elif p1.dir == 1:
+                #         p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, '', p1.sx, p1.sy, 125, 200)
+                # else:
+                if p1.dir == -1:
+                    p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, 'h', p1.sx, p1.sy, 125, 200)
+                elif p1.dir == 1:
+                    p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, '', p1.sx, p1.sy, 125, 200)
         elif p1.char_name == 'itachi':
             if p1.skill_num == 'skill1':
                 if p1.dir == -1:
@@ -262,20 +262,20 @@ class Skill_motion:
                 elif p1.dir == 1:
                     p1.skill2.clip_composite_draw(int(p1.frame) * 42, 0, 42, 72, 0, '', p1.sx - 10, p1.sy + 5, 90, 155)
             elif p1.skill_num == 'shuriken':
-                if p1.jump_state:
-                    if p1.dir == -1:
-                        p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 42, 0, 42, 56, 0, 'h', p1.sx, p1.sy - 25,
-                                                             131, 175)
-                    elif p1.dir == 1:
-                        p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 42, 0, 42, 56, 0, '', p1.sx, p1.sy - 25,
-                                                             131, 175)
-                else:
-                    if p1.dir == -1:
-                        p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 50, 0, 50, 64, 0, 'h', p1.sx - 15,
-                                                              p1.sy + 15, 156, 200)
-                    elif p1.dir == 1:
-                        p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 50, 0, 50, 64, 0, '', p1.sx + 15,
-                                                              p1.sy + 15, 156, 200)
+                # if p1.jump_state:
+                #     if p1.dir == -1:
+                #         p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 42, 0, 42, 56, 0, 'h', p1.sx, p1.sy - 25,
+                #                                              131, 175)
+                #     elif p1.dir == 1:
+                #         p1.shuriken_jump.clip_composite_draw(int(p1.frame) * 42, 0, 42, 56, 0, '', p1.sx, p1.sy - 25,
+                #                                              131, 175)
+                # else:
+                if p1.dir == -1:
+                    p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 50, 0, 50, 64, 0, 'h', p1.sx - 15,
+                                                          p1.sy + 15, 156, 200)
+                elif p1.dir == 1:
+                    p1.shuriken_stand.clip_composite_draw(int(p1.frame) * 50, 0, 50, 64, 0, '', p1.sx + 15,
+                                                          p1.sy + 15, 156, 200)
 
 class Easy_hit:
     @staticmethod

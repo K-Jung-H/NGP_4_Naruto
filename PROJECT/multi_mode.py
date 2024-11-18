@@ -30,7 +30,7 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '192.168.80.240'
+        SERVER_IP = '192.168.81.92'
 else:
     SERVER_IP = "0"
 
@@ -51,7 +51,9 @@ key_codes = {
     'right': 68,
     'down': 83,
     'up': 87,
-    ',': 44
+    ',': 44,
+    'l': 76,
+    ';': 59
 }
 
 def send_key_info(key_name, key_action):
@@ -181,7 +183,7 @@ def Decoding(client_socket):
     while True:
         game_data = receive_game_data(client_socket)
         if game_data:
-            print(game_data)
+            # print(game_data)
             p1.x = game_data["players"][0]["position"]["x"]
             p1.y = game_data["players"][0]["position"]["y"]
             p1_state = game_data["players"][0]["player_state"]
@@ -244,7 +246,7 @@ def Decoding(client_socket):
             #     p2.dir = 1
             # else:
             #     p2.dir = -1
-
+            # print(game_data["attacks"])
             for i, attack in enumerate(game_data["attacks"]):
                 if attack["attack_type"] > 0:  # 유효한 스킬 데이터만 활성화
                     skills[i].activate(
@@ -254,6 +256,7 @@ def Decoding(client_socket):
                         dir=attack["X_Direction"],
                         sprite_index=attack["sprite_index"]
                     )
+                    print(skills[i])
                 else:
                     skills[i].deactivate()
         else:
@@ -269,6 +272,9 @@ def init():
 
     map = Map()
     game_world.add_object(map, 1)
+
+    SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
+    skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
 
     if TEST:
         # p1 = SASUKE_MULTI(1)
@@ -310,8 +316,7 @@ def init():
         p1.set_background(map)
         p2.set_background(map)
 
-    SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
-    skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
+
 
     # 키 입력 감지 쓰레드 시작
     client_Input_thread = threading.Thread(target=key_listener)
