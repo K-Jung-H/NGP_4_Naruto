@@ -299,19 +299,21 @@ def init():
         # p1 = ITACHI_MULTI(1)
         game_world.add_object(p2, 1)
 
-        if p1.char_name == 'naruto':
-            p1_mug = naruto_mug
-        elif p1.char_name == 'sasuke':
-            p1_mug = sasuke_mug
-        elif p1.char_name == 'itachi':
-            p1_mug = itachi_mug
-
-        if p2.char_name == 'naruto':
-            p2_mug = naruto_mug
-        elif p2.char_name == 'sasuke':
-            p2_mug = sasuke_mug
-        elif p2.char_name == 'itachi':
-            p2_mug = itachi_mug
+        p1_mug = p1.char_name
+        p2_mug = p2.char_name
+        # if p1.char_name == 'naruto':
+        #     p1_mug = naruto_mug
+        # elif p1.char_name == 'sasuke':
+        #     p1_mug = sasuke_mug
+        # elif p1.char_name == 'itachi':
+        #     p1_mug = itachi_mug
+        #
+        # if p2.char_name == 'naruto':
+        #     p2_mug = naruto_mug
+        # elif p2.char_name == 'sasuke':
+        #     p2_mug = sasuke_mug
+        # elif p2.char_name == 'itachi':
+        #     p2_mug = itachi_mug
 
 
         SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
@@ -332,6 +334,8 @@ def init():
         p2.x = 400
         p1.y, p2.y = 400, 400
         p1.frame, p2.frame = 2, 2
+
+        p1_hp, p2_hp = 400, 400
 
         p1.set_background(map)
         p2.set_background(map)
@@ -425,6 +429,20 @@ def draw():
         chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 1040, 520, 32, 56)
     if p1_chakra >= 90:
         chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 1000, 520, 32, 56)
+
+    if p1_mug == 'naruto':
+        naruto_mug.clip_composite_draw(0, 0, 104, 112, 0, '', 1150, 550, 80, 80)
+    elif p1_mug == 'sasuke':
+        sasuke_mug.clip_composite_draw(0, 0, 96, 104, 0, '', 1150, 550, 80, 80)
+    elif p1_mug == 'itachi':
+        itachi_mug.clip_composite_draw(0, 0, 112, 112, 0, '', 1150, 550, 80, 80)
+    if p2_mug == 'naruto':
+        naruto_mug.clip_composite_draw(0, 0, 104, 112, 0, '', 50, 550, 80, 80)
+    elif p2_mug == 'sasuke':
+        sasuke_mug.clip_composite_draw(0, 0, 96, 104, 0, '', 50, 550, 80, 80)
+    elif p2_mug == 'itachi':
+        itachi_mug.clip_composite_draw(0, 0, 112, 112, 0, '', 50, 550, 80, 80)
+
     update_canvas()
 
 def update():
