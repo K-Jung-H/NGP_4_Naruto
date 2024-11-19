@@ -270,6 +270,21 @@ def init():
     global map
     global game_data
     global skills
+    global health_bar, health_hp, naruto_mug, sasuke_mug, itachi_mug, chakra_image, chakra_frame
+    global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp
+
+    health_bar = load_image('resource/health_bar.png')
+    health_hp = load_image('resource/health_hp.png')
+    naruto_mug = load_image('resource/naruto_mugshot.png')
+    sasuke_mug = load_image('resource/sasuke_mugshot.png')
+    itachi_mug = load_image('resource/itachi_mugshot.png')
+    chakra_image = load_image('resource/chakra.png')
+    chakra_frame = 0
+    ko = load_image('resource/ko.png')
+    fight = load_image('resource/fight.png')
+    fight_frame = 0
+    p1_chakra, p2_chakra = 0, 0
+    p1_hp, p2_hp = 0, 0
 
     map = Map()
     game_world.add_object(map, 1)
@@ -378,10 +393,23 @@ def draw():
     clear_canvas()
     # 게임 월드에 추가까지 해서 그렸어야 했나? 그냥 여기서 그리는거랑 차이가 있나?
     game_world.render()
-    # print(game_world.objects)
-    # 테스트 필요
-    # for skill in skills:
-    #     skill.draw()
+    health_bar.clip_composite_draw(0, 0, 402, 22, 0, '', 300, 570, 402, 30)
+    health_bar.clip_composite_draw(0, 0, 402, 22, 0, '', 900, 570, 402, 30)
+    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 300 - (400 - p2_hp) // 2, 570, p2_hp, 28)
+    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 900 - (400 - p1_hp) // 2, 570, p1_hp, 28)
+    if p2_chakra >= 30:
+        chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 120, 520, 32, 56)
+    if p2_chakra >= 60:
+        chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 160, 520, 32, 56)
+    if p2_chakra >= 90:
+        chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 200, 520, 32, 56)
+
+    if p1_chakra >= 30:
+        chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 1080, 520, 32, 56)
+    if p1_chakra >= 60:
+        chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 1040, 520, 32, 56)
+    if p1_chakra >= 90:
+        chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 1000, 520, 32, 56)
     update_canvas()
 
 def update():
