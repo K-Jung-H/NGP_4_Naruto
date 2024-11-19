@@ -271,7 +271,7 @@ def init():
     global game_data
     global skills
     global health_bar, health_hp, naruto_mug, sasuke_mug, itachi_mug, chakra_image, chakra_frame
-    global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp
+    global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp, p1_mug, p2_mug
 
     health_bar = load_image('resource/health_bar.png')
     health_hp = load_image('resource/health_hp.png')
@@ -298,6 +298,21 @@ def init():
         p2 = NARUTO_MULTI(2)
         # p1 = ITACHI_MULTI(1)
         game_world.add_object(p2, 1)
+
+        if p1.char_name == 'naruto':
+            p1_mug = naruto_mug
+        elif p1.char_name == 'sasuke':
+            p1_mug = sasuke_mug
+        elif p1.char_name == 'itachi':
+            p1_mug = itachi_mug
+
+        if p2.char_name == 'naruto':
+            p2_mug = naruto_mug
+        elif p2.char_name == 'sasuke':
+            p2_mug = sasuke_mug
+        elif p2.char_name == 'itachi':
+            p2_mug = itachi_mug
+
 
         SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
         skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
