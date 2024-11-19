@@ -1,3 +1,5 @@
+import socket
+
 from pico2d import *
 
 import charactor_choose_mode
@@ -155,13 +157,17 @@ extra_state_data = {
 
 def receive_game_data(client_socket):
     global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time
+
     data = b""
     while len(data) < data_size:
+        # print(data_size)
         packet = client_socket.recv(data_size - len(data))
         if not packet:
             print("연결이 종료되었습니다.")
             return None
         data += packet
+
+    # data += client_socket.recv(data_size)
     # 데이터 언패킹
     unpacked_data = struct.unpack(game_data_format, data)
     # print("Unpacked data:", unpacked_data)  # 디버깅용
@@ -285,6 +291,16 @@ def init():
         # 네트워크 클라이언트 초기화 및 연결
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
         network_client.connect()
+        # 송수신 버퍼 크기 설정 
+        new_buf_size = 492
+        network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, new_buf_size)
+        network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, new_buf_size)
+
+        recv_buf_size = network_client.client_socket.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
+        send_buf_size = network_client.client_socket.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
+
+        print(f"수신 버퍼 크기: {recv_buf_size} bytes")
+        print(f"송신 버퍼 크기: {send_buf_size} bytes")
         receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
         receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
         receiver_thread.start()
