@@ -14,7 +14,7 @@ import threading
 import struct
 from map import Map
 from multi_player_render import (SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump, Attack,
-                                 Skill_motion, Easy_hit, Hard_hit, Win, Lose)
+                                 Skill_motion, Easy_hit, Hard_hit, Win, Lose, Run_Attack, Jump_Attack, Teleport)
 from multi_skill_render import SkillObject
 
 TEST = True
@@ -52,7 +52,8 @@ key_codes = {
     'l': 76,
     ':': 58,
     ';': 59,
-    '/': 47
+    '/': 47,
+    '.': 46
 }
 
 def send_key_info(key_name, key_action):
@@ -120,6 +121,9 @@ STATE_HIT_EASY = 10
 STATE_HIT_HARD = 11
 STATE_WIN = 12
 STATE_LOSE = 13
+STATE_ATTACK_RUN = 14
+STATE_ATTACK_JUMP = 15
+STATE_TELEPORT = 16
 
 state_mapping = {
     STATE_IDLE: Idle,
@@ -136,6 +140,9 @@ state_mapping = {
     STATE_HIT_HARD: Hard_hit,
     STATE_WIN: Win,
     STATE_LOSE: Lose,
+    STATE_ATTACK_RUN: Run_Attack,
+    STATE_ATTACK_JUMP: Jump_Attack,
+    STATE_TELEPORT: Teleport
 }
 
 # 상태에 따른 추가 데이터 처리
@@ -187,18 +194,25 @@ def receive_game_data(client_socket):
         for key, value in extra_state_data[p2_state].items():
             setattr(p2, key, value)
 
-    # 공격 업데이트
-    for i, attack in enumerate(unpacked_data[14:14 + 18 * 5:5]):
-        if attack[3] > 0:  # 유효한 스킬 데이터만 활성화
-            skills[i].activate(
-                skill_type=attack[3],
-                x=attack[0],
-                y=attack[1],
-                dir=attack[2],
-                sprite_index=attack[4]
-            )
+    # 각 공격 데이터를 슬라이싱하여 그룹화
+    attacks = [
+        unpacked_data[i:i + 5] for i in range(14, 14 + 18 * 5, 5)
+    ]
+
+    for i, attack in enumerate(attacks):
+        if len(attack) >= 5:  # 공격 데이터가 유효한지 확인
+            if int(attack[3]) > 0:  # 유효한 스킬 데이터만 활성화
+                skills[i].activate(
+                    skill_type=int(attack[3]),
+                    x=attack[0],
+                    y=attack[1],
+                    dir=attack[2],
+                    sprite_index=attack[4]
+                )
+            else:
+                skills[i].deactivate()
         else:
-            skills[i].deactivate()
+            print(f"Invalid attack data at index {i}: {attack}")
 
     p1_hp = unpacked_data[-5]
     p1_chakra = unpacked_data[-4]
@@ -206,141 +220,15 @@ def receive_game_data(client_socket):
     p2_chakra = unpacked_data[-2]
     game_time = unpacked_data[-1]
 
-    # # 데이터 매핑
-    # game_data = {
-    #     "players": [
-    #         {
-    #             # player_ID를 ASCII로 디코딩, 예외 발생 시 기본값으로 대체
-    #             # 플레이어 ID는 왜 필요하지? 서버에서 1p 2p 설정되있는거 아닌가?
-    #             "player_ID": unpacked_data[0].decode('ascii', errors='ignore').strip("\x00"),
-    #             "position": {"x": unpacked_data[1], "y": unpacked_data[2]},
-    #             "X_Direction": unpacked_data[3],
-    #             "player_state": unpacked_data[4],
-    #             "selected_character": unpacked_data[5],
-    #             "sprite_index": unpacked_data[6]
-    #         },
-    #         {
-    #             "player_ID": unpacked_data[7].decode('ascii', errors='ignore').strip("\x00"),
-    #             "position": {"x": unpacked_data[8], "y": unpacked_data[9]},
-    #             "X_Direction": unpacked_data[10],
-    #             "player_state": unpacked_data[11],
-    #             "selected_character": unpacked_data[12],
-    #             "sprite_index": unpacked_data[13]
-    #         }
-    #     ],
-    #     "attacks": [
-    #         {
-    #             "position": {"x": unpacked_data[i], "y": unpacked_data[i + 1]},
-    #             "X_Direction": unpacked_data[i + 2],
-    #             # "selected_character": unpacked_data[i + 3],
-    #             "attack_type": unpacked_data[i + 3],
-    #             "sprite_index": unpacked_data[i + 4]
-    #         }
-    #         for i in range(14, 14 + 18 * 5, 5)
-    #         # for i in range(14, 14 + 18 * 6, 6)
-    #     ],
-    #     "etc": {
-    #         "player1_hp": unpacked_data[-5],
-    #         "player1_sp": unpacked_data[-4],
-    #         "player2_hp": unpacked_data[-3],
-    #         "player2_sp": unpacked_data[-2],
-    #         "game_time": unpacked_data[-1]
-    #     }
-    # }
-    # return game_data
-
 def receive_game_data_loop(client_socket):
     """서버로부터 데이터를 계속 수신하고 게임 객체를 업데이트."""
     while True:
-        try:
-            receive_game_data(client_socket)
-        except Exception as e:
-            print(f"데이터 수신 중 오류 발생: {e}")
-            break
-
-# def Decoding(client_socket):
-#     global game_data
-#     global p1, p2
-#     while True:
-#         game_data = receive_game_data(client_socket)
-#         if game_data:
-#             # print(game_data)
-#             p1.x = game_data["players"][0]["position"]["x"]
-#             p1.y = game_data["players"][0]["position"]["y"]
-#             p1_state = game_data["players"][0]["player_state"]
-#             if p1_state == STATE_IDLE:
-#                 p1.cur_state = Idle
-#             elif p1_state == STATE_RUN:
-#                 p1.cur_state = Run
-#             elif p1_state == STATE_JUMP:
-#                 p1.cur_state = Jump
-#             elif p1_state == STATE_ATTACK_NORMAL_1:
-#                 p1.cur_state = Attack
-#                 p1.attack_num = 1
-#             elif p1_state == STATE_ATTACK_NORMAL_2:
-#                 p1.cur_state = Attack
-#                 p1.attack_num = 2
-#             elif p1_state == STATE_ATTACK_NORMAL_3:
-#                 p1.cur_state = Attack
-#                 p1.attack_num = 3
-#             elif p1_state == STATE_ATTACK_NORMAL_4:
-#                 p1.cur_state = Attack
-#                 p1.attack_num = 4
-#             elif p1_state == STATE_ATTACK_SKILL_1:
-#                 p1.cur_state = Skill_motion
-#                 p1.skill_num = 'shuriken'
-#             elif p1_state == STATE_ATTACK_SKILL_2:
-#                 p1.cur_state = Skill_motion
-#                 p1.skill_num = 'skill2'
-#             elif p1_state == STATE_ATTACK_SKILL_3:
-#                 p1.cur_state = Skill_motion
-#                 p1.skill_num = 'skill1'
-#             elif p1_state == STATE_HIT_EASY:
-#                 p1.cur_state = Easy_hit
-#             elif p1_state == STATE_HIT_HARD:
-#                 p1.cur_state = Hard_hit
-#             elif p1_state == STATE_WIN:
-#                 p1.cur_state = Win
-#             elif p1_state == STATE_LOSE:
-#                 p1.cur_state = Lose
-#
-#             p1.frame = game_data["players"][0]["sprite_index"]
-#             # print("Player 1 Dir:", game_data["players"][0]["X_Direction"])
-#             p1.dir = game_data["players"][0]["X_Direction"]
-#
-#             # print("Player 2 Name:", game_data["players"][1]["player_ID"])
-#             # print("Player 2 Position:", game_data["players"][1]["position"])
-#             # p2.x = game_data["players"][1]["position"]["x"]
-#             # p2.y = game_data["players"][1]["position"]["y"]
-#             # p2_state = game_data["players"][1]["player_state"]
-#             # if p2_state == STATE_IDLE:
-#             #     p2.cur_state = Idle
-#             # elif p2_state == STATE_RUN:
-#             #     p2.cur_state = Run
-#             # elif p2_state == STATE_JUMP:
-#             #     p2.cur_state = Jump
-#             # p2.frame = game_data["players"][1]["sprite_index"]
-#             # if game_data["players"][1]["X_Direction"]:
-#             #     p2.dir = 1
-#             # else:
-#             #     p2.dir = -1
-#             # print(game_data["attacks"])
-#             for i, attack in enumerate(game_data["attacks"]):
-#                 # print(attack["attack_type"])
-#                 if attack["attack_type"] > 0:  # 유효한 스킬 데이터만 활성화
-#                     # print(attack)
-#                     skills[i].activate(
-#                         skill_type=attack["attack_type"],
-#                         x=attack["position"]["x"],
-#                         y=attack["position"]["y"],
-#                         dir=attack["X_Direction"],
-#                         sprite_index=attack["sprite_index"]
-#                     )
-#                     # print(i, skills[i].skill_type, skills[i].x, skills[i].y, skills[i].dir, skills[i].sprite_index)
-#                 else:
-#                     skills[i].deactivate()
-#         else:
-#             print("데이터 없음")
+        # try:
+        #     receive_game_data(client_socket)
+        # except Exception as e:
+        #     print(f"데이터 수신 중 오류 발생: {e}")
+        #     break
+        receive_game_data(client_socket)
 
 def init():
     global network_client
@@ -369,8 +257,8 @@ def init():
     game_world.add_object(map, 1)
 
     if TEST:
-        # p1 = SASUKE_MULTI(1)
-        p1 = NARUTO_MULTI(1)
+        p1 = SASUKE_MULTI(1)
+        # p1 = NARUTO_MULTI(1)
         # p1 = ITACHI_MULTI(1)
         game_world.add_object(p1, 1)
 

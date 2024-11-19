@@ -295,19 +295,19 @@ class Easy_hit:
     @staticmethod
     def draw(p1):
         if p1.char_name == 'naruto':
-            if p1.dir == -1:
+            if not p1.dir:
                 p1.easy_hit.clip_composite_draw(int(p1.frame) * 40, 0, 40, 48, 0, 'h', p1.sx, p1.sy - 15, 112, 135)
-            elif p1.dir == 1:
+            else:
                 p1.easy_hit.clip_composite_draw(int(p1.frame) * 40, 0, 40, 48, 0, '', p1.sx, p1.sy - 15, 112, 135)
         elif p1.char_name == 'sasuke':
-            if p1.dir == -1:
+            if not p1.dir:
                 p1.easy_hit.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, 'h', p1.sx, p1.sy, 125, 200)
-            elif p1.dir == 1:
+            else:
                 p1.easy_hit.clip_composite_draw(int(p1.frame) * 40, 0, 40, 64, 0, '', p1.sx, p1.sy, 125, 200)
         elif p1.char_name == 'itachi':
-            if p1.dir == -1:
+            if not p1.dir:
                 p1.easy_hit.clip_composite_draw(int(p1.frame) * 43, 0, 43, 64, 0, 'h', p1.sx + 15, p1.sy + 15, 134, 200)
-            elif p1.dir == 1:
+            else:
                 p1.easy_hit.clip_composite_draw(int(p1.frame) * 43, 0, 43, 64, 0, '', p1.sx - 15, p1.sy + 15, 134, 200)
 
 class Hard_hit:
@@ -328,36 +328,36 @@ class Hard_hit:
     def draw(p1):
         if p1.char_name == 'naruto':
             if p1.frame > 3:
-                if p1.dir == -1:
+                if not p1.dir:
                     p1.hard_hit.clip_composite_draw(3 * 48, 0, 48, 40, 0, 'h', p1.sx, p1.sy - 15, 135, 112)
-                elif p1.dir == 1:
+                else:
                     p1.hard_hit.clip_composite_draw(3 * 48, 0, 48, 40, 0, '', p1.sx, p1.sy - 15, 135, 112)
             else:
-                if p1.dir == -1:
+                if not p1.dir:
                     p1.hard_hit.clip_composite_draw(int(p1.frame) * 48, 0, 48, 40, 0, 'h', p1.sx, p1.sy - 15, 135, 112)
-                elif p1.dir == 1:
+                else:
                     p1.hard_hit.clip_composite_draw(int(p1.frame) * 48, 0, 48, 40, 0, '', p1.sx, p1.sy - 15, 135, 112)
         elif p1.char_name == 'sasuke':
             if p1.frame > 3:
-                if p1.dir == -1:
+                if not p1.dir:
                     p1.hard_hit.clip_composite_draw(3 * 64, 0, 64, 40, 0, 'h', p1.sx, p1.sy - 15, 200, 125)
-                elif p1.dir == 1:
+                else:
                     p1.hard_hit.clip_composite_draw(3 * 64, 0, 64, 40, 0, '', p1.sx, p1.sy - 15, 200, 125)
             else:
-                if p1.dir == -1:
+                if not p1.dir:
                     p1.hard_hit.clip_composite_draw(int(p1.frame) * 64, 0, 64, 40, 0, 'h', p1.sx, p1.sy-15, 200, 125)
-                elif p1.dir == 1:
+                else:
                     p1.hard_hit.clip_composite_draw(int(p1.frame) * 64, 0, 64, 40, 0, '', p1.sx, p1.sy-15, 200, 125)
         elif p1.char_name == 'itachi':
             if p1.frame > 3:
-                if p1.dir == -1:
+                if not p1.dir:
                     p1.hard_hit.clip_composite_draw(3 * 66, 0, 66, 40, 0, 'h', p1.sx, p1.sy - 15, 206, 125)
-                elif p1.dir == 1:
+                else:
                     p1.hard_hit.clip_composite_draw(3 * 66, 0, 66, 40, 0, '', p1.sx, p1.sy - 15, 206, 125)
             else:
-                if p1.dir == -1:
+                if not p1.dir:
                     p1.hard_hit.clip_composite_draw(int(p1.frame) * 66, 0, 66, 40, 0, 'h', p1.sx, p1.sy - 15, 206, 125)
-                elif p1.dir == 1:
+                else:
                     p1.hard_hit.clip_composite_draw(int(p1.frame) * 66, 0, 66, 40, 0, '', p1.sx, p1.sy - 15, 206, 125)
 
 class Win:
@@ -378,14 +378,14 @@ class Win:
         if p1.char_name == 'naruto':
             p1.win_image.clip_composite_draw(int(p1.frame) * 50, 0, 50, 64, 0, '', p1.sx, p1.sy, 140, 180)
         elif p1.char_name == 'sasuke':
-            if p1.dir == 1:
+            if p1.dir:
                 p1.win_image.clip_composite_draw(int(p1.frame) * 34, 0, 34, 64, 0, '', p1.sx-10, p1.sy-6, 103, 200)
-            elif p1.dir == -1:
+            else:
                 p1.win_image.clip_composite_draw(int(p1.frame) * 34, 0, 34, 64, 0, 'h', p1.sx + 10, p1.sy - 6, 103, 200)
         elif p1.char_name == 'itachi':
-            if p1.dir == 1:
+            if p1.dir:
                 p1.win_image.clip_composite_draw(int(p1.frame) * 42, 0, 42, 74, 0, '', p1.sx, p1.sy, 90, 159)
-            elif p1.dir == -1:
+            else:
                 p1.win_image.clip_composite_draw(int(p1.frame) * 42, 0, 42, 74, 0, 'h', p1.sx, p1.sy, 90, 159)
 
 class Lose:
@@ -405,20 +405,120 @@ class Lose:
     @staticmethod
     def draw(p1):
         if p1.char_name == 'naruto':
-            if p1.dir == -1:
+            if not p1.dir:
                 p1.hard_hit.clip_composite_draw(int(p1.frame) * 48, 0, 48, 40, 0, 'h', p1.sx, p1.sy - 15, 135, 112)
-            elif p1.dir == 1:
+            else:
                 p1.hard_hit.clip_composite_draw(int(p1.frame) * 48, 0, 48, 40, 0, '', p1.sx, p1.sy - 15, 135, 112)
         elif p1.char_name == 'sasuke':
-            if p1.dir == -1:
+            if not p1.dir:
                 p1.hard_hit.clip_composite_draw(int(p1.frame) * 64, 0, 64, 40, 0, 'h', p1.sx, p1.sy - 15, 200, 125)
-            elif p1.dir == 1:
+            else:
                 p1.hard_hit.clip_composite_draw(int(p1.frame) * 64, 0, 64, 40, 0, '', p1.sx, p1.sy - 15, 200, 125)
         elif p1.char_name == 'itachi':
-            if p1.dir == -1:
+            if not p1.dir:
                 p1.hard_hit.clip_composite_draw(int(p1.frame) * 64, 0, 64, 40, 0, 'h', p1.sx, p1.sy - 15, 200, 125)
-            elif p1.dir == 1:
+            else:
                 p1.hard_hit.clip_composite_draw(int(p1.frame) * 64, 0, 64, 40, 0, '', p1.sx, p1.sy - 15, 200, 125)
+
+class Run_Attack:
+    @staticmethod
+    def enter(p1, e):
+        pass
+
+    @staticmethod
+    def exit(p1, e):
+        pass
+    @staticmethod
+    def do(p1):
+        pass
+
+    @staticmethod
+    def draw(p1):
+        if p1.char_name == 'naruto':
+            if not p1.dir:
+                p1.run_attack.clip_composite_draw(int(p1.frame) * 40, 0, 40, 48, 0, 'h', p1.sx, p1.sy-15, 113, 135)
+            else:
+                p1.run_attack.clip_composite_draw(int(p1.frame) * 40, 0, 40, 48, 0, '', p1.sx, p1.sy-15, 113, 135)
+        elif p1.char_name == 'sasuke':
+            if not p1.dir:
+                p1.run_attack.clip_composite_draw(int(p1.frame) * 79, 0, 79, 64, 0, 'h', p1.sx - 35, p1.sy, 247, 200)
+            else:
+                p1.run_attack.clip_composite_draw(int(p1.frame) * 79, 0, 79, 64, 0, '', p1.sx + 35, p1.sy, 247, 200)
+        elif p1.char_name == 'itachi':
+            if not p1.dir:
+                p1.run_attack.clip_composite_draw(int(p1.frame) * 66, 0, 66, 49, 0, 'h', p1.sx - 50, p1.sy, 206, 153)
+            else:
+                p1.run_attack.clip_composite_draw(int(p1.frame) * 66, 0, 66, 49, 0, '', p1.sx + 50, p1.sy, 206, 153)
+
+class Jump_Attack:
+    @staticmethod
+    def enter(p1, e):
+        pass
+
+    @staticmethod
+    def exit(p1, e):
+        pass
+
+    @staticmethod
+    def do(p1):
+        pass
+
+    @staticmethod
+    def draw(p1):
+        if p1.char_name == 'naruto':
+            if not p1.dir:
+                p1.jump_attack.clip_composite_draw(int(p1.frame) * 48, 0, 48, 52, 0, 'h', p1.sx, p1.sy, 135, 146)
+            else:
+                p1.jump_attack.clip_composite_draw(int(p1.frame) * 48, 0, 48, 52, 0, '', p1.sx, p1.sy, 135, 146)
+        elif p1.char_name == 'sasuke':
+            if not p1.dir:
+                p1.jump_attack.clip_composite_draw(int(p1.frame) * 56, 0, 56, 64, 0, 'h', p1.sx, p1.sy, 175, 200)
+            else:
+                p1.jump_attack.clip_composite_draw(int(p1.frame) * 56, 0, 56, 64, 0, '', p1.sx, p1.sy, 175, 200)
+        elif p1.char_name == 'itachi':
+            if not p1.dir:
+                p1.jump_attack.clip_composite_draw(int(p1.frame) * 50, 0, 50, 48, 0, 'h', p1.sx, p1.sy, 156, 150)
+            else:
+                p1.jump_attack.clip_composite_draw(int(p1.frame) * 50, 0, 50, 48, 0, '', p1.sx, p1.sy, 156, 150)
+
+class Teleport:
+    @staticmethod
+    def enter(p1, e):
+        # p1.attack_s_1.play()
+        pass
+
+
+    @staticmethod
+    def exit(p1, e):
+        pass
+
+    @staticmethod
+    def do(p1):
+        pass
+
+    @staticmethod
+    def draw(p1):
+        if p1.char_name == 'naruto':
+            if not p1.dir:
+                p1.teleport.clip_composite_draw(int(p1.frame) * 32, 0, 32, 56, 0, 'h', p1.sx, p1.sy, 90, 158)
+                p1.teleport_motion.clip_composite_draw(int(p1.frame) * 72, 0, 72, 75, 0, 'h', p1.sx, p1.sy, 150, 250)
+            else:
+                p1.teleport.clip_composite_draw(int(p1.frame) * 32, 0, 32, 56, 0, '', p1.sx, p1.sy, 90, 158)
+                p1.teleport_motion.clip_composite_draw(int(p1.frame) * 72, 0, 72, 75, 0, '', p1.sx, p1.sy, 150, 250)
+        elif p1.char_name == 'sasuke':
+            if not p1.dir:
+                p1.teleport.clip_composite_draw(int(p1.frame) * 32, 0, 32, 64, 0, 'h', p1.sx, p1.sy, 100, 200)
+                p1.teleport_motion.clip_composite_draw(int(p1.frame) * 72, 0, 72, 75, 0, 'h', p1.sx, p1.sy, 150, 250)
+            else:
+                p1.teleport.clip_composite_draw(int(p1.frame) * 32, 0, 32, 64, 0, '', p1.sx, p1.sy, 100, 200)
+                p1.teleport_motion.clip_composite_draw(int(p1.frame) * 72, 0, 72, 75, 0, '', p1.sx, p1.sy, 150, 250)
+        elif p1.char_name == 'itachi':
+            if not p1.dir:
+                p1.teleport.clip_composite_draw(int(p1.frame) * 40, 0, 40, 66, 0, 'h', p1.sx, p1.sy, 125, 202)
+                p1.teleport_motion.clip_composite_draw(int(p1.frame) * 72, 0, 72, 75, 0, 'h', p1.sx, p1.sy, 150, 250)
+            else:
+                p1.teleport.clip_composite_draw(int(p1.frame) * 40, 0, 40, 66, 0, '', p1.sx, p1.sy, 125, 202)
+                p1.teleport_motion.clip_composite_draw(int(p1.frame) * 72, 0, 72, 75, 0, '', p1.sx, p1.sy, 150, 250)
 
 class SASUKE_MULTI:
     global skill_num
