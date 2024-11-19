@@ -106,7 +106,7 @@ class SkillObject:
 
             # 두 번째 효과 (skill2_effect1)
             if self.sprite_index >= 1:
-                if self.dir == -1:  # 왼쪽 방향
+                if not self.dir:  # 왼쪽 방향
                     if self.sprite_index > 7:
                         sprite_list[0].clip_composite_draw(
                             (int(self.sprite_index) - 1) * 104, 0, 104, 77, 0, 'h',
@@ -117,7 +117,7 @@ class SkillObject:
                             (int(self.sprite_index) - 1) * 104, 0, 104, 77, 0, 'h',
                             self.sx + 30, self.sy + 41 - 10, 325, 241
                         )
-                elif self.dir == 1:  # 오른쪽 방향
+                else:  # 오른쪽 방향
                     if self.sprite_index > 7:
                         sprite_list[0].clip_composite_draw(
                             (int(self.sprite_index) - 1) * 104, 0, 104, 77, 0, '',

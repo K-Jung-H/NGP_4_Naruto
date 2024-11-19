@@ -3,7 +3,6 @@ from pico2d import *
 import charactor_choose_mode
 import game_framework
 import game_world
-import play_mode
 import single_character_choice_mode
 import mode_choose_mode
 import keyboard
@@ -14,8 +13,6 @@ from network_client import NetworkClient
 import threading
 import struct
 from map import Map
-from sasuke import SASUKE
-from naruto import NARUTO
 from multi_player_render import (SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump, Attack,
                                  Skill_motion, Easy_hit, Hard_hit, Win, Lose)
 from multi_skill_render import SkillObject
@@ -301,27 +298,12 @@ def init():
 
         p1_mug = p1.char_name
         p2_mug = p2.char_name
-        # if p1.char_name == 'naruto':
-        #     p1_mug = naruto_mug
-        # elif p1.char_name == 'sasuke':
-        #     p1_mug = sasuke_mug
-        # elif p1.char_name == 'itachi':
-        #     p1_mug = itachi_mug
-        #
-        # if p2.char_name == 'naruto':
-        #     p2_mug = naruto_mug
-        # elif p2.char_name == 'sasuke':
-        #     p2_mug = sasuke_mug
-        # elif p2.char_name == 'itachi':
-        #     p2_mug = itachi_mug
-
 
         SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
         skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
         for skill in skills:
             game_world.add_object(skill, 2)
             skill.set_background(map)
-        # game_world.add_object(skills, 2)
 
         # 네트워크 클라이언트 초기화 및 연결
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
@@ -372,7 +354,6 @@ def finish():
     game_world.remove_object(p2)
     game_world.remove_object(map)
     game_world.objects[2] = []
-    game_world.collision_pairs = {}
     Input_thread_running = False
 
 def handle_events():
@@ -447,5 +428,4 @@ def draw():
 
 def update():
     game_world.update()
-    # game_world.handle_collisions()
     pass
