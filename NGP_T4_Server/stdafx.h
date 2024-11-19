@@ -51,6 +51,9 @@
 #define EVENT_SKILL_ATTACK_2_KEY_DOWN 15
 #define EVENT_SKILL_ATTACK_2_KEY_UP 16
 
+#define EVENT_SKILL_TELEPORT_KEY_DOWN 17
+#define EVENT_SKILL_TELEPORT_KEY_UP 18
+
 #define LEFT false
 #define RIGHT true
 
@@ -79,6 +82,9 @@
 #define STATE_WIN 12
 #define STATE_LOSE 13
 
+#define STATE_ATTACK_RUN 14
+#define STATE_ATTACK_JUMP 15
+#define STATE_TELEPORT 16
 
 #define Ground_Y 120
 #define Player_Attack_Combo_Time_Limit 1.0f

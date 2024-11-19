@@ -2,8 +2,38 @@
 #include "stdafx.h"
 #include "Object.h"
 #include "Server.h"
+
+void Key_State::update(int key_state)
+{
+    switch (key_state)
+    {
+    case EVENT_MOVE_LEFT_KEY_DOWN:
+    case EVENT_MOVE_LEFT_KEY_UP:
+        left = (key_state % 2 == 1);
+        break;
+    case EVENT_MOVE_RIGHT_KEY_DOWN:
+    case EVENT_MOVE_RIGHT_KEY_UP:
+        right = (key_state % 2 == 1);
+        break;
+
+    case EVENT_MOVE_UP_KEY_DOWN:
+    case EVENT_MOVE_UP_KEY_UP:
+        up = (key_state % 2 == 1);
+        break;
+
+    case EVENT_MOVE_DOWN_KEY_DOWN:
+    case EVENT_MOVE_DOWN_KEY_UP:
+        down = (key_state % 2 == 1);
+        break;
+
+    default:
+        break;
+    }
+}
+
 //========================================================
 // 상태 머신
+
 void StateMachine::start()
 {
     enterState(currentState, 0);
@@ -17,6 +47,9 @@ void StateMachine::update(float Elapsed_time)
 
 void StateMachine::handleEvent(int key_event)
 {
+    // 현재 방향키 눌린 상태 - 텔레포트 방향 정하는 용도
+    key_state.update(key_event);
+
     if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
         Move_Left = true;
     else if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
@@ -25,14 +58,14 @@ void StateMachine::handleEvent(int key_event)
         Move_Left = false;
     else if (key_event == EVENT_MOVE_RIGHT_KEY_UP)
         Move_Right = false;
-    
+
     switch (currentState)
     {
     case State::Idle:
     {
         if (Move_Left != Move_Right)
             changeState(State::Run, key_event);
-        
+
         if (key_event == EVENT_MOVE_UP_KEY_DOWN)
             changeState(State::Jump, key_event);
 
@@ -40,7 +73,7 @@ void StateMachine::handleEvent(int key_event)
         {
             if (attack_combo)
                 combo_stack += 1;
-         
+
             changeState(State::Attack_Normal, key_event);
         }
 
@@ -53,6 +86,8 @@ void StateMachine::handleEvent(int key_event)
         if (key_event == EVENT_SKILL_ATTACK_2_KEY_DOWN)
             changeState(State::Attack_Skill_2, key_event);
 
+        if (key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
+            changeState(State::Teleport, key_event);
     }
     break;
 
@@ -65,7 +100,7 @@ void StateMachine::handleEvent(int key_event)
             changeState(State::Jump, key_event);
 
         if (key_event == EVENT_NORMAL_ATTACK_KEY_DOWN)
-            changeState(State::Attack_Normal, key_event);
+            changeState(State::Attack_Run, key_event);
 
         if (key_event == EVENT_RANGED_ATTACK_KEY_DOWN)
             changeState(State::Attack_Shuriken, key_event);
@@ -76,23 +111,32 @@ void StateMachine::handleEvent(int key_event)
         if (key_event == EVENT_SKILL_ATTACK_2_KEY_DOWN)
             changeState(State::Attack_Skill_2, key_event);
 
+        if (key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
+            changeState(State::Teleport, key_event);
     }
     break;
 
     case State::Jump:
     {
-        if(key_event == EVENT_MOVE_UP_KEY_DOWN)
+        if (key_event == EVENT_MOVE_UP_KEY_DOWN)
             changeState(State::Jump, key_event);
+
+        if (key_event == EVENT_NORMAL_ATTACK_KEY_DOWN)
+            changeState(State::Attack_Jump, key_event);
 
         if (is_air == false)
         {
             if (Move_Left != Move_Right)
                 changeState(State::Idle, key_event);
-            else 
+            else
                 changeState(State::Run, key_event);
         }
         else if (key_event == EVENT_RANGED_ATTACK_KEY_DOWN)
             changeState(State::Attack_Shuriken, key_event);
+
+        if(key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
+            changeState(State::Teleport, key_event);
+
     }
     break;
 
@@ -100,6 +144,21 @@ void StateMachine::handleEvent(int key_event)
     {
         if (attack_action == false)
             changeState(State::Idle, key_event);
+    }
+    break;
+
+    case State::Attack_Run:
+    {
+        if (attack_action == false)
+            changeState(State::Run, key_event);
+
+    }
+    break;
+
+    case State::Attack_Jump:
+    {
+        if (attack_action == false)
+            changeState(State::Jump, key_event);
     }
     break;
 
@@ -135,6 +194,12 @@ void StateMachine::handleEvent(int key_event)
     }
     break;
 
+    case State::Teleport:
+    {
+        if (attack_action == false)
+            changeState(State::Jump, key_event);
+    }
+    break;
 
     default:
         break;
@@ -162,7 +227,9 @@ void StateMachine::enterState(State state, int key_event)
         break;
     case State::Jump:
     {
-        if (lastState == State::Attack_Shuriken) // + 공중 공격 + 맞는 상태
+        if (lastState == State::Attack_Shuriken || 
+            lastState == State::Attack_Jump || 
+            lastState == State::Teleport) // + 공중 공격 + 맞는 상태
         {
             if (Y_Direction)
                 sprite_frame_value = 1.0f;
@@ -171,21 +238,29 @@ void StateMachine::enterState(State state, int key_event)
         }
         is_air = true;
     }
-        break;
+    break;
          
     case State::Attack_Normal:
     {
         attack_action = true;
         attack_combo = true;
 
-        if (combo_stack == 0 || combo_stack > 4)
+        if (combo_stack == 0 || combo_stack == 5)
             combo_stack = 1;
     }
     break;
 
+    case State::Attack_Run:
+        attack_action = true;
+        break;
+
+    case State::Attack_Jump:
+        attack_action = true;
+        break;
+
     case State::Attack_Shuriken:
         attack_action = true;
-    break;
+        break;
 
     case State::Attack_Skill_1:
         attack_action = true;
@@ -194,6 +269,11 @@ void StateMachine::enterState(State state, int key_event)
     case State::Attack_Skill_2:
         attack_action = true;
     break;
+
+    case State::Teleport:
+        attack_action = true;
+        break;
+
 
     default:
         break;
@@ -212,7 +292,6 @@ void StateMachine::exitState(State state, int key_event)
     case State::Run:
         break;
     case State::Jump:
-        is_air = false;
         break;
     case State::Attack_Normal:
         attack_after_time = 0.0f;
@@ -265,6 +344,15 @@ int  StateMachine::Get_State()
     case State::Attack_Normal:
         return (STATE_ATTACK_NORMAL_1 + (combo_stack - 1));
         break;
+
+    case State::Attack_Jump:
+        return STATE_ATTACK_JUMP;
+        break;
+
+    case State::Attack_Run:
+        return STATE_ATTACK_RUN;
+        break;
+
     case State::Attack_Shuriken:
         return STATE_ATTACK_SKILL_1;
         break;
@@ -274,6 +362,11 @@ int  StateMachine::Get_State()
     case State::Attack_Skill_2:
         return STATE_ATTACK_SKILL_3;
         break;
+
+    case State::Teleport:
+        return STATE_TELEPORT;
+        break;
+
     case State::Hit_Easy:
         return STATE_HIT_EASY;
         break;
@@ -312,19 +405,6 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
     case State::Idle:
     {
         sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 6);
-
-        // 공격이 끝나고 1초 이상 공격을 재입력 안하면
-        if (attack_combo)
-        {        
-            if (attack_after_time > Player_Attack_Combo_Time_Limit)
-            {
-                attack_combo = false;
-                attack_after_time = 0.0f;
-                combo_stack = 0;
-            }
-            else
-                attack_after_time += ElapsedTime;
-        }
     }
     break;
 
@@ -389,6 +469,49 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
     }
     break;
 
+    case State::Attack_Run: // 5
+    {
+        if (Move_Left) // 왼쪽으로 이동
+            pos.x -= 0.4f * RUN_SPEED_PPS * ElapsedTime;
+        else if (Move_Right) // 오른쪽으로 이동
+            pos.x += 0.4f * RUN_SPEED_PPS * ElapsedTime;
+
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 6, false);
+
+        if (sprite_index == 5)
+        {
+            sprite_index = 4;
+            attack_action = false;
+        }
+    }
+    break;
+
+    case State::Attack_Jump: // 4
+    {
+        // 움직이게 될 때
+        if (Y_Direction)
+            pos.y += 0.05f * RUN_SPEED_PPS * ElapsedTime;
+        else
+            pos.y -= 0.05f * RUN_SPEED_PPS * ElapsedTime;
+
+        if (Move_Left != Move_Right)
+        {
+            if (Move_Left) // 왼쪽으로 이동
+                pos.x -= 0.1f * RUN_SPEED_PPS * ElapsedTime;
+            else if (Move_Right) // 오른쪽으로 이동
+                pos.x += 0.1f * RUN_SPEED_PPS * ElapsedTime;
+        }
+
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false);
+
+        if (sprite_index == 4)
+        {
+            sprite_index = 4;
+            attack_action = false;
+        }
+    }
+    break;
+
     case State::Attack_Shuriken:
     {
         if (is_air)
@@ -422,42 +545,99 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
     case State::Attack_Skill_1:
     {
+        static bool skill_1_triggered = false;
+
         // 스킬 애니메이션은 0~10까지 있음, 11이 되면 종료하기
         sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 12, false);
+
+        if (sprite_index == 8 && skill_1_triggered == false)
+        {
+            Object* skill_1_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SKILL_1, pos, X_Direction);
+            server_ptr->Add_Skill_Object(skill_1_obj);
+            skill_1_triggered = true;
+        }
 
         // 스킬 애니메이션 끝나면
         if (sprite_index == 11)
         {
             sprite_index = 10;
             attack_action = false;
+            skill_1_triggered = false;
 
-            Object* skill_1_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SKILL_1, pos, X_Direction);
-            server_ptr->Add_Skill_Object(skill_1_obj);
         }
     }
     break;
 
     case State::Attack_Skill_2:
     {
+        static bool skill_2_triggered = false;
+
         // 스킬 애니메이션은 0~5까지 있음, 6이 되면 종료하기
         sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 7, false);
+
+        if (sprite_index == 2 && skill_2_triggered == false)
+        {
+            Object* skill_2_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SKILL_2, pos, X_Direction);
+            server_ptr->Add_Skill_Object(skill_2_obj);
+            skill_2_triggered = true;
+        }
 
         // 스킬 애니메이션 끝나면
         if (sprite_index == 6)
         {
             sprite_index = 5;
             attack_action = false;
+            skill_2_triggered = false;
 
-            Object* skill_2_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SKILL_2, pos, X_Direction);
-            server_ptr->Add_Skill_Object(skill_2_obj);
         }
     }
     break;
 
+    case State::Teleport:
+    {
+        static bool teleport_triggered = false;
 
+        // 스킬 애니메이션은 0~3까지 있음, 4이 되면 종료하기
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false);
+
+        if (sprite_index == 2 && teleport_triggered == false)
+        {
+            pos.x += (!key_state.left && key_state.right) ? 200.0f : (key_state.left && !key_state.right) ? -200.0f : 0;
+            pos.y += (!key_state.up && key_state.down) ? -200.0f : (key_state.up && !key_state.down) ? 200.0f : 0;
+
+            if (pos.y < 120.0f)
+                pos.y = 120.0f;
+
+            teleport_triggered = true;
+        }
+
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+            teleport_triggered = false;
+        }
+
+    }
+    break;
     default:
         break;
     }
+
+    // 공격이 끝나고 1초 이상 공격을 재입력 안하면
+    if (attack_combo)
+    {
+        if (attack_after_time > Player_Attack_Combo_Time_Limit)
+        {
+            attack_combo = false;
+            attack_after_time = 0.0f;
+            combo_stack = 0;
+        }
+        else
+            attack_after_time += ElapsedTime;
+    }
+
+
     Set_Draw_Direction();
 }
 
@@ -468,19 +648,6 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
     case State::Idle:
     {
         sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 6);
-
-        // 공격이 끝나고 1초 이상 공격을 재입력 안하면
-        if (attack_combo)
-        {
-            if (attack_after_time > Player_Attack_Combo_Time_Limit)
-            {
-                attack_combo = false;
-                attack_after_time = 0.0f;
-                combo_stack = 0;
-            }
-            else
-                attack_after_time += ElapsedTime;
-        }
     }
     break;
 
@@ -569,6 +736,49 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
     }
     break;
 
+    case State::Attack_Run: // 5
+    {
+        if (Move_Left) // 왼쪽으로 이동
+            pos.x -= 0.4f * RUN_SPEED_PPS * ElapsedTime;
+        else if (Move_Right) // 오른쪽으로 이동
+            pos.x += 0.4f * RUN_SPEED_PPS * ElapsedTime;
+
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 7, false);
+
+        if (sprite_index == 6)
+        {
+            sprite_index = 5;
+            attack_action = false;
+        }
+    }
+    break;
+
+    case State::Attack_Jump: // 5
+    {
+        // 움직이게 될 때
+        if (Y_Direction)
+            pos.y += 0.05f * RUN_SPEED_PPS * ElapsedTime;
+        else
+            pos.y -= 0.05f * RUN_SPEED_PPS * ElapsedTime;
+
+        if (Move_Left != Move_Right)
+        {
+            if (Move_Left) // 왼쪽으로 이동
+                pos.x -= 0.1f * RUN_SPEED_PPS * ElapsedTime;
+            else if (Move_Right) // 오른쪽으로 이동
+                pos.x += 0.1f * RUN_SPEED_PPS * ElapsedTime;
+        }
+
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 6, false);
+
+        if (sprite_index == 5)
+        {
+            sprite_index = 4;
+            attack_action = false;
+        }
+    }
+    break;
+
     case State::Attack_Shuriken:
     {
         if (is_air)
@@ -600,8 +810,43 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
     }
     break;
 
-    case State::Attack_Skill_1:
+    case State::Attack_Skill_1: // 사스케 0 ~ 18, 치도리 0 ~ 17
     {
+        static bool skill_1_triggered = false;
+
+        // 스킬 애니메이션은 0~18까지 있음, 19이 되면 종료하기
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 20, false);
+
+
+        if (sprite_index == 1 && skill_1_triggered == false)
+        {
+            Object* skill_1_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SKILL_2, pos, X_Direction);
+            server_ptr->Add_Skill_Object(skill_1_obj);
+            skill_1_triggered = true;
+        }
+
+        // 스킬 애니메이션 끝나면
+        if (sprite_index == 19)
+        {
+            sprite_index = 18;
+            attack_action = false;
+            skill_1_triggered = false;
+        }
+
+        if (7 < sprite_index && sprite_index < 18)
+        {
+            if (X_Direction == false) // 왼쪽으로 이동
+                pos.x -= RUN_SPEED_PPS * ElapsedTime;
+            else if (X_Direction) // 오른쪽으로 이동
+                pos.x += RUN_SPEED_PPS * ElapsedTime;
+        }
+    }
+    break;
+
+    case State::Attack_Skill_2: 
+    {
+        static bool skill_2_triggered = false;
+
         // 스킬 애니메이션은 0~11까지 있음, 12이 되면 종료하기
         sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 13, false);
 
@@ -610,39 +855,69 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
         {
             sprite_index = 11;
             attack_action = false;
-
-            Object* skill_1_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SKILL_1, pos, X_Direction);
-            server_ptr->Add_Skill_Object(skill_1_obj);
-        }
-    }
-    break;
-
-    case State::Attack_Skill_2: // 사스케 0 ~ 18, 치도리 0 ~ 17
-    {
-        // 스킬 애니메이션은 0~18까지 있음, 19이 되면 종료하기
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 20, false);
-
-        // 스킬 애니메이션 끝나면
-        if (sprite_index == 19)
-        {
-            sprite_index = 18;
-            attack_action = false;
+            skill_2_triggered = false;
         }
 
-        if (sprite_index == 1)
+        if (sprite_index == 9 && skill_2_triggered == false)
         {
-            sprite_frame_value += 0.5f;
-            Object* skill_2_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SKILL_2, pos, X_Direction);
+            sprite_frame_value += 1.0f;
+
+            Position skill_2_spawn_pos;
+            skill_2_spawn_pos.x = pos.x + (X_Direction * 2 - 1) * 150.0f;
+            skill_2_spawn_pos.y = pos.y;
+
+            Object* skill_2_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SKILL_1, skill_2_spawn_pos, X_Direction);
             server_ptr->Add_Skill_Object(skill_2_obj);
+            skill_2_triggered = true;
+        }
+    }
+    break;
+
+    case State::Teleport:
+    {
+        static bool teleport_triggered = false;
+
+        // 스킬 애니메이션은 0~2까지 있음, 3이 되면 종료하기
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 4, false);
+
+        if (sprite_index == 1 && teleport_triggered == false)
+        {
+            pos.x += (!key_state.left && key_state.right) ? 200.0f : (key_state.left && !key_state.right) ? -200.0f : 0;
+            pos.y += (!key_state.up && key_state.down) ? -200.0f : (key_state.up && !key_state.down) ? 200.0f : 0;
+
+            if (pos.y < 120.0f)
+                pos.y = 120.0f;
+
+            teleport_triggered = true;
+        }
+
+        if (sprite_index == 3)
+        {
+            sprite_index = 2;
+            attack_action = false;
+            teleport_triggered = false;
         }
 
     }
     break;
-
 
     default:
         break;
     }
+
+    // 공격이 끝나고 1초 이상 공격을 재입력 안하면
+    if (attack_combo)
+    {
+        if (attack_after_time > Player_Attack_Combo_Time_Limit)
+        {
+            attack_combo = false;
+            attack_after_time = 0.0f;
+            combo_stack = 0;
+        }
+        else
+            attack_after_time += ElapsedTime;
+    }
+
     Set_Draw_Direction();
 }
 
@@ -827,7 +1102,7 @@ void Attack::update(float Elapsed_time)
         {
         case 1: // Naruto - 구미
             // 제자리
-            sprite_index = Get_Sprite_Index(Elapsed_time * 6.0f, 10, false);
+            sprite_index = Get_Sprite_Index(Elapsed_time * 20.0f, 10, false);
             break;
 
         case 2: // Sasuke - 치도리
@@ -836,7 +1111,8 @@ void Attack::update(float Elapsed_time)
             sprite_index = Get_Sprite_Index(Elapsed_time * 12.0f, 19, false);
 
             // 전진
-            pos.x += (X_Direction * 2 - 1) * RUN_SPEED_PPS * Elapsed_time;
+            if(sprite_index > 6)
+                pos.x += (X_Direction * 2 - 1) * RUN_SPEED_PPS * Elapsed_time;
         }
         break;
 

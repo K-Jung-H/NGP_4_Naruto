@@ -82,6 +82,20 @@ DWORD WINAPI ServerMain(LPVOID arg)
             }
             continue;
         }
+    //while (true)
+    //{
+    //    // 플레이어 연결 상태 확인
+    //    bool player1_connected = (server_program.Get_Player(1) != NULL);
+    //    bool player2_connected = (server_program.Get_Player(2) != NULL);
+
+    //    // 두 명 모두 연결된 경우
+    //    if (player1_connected && player2_connected)
+    //    {
+    //        // 연결 상태 지속적으로 확인
+    //        Sleep(100); // CPU 과부하 방지를 위해 잠시 대기
+    //        continue;
+    //    }
+        //===========================================
 
         struct sockaddr_in clientaddr;
         int addrlen = sizeof(clientaddr);
@@ -205,7 +219,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
     if (Client_N == 1)
         server_program.Add_P1(player, CHARACTER_SASUKE);
     else if (Client_N == 2)
-        server_program.Add_P2(player, CHARACTER_NARUTO);
+        server_program.Add_P2(player, CHARACTER_SASUKE);
     else
         std::cout << "Client_N 에서 오류 발생" << std::endl;
 
