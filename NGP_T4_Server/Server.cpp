@@ -104,11 +104,13 @@ void Server::Update_Server(float elapsed_time)
 	// 플레이어 정보 출력
 	if (p1_ptr && debug_tick > DEBUG_TICK_INTERVAL) 
 	{
+		std::cout << "p1 - ";
 		p1_ptr->Print_info();
 	}
 
 	if (p2_ptr && debug_tick > DEBUG_TICK_INTERVAL)
 	{
+		std::cout << "p2 - ";
 		p2_ptr->Print_info();
 	}
 
@@ -170,6 +172,14 @@ void Server::Decoding(std::pair<int, Key_Info>* key_info)
 			key = EVENT_MOVE_UP_KEY_UP;
 		break;
 
+	case 's':
+	case 'S':
+		if (key_value.key_action == 1)
+			key = EVENT_MOVE_DOWN_KEY_DOWN;
+		else
+			key = EVENT_MOVE_DOWN_KEY_UP;
+		break;
+
 	case ',':
 		if (key_value.key_action == 1)
 			key = EVENT_NORMAL_ATTACK_KEY_DOWN;
@@ -199,6 +209,12 @@ void Server::Decoding(std::pair<int, Key_Info>* key_info)
 			key = EVENT_SKILL_ATTACK_2_KEY_UP;
 		break;
 
+	case '.':
+		if (key_value.key_action == 1)
+			key = EVENT_SKILL_TELEPORT_KEY_DOWN;
+		else
+			key = EVENT_SKILL_TELEPORT_KEY_UP;
+		break;
 
 	default:
 		break;

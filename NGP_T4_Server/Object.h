@@ -11,13 +11,14 @@ struct Key_State
 	bool left; // a 또는 방향키
 	bool right; // d 또는 방향키
 
-	bool normal_attack;	// c 또는 ','
-	bool ranged_attack;	// b  또는 '/'
-	bool skill_attack_1;		// f 또는 l
-	bool skill_attack_2;		// g 또는 ';'
-	bool teleport;			// v 또는 '.'
-
+	Key_State()
+	{
+		up = false;		down = false;
+		left = false;		right = false;
+	}
+	void update(int key_state);
 };
+
 
 // 형식 통일 필요 없는 구조체
 //=========================================================================
@@ -27,7 +28,10 @@ enum class State
 	Idle,
 	Run,
 	Jump,
+	Teleport,
 	Attack_Normal,
+	Attack_Run,
+	Attack_Jump,
 	Attack_Shuriken,
 	Attack_Skill_1,
 	Attack_Skill_2,
@@ -46,6 +50,8 @@ protected:
 	State lastState = State::Idle;
 	State currentState = State::Idle; // 현재 상태
 	Server* server_ptr;
+
+	Key_State key_state;
 public:
 	char player_ID[32] = { 0, };
 	Position pos;
@@ -153,7 +159,7 @@ class Player : public Object
 {
 private:
 	StateMachine* state_machine;
-	Key_State key_state;
+	
 
 public:
 	int hp;
