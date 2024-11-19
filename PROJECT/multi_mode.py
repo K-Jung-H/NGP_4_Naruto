@@ -16,6 +16,7 @@ from map import Map
 from multi_player_render import (SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle, Run, Jump, Attack,
                                  Skill_motion, Easy_hit, Hard_hit, Win, Lose, Run_Attack, Jump_Attack, Teleport)
 from multi_skill_render import SkillObject
+import time  # 시간 측정을 위해 추가
 
 TEST = True
 LOCAL = False
@@ -70,10 +71,8 @@ def key_listener():
         event = keyboard.read_event()
         if event.event_type == keyboard.KEY_DOWN:
             key_data = event.name
-
             # 키가 처음 눌린 경우에만 서버로 전송
             if key_data not in pressed_keys:
-                print(f"감지된 키 다운 입력: {key_data}")
                 if TEST:
                     # 서버로 키 다운 정보 전송
                     send_key_info(key_data, KEY_DOWN)
@@ -82,10 +81,8 @@ def key_listener():
 
         elif event.event_type == keyboard.KEY_UP:
             key_data = event.name
-
             # 키가 처음 떼어진 경우에만 서버로 전송
             if key_data in pressed_keys:
-                print(f"감지된 키 업 입력: {key_data}")
                 if TEST:
                     # 서버로 키 업 정보 전송
                     send_key_info(key_data, KEY_UP)  # 키 업 전송
@@ -222,6 +219,8 @@ def receive_game_data(client_socket):
 
 def receive_game_data_loop(client_socket):
     """서버로부터 데이터를 계속 수신하고 게임 객체를 업데이트."""
+    count = 0  # 수신 횟수 카운트
+    start_time = time.time()  # 시작 시간
     while True:
         # try:
         #     receive_game_data(client_socket)
@@ -229,6 +228,14 @@ def receive_game_data_loop(client_socket):
         #     print(f"데이터 수신 중 오류 발생: {e}")
         #     break
         receive_game_data(client_socket)
+        count += 1
+
+        # 1초가 지났는지 확인
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= 1.0:
+            print(f"초당 수신 횟수: {count}")
+            count = 0  # 카운트 초기화
+            start_time = time.time()  # 시간 초기화
 
 def init():
     global network_client
@@ -397,8 +404,19 @@ def draw():
     elif p2_mug == 'itachi':
         itachi_mug.clip_composite_draw(0, 0, 112, 112, 0, '', 50, 550, 80, 80)
 
+    if fight_frame <= 600:
+        fight.clip_composite_draw(0, 0, 1601, 786, 0, '', 600, 900-int(fight_frame), 473, 228)
+    elif 600 < fight_frame <= 900:
+        fight.clip_composite_draw(0, 0, 1601, 786, 0, '', 600, 300, 473, 228)
+    elif 900 < fight_frame <= 1500:
+        fight.clip_composite_draw(0, 0, 1601, 786, 0, '', 600, int(fight_frame)-600, 473, 228)
+
     update_canvas()
 
 def update():
+    global chakra_frame, fight_frame
     game_world.update()
+    chakra_frame = (chakra_frame + 4 * game_framework.frame_time) % 4
+    if fight_frame <= 1500:
+        fight_frame += game_framework.frame_time * 800
     pass
