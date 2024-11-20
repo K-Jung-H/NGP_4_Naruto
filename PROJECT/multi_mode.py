@@ -30,7 +30,8 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '192.168.28.1'
+        # SERVER_IP = '192.168.28.1'
+        SERVER_IP = '127.0.0.1'
 else:
     SERVER_IP = "0"
 
@@ -348,7 +349,8 @@ def init():
 def finish():
     global Input_thread_running
     if TEST:
-        network_client.disconnect()
+        # network_client.disconnect()
+        pass
     game_world.remove_object(p1)
     game_world.remove_object(p2)
     game_world.remove_object(map)

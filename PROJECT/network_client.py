@@ -28,3 +28,7 @@ class NetworkClient:
         self.client_socket.close()
         self.is_connected = False
         print("서버와의 연결이 종료되었습니다.")
+
+    def __del__(self):
+        # 객체 소멸 시 disconnect 호출
+        self.disconnect()
