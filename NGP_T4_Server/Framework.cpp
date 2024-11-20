@@ -3,9 +3,7 @@
 #include "Server.h"
 #include "Object.h"
 #include <windows.h>
-
-#define SERVERPORT 9000
-#define BUFSIZE    512
+#include "../protocol.h"
 
 DWORD WINAPI ServerMain(LPVOID arg);
 DWORD WINAPI ProcessClient(LPVOID arg);

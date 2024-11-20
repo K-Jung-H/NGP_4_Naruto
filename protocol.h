@@ -4,6 +4,10 @@ constexpr int MAX_CLIENTS = 10;
 constexpr int MAX_BUFFER_SIZE = 1024;
 constexpr int NAME_SIZE = 20;
 
+#define SERVER_IP "1.242.69.251"
+#define SERVERPORT 9000
+#define BUFSIZE    512
+
 //용어 정의
 //CS : Client to Server
 //SC : Server to Client
