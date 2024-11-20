@@ -42,6 +42,14 @@ def init():
     dup_on = False
     dup_wait_time = 0
     mode_choose = '1p'
+    # 이 부분을 나중에 매칭 세션에 붙이면 될 듯?
+    global network_client
+    network_client = game_framework.get_socket()
+    if network_client:
+        print("소켓 재사용 중")
+        # 소켓과 관련된 추가 작업
+    else:
+        print("소켓이 설정되지 않음.")
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space
     global duplicate, dir_image, single_image, multi_image, hand

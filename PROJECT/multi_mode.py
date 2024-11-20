@@ -30,7 +30,7 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '192.168.81.90'
+        SERVER_IP = '192.168.28.1'
 else:
     SERVER_IP = "0"
 
@@ -291,7 +291,7 @@ def init():
         # 네트워크 클라이언트 초기화 및 연결
         network_client = NetworkClient(SERVER_IP, SERVER_PORT)
         network_client.connect()
-        # 송수신 버퍼 크기 설정 
+        # 송수신 버퍼 크기 설정
         new_buf_size = 492
         network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, new_buf_size)
         network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, new_buf_size)
@@ -301,6 +301,9 @@ def init():
 
         print(f"수신 버퍼 크기: {recv_buf_size} bytes")
         print(f"송신 버퍼 크기: {send_buf_size} bytes")
+
+        game_framework.set_socket(network_client)
+
         receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
         receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
         receiver_thread.start()
@@ -364,6 +367,8 @@ def handle_events():
             pass
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_F1):
             game_framework.change_mode(title_mode)
+        elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_F2):
+            game_framework.change_mode(mode_choose_mode)
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_d):
             # p2.x = 500
             pass
