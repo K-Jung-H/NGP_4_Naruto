@@ -185,8 +185,8 @@ class Attack : public Object
 {
 private:
 	float sprite_frame_value = 0.0f;
-
 public:
+	bool life = true;
 	int selected_character_type = 0;
 	int attack_type = 0; // 1. 수리검, 2. 스킬 1, 3. 스킬 2
 

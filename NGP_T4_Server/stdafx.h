@@ -87,6 +87,9 @@
 #define STATE_TELEPORT 16
 
 #define Ground_Y 120
+#define Ground_X_Min 0
+#define Ground_X_Max 1623
+
 #define Player_Attack_Combo_Time_Limit 1.0f
 
 static float PIXEL_PER_METER = (10.0 / 0.3); // 10 pixel 30 cm

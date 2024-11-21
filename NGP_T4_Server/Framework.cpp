@@ -147,7 +147,7 @@ DWORD WINAPI ServerMain(LPVOID arg)
 // 서버 업데이트 스레드
 DWORD WINAPI ServerUpdateThread(LPVOID arg)
 {
-    int target_fps =60;  // 목표 FPS 설정 (60FPS)
+    int target_fps =100;  // 목표 FPS 설정 (60FPS)
     server_program.Set_FrameRate(target_fps);  // 서버 타이머 시작
     
     while (true)
@@ -226,7 +226,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
     if (Client_N == 1)
         server_program.Add_P1(player, CHARACTER_SASUKE);
     else if (Client_N == 2)
-        server_program.Add_P2(player, CHARACTER_SASUKE);
+        server_program.Add_P2(player, CHARACTER_NARUTO);
     else
         std::cout << "Client_N 에서 오류 발생" << std::endl;
 

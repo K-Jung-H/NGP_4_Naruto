@@ -78,13 +78,6 @@ void Server::Add_Skill_Object(Object* skill_ptr)
 
 void Server::Update_Server(float elapsed_time)
 {
-	static int debug_tick = 0;
-	constexpr int DEBUG_TICK_INTERVAL = 10; // 디버깅 간격
-	++debug_tick;
-
-	// 콘솔 화면을 지우는 대신 상단 고정 위치에 출력
-	std::cout << "\033[2J\033[H"; // ANSI escape 코드로 화면 지우기 및 커서 이동
-
 	// 플레이어 업데이트
 	if (p1_ptr) 
 		p1_ptr->update(elapsed_time);
@@ -93,47 +86,21 @@ void Server::Update_Server(float elapsed_time)
 		p2_ptr->update(elapsed_time);
 
 	// 공격 객체 업데이트
-	for (Object* obj_ptr : Stage_Attack_Object_List) 
-		if (obj_ptr) 
-			obj_ptr->update(elapsed_time);
-	
-
-	// 출력 (업데이트와 분리)
-	std::cout << "=== Debug Info ===\n";
-
-	// 플레이어 정보 출력
-	if (p1_ptr && debug_tick > DEBUG_TICK_INTERVAL) 
+	for (auto& attack_ptr : Stage_Attack_Object_List)
 	{
-		std::cout << "p1 - ";
-		p1_ptr->Print_info();
-	}
-
-	if (p2_ptr && debug_tick > DEBUG_TICK_INTERVAL)
-	{
-		std::cout << "p2 - ";
-		p2_ptr->Print_info();
-	}
-
-	// 공격 객체 정보 출력
-	int i = 0;
-	for (Object* obj_ptr : Stage_Attack_Object_List) 
-	{
-		if (obj_ptr) 
+		if (attack_ptr != nullptr)
 		{
-			std::cout << "Attack_Info " << i << ": ";
-			obj_ptr->Print_info();
+			attack_ptr->update(elapsed_time);
+
+			if (attack_ptr->life == false)
+			{
+				delete attack_ptr;
+				attack_ptr = nullptr;
+			}
 		}
-		++i;
 	}
 
-	// 디버그 틱 초기화
-	if (debug_tick > DEBUG_TICK_INTERVAL) 
-	{
-		debug_tick = 0;
-	}
 }
-
-
 
 
 void Server::Decoding(std::pair<int, Key_Info>* key_info)
@@ -298,20 +265,62 @@ Game_Data* Server::Encoding()
 
 void Server::Broadcast_GameData_All(Game_Data* data)
 {
-	std::string result_message = "";
+	// 호출 횟수 증가
+	call_count++;
+
+	// 현재 시간과 마지막 시간 비교
+	auto now = std::chrono::steady_clock::now();
+	auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(now - last_time).count();
+	if (elapsed_time >= 1) 
+	{ 
+		// 1초가 경과한 경우
+		std::wstring debug_message = L"Broadcast_GameData_All 호출 횟수 (1초): " + std::to_wstring(call_count.load()) + L"\n";
+		OutputDebugString(debug_message.c_str());
+
+		// 출력 (업데이트와 분리)
+		system("cls");
+		std::cout << "=== Debug Info ===\n";
+
+		// 플레이어 정보 출력
+		if (p1_ptr)
+		{
+			std::cout << "p1 - ";
+			p1_ptr->Print_info();
+		}
+		if (p2_ptr)
+		{
+			std::cout << "p2 - ";
+			p2_ptr->Print_info();
+		}
+
+		// 공격 객체 정보 출력
+		int i = 0;
+		for (Object* obj_ptr : Stage_Attack_Object_List)
+		{
+			if (obj_ptr)
+			{
+				std::cout << "Attack_Info " << i << ": ";
+				obj_ptr->Print_info();
+			}
+			++i;
+		}
+
+		call_count = 0; // 카운터 초기화
+		last_time = now; // 타이머 갱신
+	}
+
+
 	if (client1_socket != INVALID_SOCKET)
 	{
 		send(client1_socket, (char*)data, sizeof(Game_Data), 0);
-		result_message += "1P - ";
+
 	}
 	if (client2_socket != INVALID_SOCKET)
 	{
 		send(client2_socket, (char*)data, sizeof(Game_Data), 0);
-		result_message += "2P - ";
+
 	}
 
-	//if(result_message.length() > 0)
-	//	std::cout << result_message << " send_success" << std::endl;
 	delete data;
 }
 
