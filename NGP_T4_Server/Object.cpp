@@ -514,23 +514,37 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
     case State::Attack_Shuriken:
     {
+        static bool shuriken_triggered = false;
+
         if (is_air)
         {
             pos.y += (Y_Direction ? 1 : -1) * 0.5 * RUN_SPEED_PPS * ElapsedTime;
 
             sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 4, false); // 스프라이트 0~2 까지 있음, 3이 되면 종료하도록
+            
+            if (sprite_index == 1 && shuriken_triggered == false)
+            {
+                shuriken_triggered = true;
+
+                Object* shuriken_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
+                server_ptr->Add_Skill_Object(shuriken_obj);
+            }
             if (sprite_index == 3)
             {
                 sprite_index = 2;
                 attack_action = false;
-
-                Object* shuriken_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
-                server_ptr->Add_Skill_Object(shuriken_obj);
             }
         }
         else
         {
             sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 6, false); // 스프라이트 0~4 까지 있음, 5가 되면 종료하도록
+            if (sprite_index == 2 && shuriken_triggered == false)
+            {
+                shuriken_triggered = true;
+
+                Object* shuriken_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
+                server_ptr->Add_Skill_Object(shuriken_obj);
+            }
             if (sprite_index == 5)
             {
                 sprite_index = 4;
@@ -781,30 +795,44 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
 
     case State::Attack_Shuriken:
     {
+        static bool shuriken_triggered = false;
         if (is_air)
         {
             pos.y += (Y_Direction ? 1 : -1) * 0.5 * RUN_SPEED_PPS * ElapsedTime;
 
             sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false); // 스프라이트 0~3 까지 있음, 4이 되면 종료하도록
+            
+            if (sprite_index == 3 && shuriken_triggered == false)
+            {
+                shuriken_triggered = true;
+
+                Object* shuriken_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
+                server_ptr->Add_Skill_Object(shuriken_obj);
+
+            }
             if (sprite_index == 4)
             {
                 sprite_index = 3;
                 attack_action = false;
-
-                Object* shuriken_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
-                server_ptr->Add_Skill_Object(shuriken_obj);
+                shuriken_triggered = false;
             }
         }
         else
         {
             sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false); // 스프라이트 0~3 까지 있음, 4가 되면 종료하도록
+            
+            if (sprite_index == 3 && shuriken_triggered == false)
+            {
+                shuriken_triggered = true;
+
+                Object* shuriken_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
+                server_ptr->Add_Skill_Object(shuriken_obj);
+            }
             if (sprite_index == 4)
             {
                 sprite_index = 3;
                 attack_action = false;
-
-                Object* shuriken_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
-                server_ptr->Add_Skill_Object(shuriken_obj);
+                shuriken_triggered = false;
             }
         }
     }
@@ -848,14 +876,18 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
         static bool skill_2_triggered = false;
 
         // 스킬 애니메이션은 0~11까지 있음, 12이 되면 종료하기
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 13, false);
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 20, false);
 
         // 스킬 애니메이션 끝나면
-        if (sprite_index == 12)
+        if (sprite_index == 19)
         {
             sprite_index = 11;
             attack_action = false;
             skill_2_triggered = false;
+        }
+        else if (sprite_index > 11)
+        {
+            sprite_index = 11;
         }
 
         if (sprite_index == 9 && skill_2_triggered == false)
@@ -863,8 +895,8 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
             sprite_frame_value += 1.0f;
 
             Position skill_2_spawn_pos;
-            skill_2_spawn_pos.x = pos.x + (X_Direction * 2 - 1) * 150.0f;
-            skill_2_spawn_pos.y = pos.y;
+            skill_2_spawn_pos.x = pos.x + (X_Direction * 2 - 1) * 180.0f;
+            skill_2_spawn_pos.y = pos.y - 30;
 
             Object* skill_2_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SKILL_1, skill_2_spawn_pos, X_Direction);
             server_ptr->Add_Skill_Object(skill_2_obj);
@@ -1101,14 +1133,27 @@ void Attack::update(float Elapsed_time)
         switch (selected_character_type)
         {
         case 1: // Naruto - 구미
-            // 제자리
-            sprite_index = Get_Sprite_Index(Elapsed_time * 20.0f, 10, false);
-            break;
+        {// 제자리
+            sprite_index = Get_Sprite_Index(Elapsed_time * 20.0f, 11, false);
+
+            if (sprite_index == 10)
+            {
+                sprite_index = 9;
+                life = false;
+            }
+        }
+        break;
 
         case 2: // Sasuke - 치도리
         {
             // 스킬 애니메이션은 0~17까지 있음, 18이 되면 종료
             sprite_index = Get_Sprite_Index(Elapsed_time * 12.0f, 19, false);
+
+            if (sprite_index == 18)
+            {
+                sprite_index = 17;
+                life = false;
+            }
 
             // 전진
             if(sprite_index > 6)
@@ -1122,6 +1167,9 @@ void Attack::update(float Elapsed_time)
         }
         break;
     }
+
+    if ((Ground_X_Min - 50) > pos.x || pos.x > (Ground_X_Max + 50))
+        life = false;
 }
 
 void Attack::Print_info()

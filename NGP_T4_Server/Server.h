@@ -30,7 +30,11 @@ public:
 		// 목표 FPS에 맞추기 위해 대기 시간 계산
 		float sleep_time = (1.0f / target_fps) - frame_time;
 		if (sleep_time > 0.0f) {
-			std::this_thread::sleep_for(std::chrono::duration<float>(sleep_time)); // 남은 시간만큼 대기
+			std::this_thread::sleep_for(std::chrono::duration<float>(sleep_time));
+		}
+		else {
+			// sleep_time이 음수인 경우 로그를 출력하거나, 경고 처리
+			std::cout << "Frame processing too slow for target FPS: " << target_fps << "\n";
 		}
 	}
 
@@ -41,6 +45,11 @@ private:
 
 class Server
 {
+private:
+	// 호출 횟수 카운터 및 타이머 초기화
+	std::atomic<int> call_count = 0; // Thread-safe
+	std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
+
 private:
 	std::queue<std::pair<int, Key_Info>> keyQueue;
 	Timer timer;
