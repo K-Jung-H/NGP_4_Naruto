@@ -44,6 +44,13 @@ DWORD WINAPI ServerMain(LPVOID arg)
     if (listen_sock == INVALID_SOCKET)
         err_quit("socket()");
 
+    //==============================================================
+    int optval = 1; // 1은 비활성화, 0은 활성화
+    retval = setsockopt(listen_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&optval, sizeof(optval));
+    if (retval == SOCKET_ERROR)
+        err_quit("setsockopt(TCP_NODELAY)");
+    //==============================================================
+
     // bind()
     struct sockaddr_in serveraddr;
     memset(&serveraddr, 0, sizeof(serveraddr));
