@@ -31,7 +31,8 @@ if TEST:
         SERVER_IP = '127.0.0.1'
     else:
         # SERVER_IP = '192.168.28.1'
-        SERVER_IP = '127.0.0.1'
+        SERVER_IP = '192.168.81.99'
+        # SERVER_IP = '192.168.63.87'
 else:
     SERVER_IP = "0"
 
@@ -52,12 +53,16 @@ key_codes = {
     'right': 68,
     'down': 83,
     'up': 87,
-    ',': 44,
     'l': 76,
-    ':': 58,
     ';': 59,
+    ',': 44,
     '/': 47,
-    '.': 46
+    '.': 46,
+    'f': 76,
+    'g': 59,
+    'c': 44,
+    'v': 46,
+    'b': 47
 }
 
 def send_key_info(key_name, key_action):
@@ -289,9 +294,14 @@ def init():
             game_world.add_object(skill, 2)
             skill.set_background(map)
 
-        # 네트워크 클라이언트 초기화 및 연결
-        network_client = NetworkClient(SERVER_IP, SERVER_PORT)
-        network_client.connect()
+        network_client = game_framework.get_socket()
+        if network_client:
+            print("소켓 재사용")
+            pass
+        else:
+            # 네트워크 클라이언트 초기화 및 연결
+            network_client = NetworkClient(SERVER_IP, SERVER_PORT)
+            network_client.connect()
         # 송수신 버퍼 크기 설정
         new_buf_size = 492
         network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, new_buf_size)
@@ -321,6 +331,8 @@ def init():
 
         p1.set_background(map)
         p2.set_background(map)
+        # 맵 크기 확인
+        print(map.w, map.h)
     else:
         # p1 = NARUTO_MULTI(1)
         # p1 = SASUKE_MULTI(1)
@@ -348,6 +360,10 @@ def init():
     pass
 def finish():
     global Input_thread_running
+    global network_client
+    network_client = game_framework.get_socket()
+    if network_client:
+        network_client.disconnect()
     if TEST:
         # network_client.disconnect()
         pass
