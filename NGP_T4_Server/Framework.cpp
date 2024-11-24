@@ -218,9 +218,9 @@ DWORD WINAPI ProcessClient(LPVOID arg)
     Object* player = new Player();
 
     if (Client_N == 1)
-        server_program.Add_P1(player, CHARACTER_ITACHI);
+        server_program.Add_P1(player, CHARACTER_NARUTO); 
     else if (Client_N == 2)
-        server_program.Add_P2(player, CHARACTER_NARUTO);
+        server_program.Add_P2(player, CHARACTER_ITACHI);
     else
         std::cout << "Client_N 에서 오류 발생" << std::endl;
 
