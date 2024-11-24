@@ -4,6 +4,7 @@ import charactor_choose_mode
 import game_framework
 import play_mode
 import single_character_choice_mode
+import multi_room_select_mode
 import title_mode
 import multi_mode
 
@@ -70,7 +71,8 @@ def handle_events():
             elif mode_choose == '2p':
                 game_framework.change_mode(charactor_choose_mode)
             elif mode_choose == 'multi':
-                game_framework.change_mode(multi_mode)
+                # game_framework.change_mode(multi_mode)
+                game_framework.change_mode(multi_room_select_mode)
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()
