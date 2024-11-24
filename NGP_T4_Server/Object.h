@@ -52,8 +52,6 @@ protected:
 	Server* server_ptr;
 
 	Key_State key_state;
-
-	int sp = 0;
 public:
 	char player_ID[32] = { 0, };
 	Position pos;
@@ -61,9 +59,6 @@ public:
 	bool Move_Left = false;
 	bool Move_Right = false;
 
-	bool is_easy_hit = false;
-	bool is_hard_hit = false;
-	bool is_protected = false;
 
 	int sprite_index = 0;
 	float sprite_frame_value = 0.0f;
@@ -97,9 +92,6 @@ public:
 	Position Get_Pos() { return pos; };
 	int  Get_State();
 	void Set_Draw_Direction();
-
-	int Get_SP() { return sp; };
-	void Set_SP(int player_sp) { sp = player_sp; };
 
 private:
 
@@ -163,26 +155,17 @@ public:
 	virtual	 void Print_info() {};
 };
 
-#define SP_RESTORE_COOL_DOWN 3.0f
-#define SP_RESTORE_DEGREE 30
-
 class Player : public Object
 {
 private:
 	StateMachine* state_machine;
-	float sp_elapsed_time;
+	
 
 public:
 	int hp;
 	int sp;
 	int state;
 	int selected_character_type;
-
-	Player()
-	{
-		hp = 400;
-		sp = 0;
-	}
 
 	void Set_Character(int n, Server* server_ptr);
 	StateMachine* Get_StateMachine() { return state_machine; };

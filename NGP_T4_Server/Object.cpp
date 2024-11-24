@@ -81,19 +81,10 @@ void StateMachine::handleEvent(int key_event)
             changeState(State::Attack_Shuriken, key_event);
 
         if (key_event == EVENT_SKILL_ATTACK_1_KEY_DOWN)
-            if (sp >= 20)
-            {
-                sp = sp - 20;
-                changeState(State::Attack_Skill_1, key_event);
-            }
+            changeState(State::Attack_Skill_1, key_event);
 
         if (key_event == EVENT_SKILL_ATTACK_2_KEY_DOWN)
-            if (sp >= 20)
-            {
-                sp = sp - 20;
-                changeState(State::Attack_Skill_2, key_event);
-            }
-
+            changeState(State::Attack_Skill_2, key_event);
 
         if (key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
             changeState(State::Teleport, key_event);
@@ -115,18 +106,10 @@ void StateMachine::handleEvent(int key_event)
             changeState(State::Attack_Shuriken, key_event);
 
         if (key_event == EVENT_SKILL_ATTACK_1_KEY_DOWN)
-            if (sp >= 20)
-            {
-                sp -= 20;
-                changeState(State::Attack_Skill_1, key_event);
-            }
+            changeState(State::Attack_Skill_1, key_event);
 
         if (key_event == EVENT_SKILL_ATTACK_2_KEY_DOWN)
-            if (sp >= 20)
-            {
-                sp -= 20;
-                changeState(State::Attack_Skill_2, key_event);
-            }
+            changeState(State::Attack_Skill_2, key_event);
 
         if (key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
             changeState(State::Teleport, key_event);
@@ -166,9 +149,6 @@ void StateMachine::handleEvent(int key_event)
 
     case State::Attack_Run:
     {
-        if (attack_action == false && (Move_Left == Move_Right))
-            changeState(State::Idle, key_event);
-
         if (attack_action == false)
             changeState(State::Run, key_event);
 
@@ -218,21 +198,6 @@ void StateMachine::handleEvent(int key_event)
     {
         if (attack_action == false)
             changeState(State::Jump, key_event);
-    }
-    break;
-
-    case State::Hit_Easy:
-    {
-        if (is_easy_hit == false)
-            changeState(State::Idle, key_event);
-    }
-    break;
-
-    case State::Hit_Hard:
-    {
-        if (is_hard_hit == false && (Move_Left != Move_Right))
-            changeState(State::Run, key_event);
-
     }
     break;
 
@@ -299,27 +264,16 @@ void StateMachine::enterState(State state, int key_event)
 
     case State::Attack_Skill_1:
         attack_action = true;
-        is_protected = true;
     break;
 
     case State::Attack_Skill_2:
         attack_action = true;
-        is_protected = true;
     break;
 
     case State::Teleport:
         attack_action = true;
         break;
 
-    case State::Hit_Easy:
-        is_easy_hit = true;
-        is_protected = true;
-        break;
-
-    case State::Hit_Hard:
-        is_hard_hit = true;
-        is_protected = true;
-        break;
 
     default:
         break;
@@ -341,22 +295,6 @@ void StateMachine::exitState(State state, int key_event)
         break;
     case State::Attack_Normal:
         attack_after_time = 0.0f;
-        break;
-
-    case State::Attack_Skill_1:
-        is_protected = false;
-        break;
-
-    case State::Attack_Skill_2:
-        is_protected = false;
-        break;
-
-    case State::Hit_Easy:
-        is_protected = false;
-        break;
-
-    case State::Hit_Hard:
-        is_protected = false;
         break;
 
     default:
@@ -450,9 +388,6 @@ int  StateMachine::Get_State()
 void StateMachine::Set_Draw_Direction()
 {
     if (Move_Left && Move_Right)
-        return;
-
-    if (currentState == State::Hit_Easy || currentState == State::Hit_Hard)
         return;
 
     if (Move_Left)
@@ -598,7 +533,6 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
             {
                 sprite_index = 2;
                 attack_action = false;
-                shuriken_triggered = false;
             }
         }
         else
@@ -615,8 +549,9 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
             {
                 sprite_index = 4;
                 attack_action = false;
-                shuriken_triggered = false;
 
+                Object* shuriken_obj = new Attack(player_ID, CHARACTER_NARUTO, ATTACK_TYPE_SHURIKEN, pos, X_Direction);
+                server_ptr->Add_Skill_Object(shuriken_obj);
             }
         }
     }
@@ -699,33 +634,6 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
     }
     break;
-
-    case State::Hit_Easy: // 0 ~ 1
-    {
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 3, false);
-
-        if (sprite_index == 2)
-        {
-            sprite_index = 1;
-            is_easy_hit = false;
-
-        }
-    }
-    break;
-
-    case State::Hit_Hard: // 0 ~ 3
-    {
-        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 5, false);
-
-        if (sprite_index == 4)
-        {
-            sprite_index = 3;
-            is_hard_hit = false;
-        }
-    }
-    break;
-
-
     default:
         break;
     }
@@ -1025,32 +933,6 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
     }
     break;
 
-    case State::Hit_Easy: // 0 ~ 1
-    {
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 3, false);
-
-        if (sprite_index == 2)
-        {
-            sprite_index = 1;
-            is_easy_hit = false;
-
-        }
-    }
-    break;
-
-    case State::Hit_Hard: // 0 ~ 3
-    {
-        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 5, false);
-
-        if (sprite_index == 4)
-        {
-            sprite_index = 3;
-            is_hard_hit = false;
-        }
-    }
-    break;
-
-
     default:
         break;
     }
@@ -1230,7 +1112,6 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
             {
                 sprite_index = 1;
                 attack_action = false;
-                shuriken_triggered = false;
             }
         }
         else
@@ -1247,8 +1128,6 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
             {
                 sprite_index = 2;
                 attack_action = false;
-                shuriken_triggered = false;
-
             }
         }
     }
@@ -1348,33 +1227,6 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
 
     }
     break;
-
-    case State::Hit_Easy: // 0 ~ 1
-    {
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 3, false);
-
-        if (sprite_index == 2)
-        {
-            sprite_index = 1;
-            is_easy_hit = false;
-
-        }
-    }
-    break;
-
-    case State::Hit_Hard: // 0 ~ 3
-    {
-        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 5, false);
-
-        if (sprite_index == 4)
-        {
-            sprite_index = 3;
-            is_hard_hit = false;
-        }
-    }
-    break;
-
-
     default:
         break;
     }
@@ -1421,26 +1273,14 @@ void Player::synchronize_state_machine()
     this->state = state_machine->Get_State();
     this->sprite_index = state_machine->sprite_index;
     this->X_Direction = state_machine->X_Direction;
-    this->sp = state_machine->Get_SP();
 }
 
 void Player::update(float Elapsed_time)
 {
     if (state_machine != NULL)
     {
-        sp_elapsed_time += Elapsed_time;
-
-        sp = state_machine->Get_SP();
-        if (sp_elapsed_time >= SP_RESTORE_COOL_DOWN)
-        {
-            sp_elapsed_time = 0.0f;
-            sp += SP_RESTORE_DEGREE;
-        }
-
-        state_machine->Set_SP(sp);
         state_machine->update(Elapsed_time);
         synchronize_state_machine();
-        std::cout << "sp - " << state_machine->Get_SP() << std::endl;
     }
 }
 
