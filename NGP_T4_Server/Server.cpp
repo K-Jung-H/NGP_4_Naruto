@@ -57,11 +57,19 @@ void Server::Remove_Client_Socket(int playerNum)
 void Server::Add_P1(Object* p_ptr, int n) 
 {
 	p1_ptr = static_cast<Player*>(p_ptr);
+	
+	char player_id[32] = "player_1";
+	std::memcpy(p1_ptr->player_ID, player_id, sizeof(player_id));
+
 	p1_ptr->Set_Character(n, this);
 }
 void Server::Add_P2(Object* p_ptr, int n) 
 {
 	p2_ptr = static_cast<Player*>(p_ptr);
+
+	char player_id[32] = "player_2";
+	std::memcpy(p2_ptr->player_ID, player_id, sizeof(player_id));
+
 	p2_ptr->Set_Character(n, this);
 }
 
@@ -78,6 +86,9 @@ void Server::Add_Skill_Object(Object* skill_ptr)
 
 void Server::Update_Server(float elapsed_time)
 {
+	// 시간 업데이트
+	game_time += elapsed_time;
+
 	// 플레이어 업데이트
 	if (p1_ptr) 
 		p1_ptr->update(elapsed_time);
@@ -233,6 +244,10 @@ Game_Data* Server::Encoding()
 			temp_info.pos = temp_attack->pos;
 			temp_info.X_Direction = temp_attack->X_Direction;
 			temp_info.attack_type = (temp_attack->selected_character_type * 10) + temp_attack->attack_type;
+			
+			if (temp_attack->sticked == true) // 아마테라스 부착 상태
+				temp_info.attack_type += 1;
+
 			temp_info.sprite_index = temp_attack->sprite_index;
 		}
 		sending_data->attacks[i] = temp_info;
@@ -244,7 +259,7 @@ Game_Data* Server::Encoding()
 		Player* p1_ptr = Get_Player(1);
 		Player* p2_ptr = Get_Player(2);
 
-		etc_info.game_time = 0;
+		etc_info.game_time = game_time;
 		if (p1_ptr != NULL)
 		{
 			etc_info.player1_hp = p1_ptr->hp;

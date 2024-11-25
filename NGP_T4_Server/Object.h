@@ -172,6 +172,7 @@ private:
 	StateMachine* state_machine;
 	float sp_elapsed_time;
 
+	
 public:
 	int hp;
 	int sp;
@@ -202,11 +203,14 @@ class Attack : public Object
 {
 private:
 	float sprite_frame_value = 0.0f;
+	Player* target_ptr = NULL;	// 이타치 - 아마테라스
 public:
 	bool life = true;
 	int selected_character_type = 0;
 	int attack_type = 0; // 1. 수리검, 2. 스킬 1, 3. 스킬 2
 
+	bool sticked = false;			// 이타치 - 아마테라스
+	
 	Attack(const char player_id[32], int c_t, int a_t, Position p, bool x_dir)
 	{
 		std::copy(player_id, player_id + 32, player_ID);
@@ -218,6 +222,7 @@ public:
 
 	void  update(float Elapsed_time) override;
 	int Get_Sprite_Index(float Elapsed_time, int sprite_range, bool index_loop);
+	void Set_Target(Player* player_ptr) { target_ptr = player_ptr; } // 아마테라스 용
 
 	void Print_info();
 };
