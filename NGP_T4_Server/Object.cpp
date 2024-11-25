@@ -50,6 +50,7 @@ void StateMachine::handleEvent(int key_event)
     // 현재 방향키 눌린 상태 - 텔레포트 방향 정하는 용도
     key_state.update(key_event);
 
+
     if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
         Move_Left = true;
     else if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
@@ -143,7 +144,7 @@ void StateMachine::handleEvent(int key_event)
 
         if (is_air == false)
         {
-            if (Move_Left != Move_Right)
+            if (Move_Left == Move_Right)
                 changeState(State::Idle, key_event);
             else
                 changeState(State::Run, key_event);
@@ -1254,35 +1255,34 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
     }
     break;
 
-    case State::Attack_Skill_1: // 사스케 0 ~ 18, 치도리 0 ~ 17
+    case State::Attack_Skill_1:
     {
         static bool skill_1_triggered = false;
 
-        // 스킬 애니메이션은 0~18까지 있음, 19이 되면 종료하기
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 20, false);
+        // 스킬 애니메이션은 0~8까지 있음, 9이 되면 종료하기
+        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 10, false);
 
-
-        if (sprite_index == 1 && skill_1_triggered == false)
+        if (sprite_index == 7 && skill_1_triggered == false)
         {
+            Player* target_ptr = NULL;
+            if (std::memcmp(server_ptr->Get_Player(1)->player_ID, player_ID, sizeof(player_ID)) != 0)
+                target_ptr = server_ptr->Get_Player(1);
+            else if (std::memcmp(server_ptr->Get_Player(2)->player_ID, player_ID, sizeof(player_ID)) != 0)
+                target_ptr = server_ptr->Get_Player(2);
+
             Object* skill_1_obj = new Attack(player_ID, CHARACTER_ITACHI, ATTACK_TYPE_SKILL_2, pos, X_Direction);
+            ((Attack*)skill_1_obj)->Set_Target(target_ptr);
+
             server_ptr->Add_Skill_Object(skill_1_obj);
             skill_1_triggered = true;
         }
 
         // 스킬 애니메이션 끝나면
-        if (sprite_index == 19)
+        if (sprite_index == 9)
         {
-            sprite_index = 18;
+            sprite_index = 8;
             attack_action = false;
             skill_1_triggered = false;
-        }
-
-        if (7 < sprite_index && sprite_index < 18)
-        {
-            if (X_Direction == false) // 왼쪽으로 이동
-                pos.x -= RUN_SPEED_PPS * ElapsedTime;
-            else if (X_Direction) // 오른쪽으로 이동
-                pos.x += RUN_SPEED_PPS * ElapsedTime;
         }
     }
     break;
@@ -1411,7 +1411,8 @@ void Player::Set_Character(int n, Server* server_ptr)
     if (state_machine != NULL)
     {
         state_machine->Set_Server(server_ptr);
-        std::copy(this->player_ID, this->player_ID + 32, state_machine->player_ID);
+        std::memcpy(state_machine->player_ID, player_ID, sizeof(player_ID));
+        // std::copy(this->player_ID, this->player_ID + 32, state_machine->player_ID);
     }
 }
 
@@ -1607,14 +1608,64 @@ void Attack::update(float Elapsed_time)
             }
 
             // 전진
-            if(sprite_index > 6)
+            if (sprite_index > 6)
                 pos.x += (X_Direction * 2 - 1) * RUN_SPEED_PPS * Elapsed_time;
         }
         break;
 
         case 3: // Itachi - 아마테라스
-            // 따라가기
-            break;
+        {
+            if (sticked == false)
+            {
+                sprite_index = Get_Sprite_Index(Elapsed_time * 12.0f, 6);             // 따라가기 0 ~ 15 
+
+                if (target_ptr != NULL)
+                {
+                    float direction_x = target_ptr->pos.x - pos.x;
+                    float direction_y = target_ptr->pos.y - pos.y;
+
+                    // 방향 벡터를 정규화
+                    float length = sqrtf(direction_x * direction_x + direction_y * direction_y);
+                    if (length > 0.0f)
+                    {
+                        direction_x /= length;
+                        direction_y /= length;
+                    }
+
+                    // 이동
+                    pos.x += direction_x * RUN_SPEED_PPS * Elapsed_time;
+                    pos.y += direction_y * RUN_SPEED_PPS * Elapsed_time;
+
+                    float final_direction_x = target_ptr->pos.x - pos.x;
+                    float final_direction_y = target_ptr->pos.y - pos.y;
+                    float distance = sqrtf(final_direction_x * final_direction_x + final_direction_y * final_direction_y);
+
+                    if (distance <= 30)
+                        sticked = true;
+
+                }
+                else
+                    pos.x += (X_Direction * 2 - 1) * (RUN_SPEED_PPS / 5) * Elapsed_time;
+            }
+            else
+            {
+                sprite_index = Get_Sprite_Index(Elapsed_time * 12.0f, 5);             // 부착 상태 0 ~ 5
+
+                if (target_ptr != NULL)
+                {
+                    pos.x = target_ptr->pos.x;
+                    pos.y = target_ptr->pos.y;
+                }
+                else
+                {
+                    life = false;
+                }
+            }
+
+        }
+        break;
+
+
         }
         break;
     }

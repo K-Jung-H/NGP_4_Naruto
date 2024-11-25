@@ -119,6 +119,8 @@ DWORD WINAPI ServerMain(LPVOID arg)
             client_info->player_N = 2;
 
         HANDLE hThread = CreateThread(NULL, 0, ProcessClient, (LPVOID)client_info, 0, NULL);
+
+
         if (hThread == NULL)
         {
             std::cerr << "Failed to create client thread." << std::endl;
@@ -217,8 +219,11 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
     Object* player = new Player();
 
+    Object* test_player = new Player();
+    server_program.Add_P2(test_player, CHARACTER_NARUTO);
+
     if (Client_N == 1)
-        server_program.Add_P1(player, CHARACTER_NARUTO); 
+        server_program.Add_P1(player, CHARACTER_ITACHI);
     else if (Client_N == 2)
         server_program.Add_P2(player, CHARACTER_ITACHI);
     else

@@ -46,7 +46,7 @@ private:
 class Server
 {
 private:
-	// 호출 횟수 카운터 및 타이머 초기화
+	// 디버깅용 - 호출 횟수 카운터 및 타이머 초기화
 	std::atomic<int> call_count = 0; // Thread-safe
 	std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
 
@@ -63,6 +63,8 @@ private:
 
 	Player* p1_ptr = NULL;
 	Player* p2_ptr = NULL;
+
+	float game_time = 0.0f;
 public:
 	Server() 
 	{ 
