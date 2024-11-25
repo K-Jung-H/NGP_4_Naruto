@@ -60,6 +60,7 @@ class SkillObject:
             22: 5,  # 사스케, 이타치 화둔
             23: 6,  # 사스케 치도리
             33: 7,  # 이타치 아마테라스
+            34: 7  # 이타치 아마테라스
         }
 
         # 매핑된 스프라이트 키 가져오기
@@ -128,6 +129,13 @@ class SkillObject:
                             (int(self.sprite_index) - 1) * 104, 0, 104, 77, 0, '',
                             self.sx - 30, self.sy + 41 - 10, 325, 241
                         )
-        elif self.skill_type == 33:  # 이타치 아마테라스
-            # reach 함수 어쩔건지 이야기하기
-            pass
+        elif self.skill_type == 33:  # 이타치 아마테라스 추적
+            if self.dir:
+                sprite_list[0].clip_composite_draw(int(self.sprite_index) * 122, 0, 122, 56, 0, '',
+                                                        self.sx, self.sy + 41, 200, 140)
+            else:
+                sprite_list[0].clip_composite_draw(int(self.sprite_index) * 122, 0, 122, 56, 0, 'h',
+                                                        self.sx, self.sy + 41, 200, 140)
+        elif self.skill_type == 34:  # 이타치 아마테라스 적중 시
+            sprite_list[1].clip_composite_draw(int(self.sprite_index) * 133, 0, 133, 150, 0, '',
+                                                    self.sx, self.sy, 100, 130)

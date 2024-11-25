@@ -29,10 +29,8 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        # SERVER_IP = '192.168.28.1'
-        # SERVER_IP = '192.168.81.99'
-        # SERVER_IP = '192.168.63.87'
-        SERVER_IP = '127.0.0.1'
+        # SERVER_IP = '127.0.0.1'
+        SERVER_IP = '192.168.81.90'
 else:
     SERVER_IP = "0"
 
@@ -203,7 +201,7 @@ def receive_game_data(client_socket):
         for key, value in extra_state_data[p2_state].items():
             setattr(p2, key, value)
 
-    print(unpacked_data[5], unpacked_data[12])
+    # print(unpacked_data[5], unpacked_data[12])
 
     # 각 공격 데이터를 슬라이싱하여 그룹화
     attacks = [
@@ -299,7 +297,7 @@ def init():
         print(f"송신 버퍼 크기: {send_buf_size} bytes")
 
         game_framework.set_socket(network_client)
-        
+
         data = b""
         while len(data) < data_size:
             # print(data_size)
