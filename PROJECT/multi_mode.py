@@ -5,7 +5,6 @@ from pico2d import *
 import charactor_choose_mode
 import game_framework
 import game_world
-import single_character_choice_mode
 import mode_choose_mode
 import keyboard
 
@@ -204,6 +203,8 @@ def receive_game_data(client_socket):
         for key, value in extra_state_data[p2_state].items():
             setattr(p2, key, value)
 
+    print(unpacked_data[5], unpacked_data[12])
+
     # 각 공격 데이터를 슬라이싱하여 그룹화
     attacks = [
         unpacked_data[i:i + 5] for i in range(14, 14 + 18 * 5, 5)
@@ -277,24 +278,6 @@ def init():
     game_world.add_object(map, 1)
 
     if TEST:
-        p1 = SASUKE_MULTI(1)
-        # p1 = NARUTO_MULTI(1)
-        # p1 = ITACHI_MULTI(1)
-        game_world.add_object(p1, 1)
-
-        p2 = NARUTO_MULTI(2)
-        # p1 = ITACHI_MULTI(1)
-        game_world.add_object(p2, 1)
-
-        p1_mug = p1.char_name
-        p2_mug = p2.char_name
-
-        SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
-        skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
-        for skill in skills:
-            game_world.add_object(skill, 2)
-            skill.set_background(map)
-
         network_client = game_framework.get_socket()
         if network_client:
             print("소켓 재사용")
@@ -303,6 +286,7 @@ def init():
             # 네트워크 클라이언트 초기화 및 연결
             network_client = NetworkClient(SERVER_IP, SERVER_PORT)
             network_client.connect()
+
         # 송수신 버퍼 크기 설정
         new_buf_size = 492
         network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, new_buf_size)
@@ -315,6 +299,44 @@ def init():
         print(f"송신 버퍼 크기: {send_buf_size} bytes")
 
         game_framework.set_socket(network_client)
+        
+        data = b""
+        while len(data) < data_size:
+            # print(data_size)
+            packet = network_client.client_socket.recv(data_size - len(data))
+            if not packet:
+                print("연결이 종료되었습니다.")
+                return None
+            data += packet
+        unpacked_data = struct.unpack(game_data_format, data)
+
+        if unpacked_data[5] == 1:
+            p1 = NARUTO_MULTI(1)
+        elif unpacked_data[5] == 2:
+            p1 = SASUKE_MULTI(1)
+        elif unpacked_data[5] == 3:
+            p1 = ITACHI_MULTI(1)
+        game_world.add_object(p1, 1)
+
+        if unpacked_data[12] == 1:
+            p2 = NARUTO_MULTI(2)
+        elif unpacked_data[12] == 2:
+            p2 = SASUKE_MULTI(2)
+        elif unpacked_data[12] == 3:
+            p2 = ITACHI_MULTI(2)
+        game_world.add_object(p2, 1)
+
+        p1_mug = p1.char_name
+        p2_mug = p2.char_name
+
+        SkillObject.load_sprites()  # 스프라이트 이미지를 한 번만 로드
+        skills = [SkillObject() for _ in range(18)]  # 18개의 Skill 객체 생성
+        for skill in skills:
+            game_world.add_object(skill, 2)
+            skill.set_background(map)
+
+
+
 
         receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
         receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
