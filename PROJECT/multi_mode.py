@@ -29,8 +29,8 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        # SERVER_IP = '127.0.0.1'
-        SERVER_IP = '192.168.81.90'
+        SERVER_IP = '127.0.0.1'
+        # SERVER_IP = '192.168.81.90'
 else:
     SERVER_IP = "0"
 
