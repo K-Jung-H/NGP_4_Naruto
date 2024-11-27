@@ -4,6 +4,15 @@ import time
 
 running = None
 stack = None
+network_client = None  # 전역 소켓 객체 선언
+
+def set_socket(client_socket):
+    global network_client
+    network_client = client_socket
+
+def get_socket():
+    global network_client
+    return network_client
 
 def change_mode(mode):
     global stack

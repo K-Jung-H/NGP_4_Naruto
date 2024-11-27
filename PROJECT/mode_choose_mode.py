@@ -4,8 +4,10 @@ import charactor_choose_mode
 import game_framework
 import play_mode
 import single_character_choice_mode
+import multi_room_select_mode
 import title_mode
 import multi_mode
+import server_connect
 
 character_count = 3
 
@@ -14,7 +16,8 @@ def init():
     global p1_x, p1_y, p2_x, p2_y, p1_choose, p2_choose, p1_image, p2_image, character_back
     global vs, press_space
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up
-    global duplicate, dup_on, dup_wait_time, dir_image, single_image, multi_image, mode_choose, hand, mode_back
+    global duplicate, dup_on, dup_wait_time, dir_image, single_image, multi_image, mode_choose, hand, mode_back,\
+        multi_font
     image1 = load_image('resource/title_main.png')
     naruto = load_image('resource/naruto_idle.png')
     sasuke = load_image('resource/sasuke_idle.png')
@@ -30,6 +33,7 @@ def init():
     multi_image = load_image('resource/multi_play_image.png')
     hand = load_image('resource/hand_image.png')
     mode_back = load_image('resource/mode_choice_back.png')
+    multi_font = load_image('resource/multi_font.png')
     p1_x = 900
     p1_y = 360
     p2_x = 300
@@ -42,11 +46,12 @@ def init():
     dup_on = False
     dup_wait_time = 0
     mode_choose = '1p'
+
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space
-    global duplicate, dir_image, single_image, multi_image, hand
+    global duplicate, dir_image, single_image, multi_image, hand, multi_font
     del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
-    del single_image, multi_image, hand
+    del single_image, multi_image, hand, multi_font
 def handle_events():
     events = get_events()
     global p1_choose, p2_choose, character_count, dup_on, dup_wait_time, mode_choose
@@ -62,18 +67,32 @@ def handle_events():
             elif mode_choose == '2p':
                 game_framework.change_mode(charactor_choose_mode)
             elif mode_choose == 'multi':
-                game_framework.change_mode(multi_mode)
+                # game_framework.change_mode(multi_mode)
+                # game_framework.change_mode(multi_room_select_mode)
+                game_framework.change_mode(server_connect)
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_a:
-            mode_choose = '1p'
+            if mode_choose == '2p':
+                mode_choose = '1p'
+            elif mode_choose == 'multi':
+                mode_choose = '2p'
         elif event.type == SDL_KEYDOWN and event.key == SDLK_d:
-            mode_choose = '2p'
+            if mode_choose == '1p':
+                mode_choose = '2p'
+            elif mode_choose == '2p':
+                mode_choose = 'multi'
         elif event.type == SDL_KEYDOWN and event.key == SDLK_LEFT:
-            mode_choose = '1p'
+            if mode_choose == '2p':
+                mode_choose = '1p'
+            elif mode_choose == 'multi':
+                mode_choose = '2p'
         elif event.type == SDL_KEYDOWN and event.key == SDLK_RIGHT:
-            mode_choose = '2p'
+            if mode_choose == '1p':
+                mode_choose = '2p'
+            elif mode_choose == '2p':
+                mode_choose = 'multi'
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_z:
@@ -87,16 +106,24 @@ def draw():
     mode_back.clip_composite_draw(0, 0, mode_back.w, mode_back.h, 0, '', 600, 300, mode_back.w*3.8, mode_back.h*3.8)
     # vs.clip_composite_draw(0, 0, 2500, 2500, 0, '', 600, 300, 200, 200)
     single_image.clip_composite_draw(int(naruto_frame)*single_image.w//3, 0, single_image.w//3, single_image.h,
-                                     0, '', 400, 300,
+                                     0, '', 350, 300,
                                      single_image.w//3*2, single_image.h*2)
     multi_image.clip_composite_draw(int(naruto_frame)*multi_image.w//3, 0, multi_image.w//3, multi_image.h,
-                                    0, '', 800, 300,
+                                    0, '', 600, 300,
                                      multi_image.w//3*2, multi_image.h*2)
+    multi_image.clip_composite_draw(int(naruto_frame) * multi_image.w // 3, 0, multi_image.w // 3, multi_image.h,
+                                    0, '', 850, 300,
+                                    multi_image.w // 3 * 2, multi_image.h * 2)
+    multi_font.clip_composite_draw(0, 0, multi_font.w, multi_font.h, 0, '', 840, 340, multi_font.w, multi_font.h)
+
     if mode_choose == '1p':
-        hand.clip_composite_draw(0, 0, hand.w, hand.h, 0, '', 420, 430+naruto_frame*3,
+        hand.clip_composite_draw(0, 0, hand.w, hand.h, 0, '', 370, 430+naruto_frame*3,
                                         hand.w*2.5, hand.h*2.5)
     elif mode_choose == '2p':
-        hand.clip_composite_draw(0, 0, hand.w, hand.h, 0, '', 820, 430+naruto_frame*3,
+        hand.clip_composite_draw(0, 0, hand.w, hand.h, 0, '', 620, 430+naruto_frame*3,
+                                 hand.w*2.5, hand.h*2.5)
+    elif mode_choose == 'multi':
+        hand.clip_composite_draw(0, 0, hand.w, hand.h, 0, '', 870, 430+naruto_frame*3,
                                  hand.w*2.5, hand.h*2.5)
 
     if space_up:
