@@ -1,0 +1,157 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\collider.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|solutionrelative:collider.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\protocol.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\collider.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|solutionrelative:collider.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Server.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|solutionrelative:Server.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Server.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|solutionrelative:Server.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Object.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|solutionrelative:Object.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Framework.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|solutionrelative:Framework.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Object.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4F6937D0-FEDF-4BB8-BCD4-F6CF8EA9DED8}|NGP_T4_Server.vcxproj|solutionrelative:Object.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "protocol.h",
+              "DocumentMoniker": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\protocol.h",
+              "RelativeDocumentMoniker": "..\\protocol.h",
+              "ToolTip": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\protocol.h",
+              "RelativeToolTip": "..\\protocol.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABgAAAALAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-20T15:40:20.336Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Server.h",
+              "DocumentMoniker": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Server.h",
+              "RelativeDocumentMoniker": "Server.h",
+              "ToolTip": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Server.h",
+              "RelativeToolTip": "Server.h",
+              "ViewState": "AQIAABAAAAAAAAAAAAAiwDEAAAAMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-20T15:39:09.802Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "collider.h",
+              "DocumentMoniker": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\collider.h",
+              "RelativeDocumentMoniker": "collider.h",
+              "ToolTip": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\collider.h",
+              "RelativeToolTip": "collider.h",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAAwAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-20T15:54:35.77Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "collider.cpp",
+              "DocumentMoniker": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\collider.cpp",
+              "RelativeDocumentMoniker": "collider.cpp",
+              "ToolTip": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\collider.cpp",
+              "RelativeToolTip": "collider.cpp",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-20T15:53:54.318Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Object.h",
+              "DocumentMoniker": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Object.h",
+              "RelativeDocumentMoniker": "Object.h",
+              "ToolTip": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Object.h",
+              "RelativeToolTip": "Object.h",
+              "ViewState": "AQIAAJ0AAAAAAAAAAADwv8EAAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-20T15:39:00.876Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Server.cpp",
+              "DocumentMoniker": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Server.cpp",
+              "RelativeDocumentMoniker": "Server.cpp",
+              "ToolTip": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Server.cpp",
+              "RelativeToolTip": "Server.cpp",
+              "ViewState": "AQIAACwBAAAAAAAAAAAiwB0BAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-20T15:38:52.97Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Object.cpp",
+              "DocumentMoniker": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Object.cpp",
+              "RelativeDocumentMoniker": "Object.cpp",
+              "ToolTip": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Object.cpp",
+              "RelativeToolTip": "Object.cpp",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-20T15:38:50.839Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Framework.cpp",
+              "DocumentMoniker": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Framework.cpp",
+              "RelativeDocumentMoniker": "Framework.cpp",
+              "ToolTip": "C:\\Users\\\uC724\uC124\uD55C\\Documents\\work\\NGP_T4_Server\\Framework.cpp",
+              "RelativeToolTip": "Framework.cpp",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAACwAAAANAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-20T15:23:49.273Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -185,16 +185,18 @@ class Attack : public Object
 {
 private:
 	float sprite_frame_value = 0.0f;
-
+	
 public:
 	int selected_character_type = 0;
 	int attack_type = 0; // 1. 수리검, 2. 스킬 1, 3. 스킬 2
+	float damage = 0.0f;
 
-	Attack(const char player_id[32], int c_t, int a_t, Position p, bool x_dir)
+	Attack(const char player_id[32], int c_t, int a_t, Position p, bool x_dir, int a_damage)
 	{
 		std::copy(player_id, player_id + 32, player_ID);
 		selected_character_type = c_t;
 		attack_type = a_t;
+		damage = a_damage;
 		pos = p;
 		X_Direction = x_dir;
 	}
