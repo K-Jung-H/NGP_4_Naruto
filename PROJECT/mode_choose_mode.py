@@ -7,6 +7,7 @@ import single_character_choice_mode
 import multi_room_select_mode
 import title_mode
 import multi_mode
+import server_connect
 
 character_count = 3
 
@@ -67,7 +68,8 @@ def handle_events():
                 game_framework.change_mode(charactor_choose_mode)
             elif mode_choose == 'multi':
                 # game_framework.change_mode(multi_mode)
-                game_framework.change_mode(multi_room_select_mode)
+                # game_framework.change_mode(multi_room_select_mode)
+                game_framework.change_mode(server_connect)
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()

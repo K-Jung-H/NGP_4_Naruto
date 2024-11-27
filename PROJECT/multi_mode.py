@@ -18,6 +18,7 @@ from multi_player_render import (SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle,
                                  Skill_motion, Easy_hit, Hard_hit, Win, Lose, Run_Attack, Jump_Attack, Teleport)
 from multi_skill_render import SkillObject
 import time  # 시간 측정을 위해 추가
+from server_connect import server_ip
 
 TEST = True
 LOCAL = False
@@ -29,8 +30,9 @@ if TEST:
     if LOCAL:
         SERVER_IP = '127.0.0.1'
     else:
-        SERVER_IP = '127.0.0.1'
+        # SERVER_IP = '127.0.0.1'
         # SERVER_IP = '192.168.81.90'
+        SERVER_IP = server_ip
 else:
     SERVER_IP = "0"
 
@@ -276,6 +278,7 @@ def init():
     game_world.add_object(map, 1)
 
     if TEST:
+        global network_client
         network_client = game_framework.get_socket()
         if network_client:
             print("소켓 재사용")

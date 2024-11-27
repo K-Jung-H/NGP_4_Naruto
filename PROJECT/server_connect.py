@@ -4,11 +4,14 @@ import play_mode
 import mode_choose_mode
 import multi_char_select_mode
 import title_mode
+import multi_room_select_mode
 from network_client import NetworkClient
 
 character_count = 3
 
 SERVER_IP = "127.0.0.1"
+server_ip = ""  # 사용자가 입력할 서버 IP
+input_active = True  # 입력 중인지 여부
 
 SERVER_PORT = 9000
 
@@ -18,7 +21,7 @@ def init():
     global vs, press_space
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up
     global duplicate, dup_on, dup_wait_time, dir_image, mode_choose
-    global naruto_back, sasuke_back, itachi_back, naruto_logo, sasuke_logo, itachi_logo
+    global naruto_back, sasuke_back, itachi_back, naruto_logo, sasuke_logo, itachi_logo, server_ip
     image1 = load_image('resource/title_main.png')
     naruto = load_image('resource/naruto_idle.png')
     sasuke = load_image('resource/sasuke_idle.png')
@@ -48,18 +51,9 @@ def init():
     dup_on = False
     dup_wait_time = 0
     mode_choose = mode_choose_mode.mode_choose_result()
-    global network_client
-    network_client = game_framework.get_socket()
-    if network_client:
-        print("소켓 재사용 중")
-        # 소켓과 관련된 추가 작업
-    else:
-        print("전역소켓 설정안된듯")
-        # network_client = NetworkClient(SERVER_IP, SERVER_PORT)
-        # network_client.connect()
-        # if not network_client.is_connected:
-        #     print("서버 안열림 or ip 잘못 치심")
-        #     game_framework.change_mode(mode_choose_mode)
+    server_ip = server_ip
+    #server_ip = ""
+
 
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
@@ -67,6 +61,7 @@ def finish():
 def handle_events():
     events = get_events()
     global p1_choose, p2_choose, character_count, dup_on, dup_wait_time
+    global server_ip, input_active
     for event in events:
         if event.type == SDL_QUIT:
             game_framework.quit()
@@ -78,25 +73,45 @@ def handle_events():
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()
-            game_framework.change_mode(multi_char_select_mode)
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_a:
-            p2_choose = (p2_choose - 1) % character_count
-            if p2_choose == 0:
-                p2_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_d:
-            p2_choose = (p2_choose + 1) % character_count
-            if p2_choose == 0:
-                p2_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_LEFT:
-            p1_choose = (p1_choose - 1) % character_count
-            if p1_choose == 0:
-                p1_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_RIGHT:
-            p1_choose = (p1_choose + 1) % character_count
-            if p1_choose == 0:
-                p1_choose = character_count
+            game_framework.change_mode(multi_room_select_mode)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_RETURN:
+            global network_client
+            network_client = game_framework.get_socket()
+            if network_client:
+                print("소켓 재사용 중")
+            else:
+                network_client = NetworkClient(server_ip, SERVER_PORT)
+                game_framework.set_socket(network_client)
+                network_client.connect()
+                if not network_client.is_connected:
+                    print("서버 안열림 or ip 잘못 치심")
+                    game_framework.change_mode(mode_choose_mode)
+                    break
+            game_framework.change_mode(multi_room_select_mode)
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_BACKSPACE:
+            if len(server_ip) > 0:  # 문자열이 비어있지 않을 때만 삭제
+                server_ip = server_ip[:-1]
+        elif event.type == SDL_KEYDOWN:
+            # event.key가 None인지 확인
+            if event.key is None:
+                continue
+            if is_valid_ip_key(event.key):  # 유효한 키 입력만 추가
+                server_ip += key_to_char(event.key)
+
+def is_valid_ip_key(key):
+    """숫자 및 점에 해당하는 키인지 확인."""
+    return (SDLK_0 <= key <= SDLK_9) or (key == SDLK_PERIOD)
+
+
+def key_to_char(key):
+    """키를 문자로 변환."""
+    if SDLK_0 <= key <= SDLK_9:
+        return chr(key)  # 숫자 키
+    elif key == SDLK_PERIOD:
+        return '.'
+    return ''
 
 def running():
     pass
@@ -149,6 +164,8 @@ def draw():
     #     itachi_logo.clip_composite_draw(0, 0, itachi_logo.w, itachi_logo.h, 0, '', 300 - 60, 330 - 90,
     #                                     itachi_logo.w * 0.1, itachi_logo.h * 0.1)
 
+    draw_text(f"Server IP: {server_ip}", 200, 300, 50)
+
     if space_up:
         press_space.clip_composite_draw(0, 0, press_space.w, press_space.h, 0, '', 600, 60 + space_frame,
                                         press_space.w * 0.15, press_space.h * 0.15)
@@ -159,6 +176,10 @@ def draw():
     if dup_on:
         duplicate.clip_composite_draw(0, 0, 5906, 4135, 0, '', 600, 300, 600, 300)
     update_canvas()
+
+def draw_text(text, x, y, size):
+    font = load_font("C:/Windows/Fonts/Arial.ttf", size)
+    font.draw(x, y, text, (0, 0, 0))  # 흰색 텍스트
 
 def update():
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up, dup_wait_time, dup_on
