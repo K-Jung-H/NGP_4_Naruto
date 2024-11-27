@@ -4,8 +4,13 @@ import play_mode
 import mode_choose_mode
 import multi_char_select_mode
 import title_mode
+from network_client import NetworkClient
 
 character_count = 3
+
+SERVER_IP = "127.0.0.1"
+
+SERVER_PORT = 9000
 
 def init():
     global image1, naruto, sasuke, itachi
@@ -43,6 +48,18 @@ def init():
     dup_on = False
     dup_wait_time = 0
     mode_choose = mode_choose_mode.mode_choose_result()
+    global network_client
+    network_client = game_framework.get_socket()
+    if network_client:
+        print("소켓 재사용 중")
+        # 소켓과 관련된 추가 작업
+    else:
+        network_client = NetworkClient(SERVER_IP, SERVER_PORT)
+        network_client.connect()
+        if not network_client.is_connected:
+            print("서버 안열림 or ip 잘못 치심")
+            game_framework.change_mode(mode_choose_mode)
+
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
     del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
