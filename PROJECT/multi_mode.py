@@ -438,8 +438,8 @@ def draw():
     game_world.render()
     health_bar.clip_composite_draw(0, 0, 402, 22, 0, '', 300, 570, 402, 30)
     health_bar.clip_composite_draw(0, 0, 402, 22, 0, '', 900, 570, 402, 30)
-    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 300 - (400 - p2_hp) // 2, 570, p2_hp, 28)
-    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 900 - (400 - p1_hp) // 2, 570, p1_hp, 28)
+    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 300 - (400 - p2.hp) // 2, 570, p2.hp, 28)
+    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 900 - (400 - p1.hp) // 2, 570, p1.hp, 28)
     if p2_chakra >= 30:
         chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 120, 520, 32, 56)
     if p2_chakra >= 60:
@@ -474,6 +474,9 @@ def draw():
     elif 900 < fight_frame <= 1500:
         fight.clip_composite_draw(0, 0, 1601, 786, 0, '', 600, int(fight_frame)-600, 473, 228)
 
+    if p1.hp == 0 or p2.hp == 0:
+
+        ko.clip_composite_draw(0, 0, 473, 228, 0, '', 600, 300, 473, 228)
     update_canvas()
 
 def update():
