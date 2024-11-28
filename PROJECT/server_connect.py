@@ -73,7 +73,8 @@ def handle_events():
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()
-            game_framework.change_mode(multi_room_select_mode)
+            # game_framework.change_mode(multi_room_select_mode)
+            pass
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_RETURN:
@@ -87,6 +88,7 @@ def handle_events():
                 network_client.connect()
                 if not network_client.is_connected:
                     print("서버 안열림 or ip 잘못 치심")
+                    mode_choose_mode.connect_fail_flag = True
                     game_framework.change_mode(mode_choose_mode)
                     break
             game_framework.change_mode(multi_room_select_mode)

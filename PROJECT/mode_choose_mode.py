@@ -11,13 +11,15 @@ import server_connect
 
 character_count = 3
 
+connect_fail_flag = False
+
 def init():
     global image1, naruto, sasuke, itachi
     global p1_x, p1_y, p2_x, p2_y, p1_choose, p2_choose, p1_image, p2_image, character_back
     global vs, press_space
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up
     global duplicate, dup_on, dup_wait_time, dir_image, single_image, multi_image, mode_choose, hand, mode_back,\
-        multi_font
+        multi_font, connect_fail, cf_frame
     image1 = load_image('resource/title_main.png')
     naruto = load_image('resource/naruto_idle.png')
     sasuke = load_image('resource/sasuke_idle.png')
@@ -34,6 +36,7 @@ def init():
     hand = load_image('resource/hand_image.png')
     mode_back = load_image('resource/mode_choice_back.png')
     multi_font = load_image('resource/multi_font.png')
+    connect_fail = load_image('resource/connect_fail.png')
     p1_x = 900
     p1_y = 360
     p2_x = 300
@@ -46,12 +49,13 @@ def init():
     dup_on = False
     dup_wait_time = 0
     mode_choose = '1p'
+    cf_frame = 0
 
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space
-    global duplicate, dir_image, single_image, multi_image, hand, multi_font
+    global duplicate, dir_image, single_image, multi_image, hand, multi_font, connect_fail
     del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
-    del single_image, multi_image, hand, multi_font
+    del single_image, multi_image, hand, multi_font, connect_fail
 def handle_events():
     events = get_events()
     global p1_choose, p2_choose, character_count, dup_on, dup_wait_time, mode_choose
@@ -132,10 +136,15 @@ def draw():
     else:
         press_space.clip_composite_draw(0, 0, press_space.w, press_space.h, 0, '', 600, 70 - space_frame,
                                         press_space.w * 0.15, press_space.h * 0.15)
+
+    if connect_fail_flag:
+        connect_fail.clip_composite_draw(0, 0, connect_fail.w, connect_fail.h, 0, '', 600, 300, connect_fail.w * 1,
+                                      connect_fail.h * 1)
     update_canvas()
 
 def update():
-    global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up, dup_wait_time, dup_on
+    global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up, dup_wait_time, dup_on, cf_frame, \
+        connect_fail_flag
     naruto_frame = (naruto_frame + 3 * game_framework.frame_time) % 3
     space_frame = space_frame + 10 * game_framework.frame_time
     if space_frame >= 9:
@@ -144,6 +153,13 @@ def update():
         else:
             space_up = True
         space_frame = 0
+    if connect_fail_flag:
+        cf_frame += 1 * game_framework.frame_time
+        if cf_frame > 5:
+            connect_fail_flag = False
+            cf_frame = 0
+
+
 
 
 def mode_choose_result():
