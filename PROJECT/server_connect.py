@@ -178,7 +178,8 @@ def draw():
     update_canvas()
 
 def draw_text(text, x, y, size):
-    font = load_font("C:/Windows/Fonts/Arial.ttf", size)
+    # font = load_font("C:/Windows/Fonts/Arial.ttf", size)
+    font = load_font("resource/Arial.ttf", size)
     font.draw(x, y, text, (0, 0, 0))  # 흰색 텍스트
 
 def update():
