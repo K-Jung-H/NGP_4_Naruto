@@ -1412,7 +1412,6 @@ void Player::Set_Character(int n, Server* server_ptr)
     {
         state_machine->Set_Server(server_ptr);
         std::memcpy(state_machine->player_ID, player_ID, sizeof(player_ID));
-        // std::copy(this->player_ID, this->player_ID + 32, state_machine->player_ID);
     }
 }
 
@@ -1441,7 +1440,6 @@ void Player::update(float Elapsed_time)
         state_machine->Set_SP(sp);
         state_machine->update(Elapsed_time);
         synchronize_state_machine();
-        std::cout << "sp - " << state_machine->Get_SP() << std::endl;
     }
 }
 

@@ -84,7 +84,14 @@ void Server::Add_Skill_Object(Object* skill_ptr)
 	
 }
 
-void Server::Update_Server(float elapsed_time)
+void Server::Update_Character_Select(float elapsed_time)
+{
+	// 선택정보 업데이트
+
+
+}
+
+void Server::Update_Game_World(float elapsed_time)
 {
 	// 시간 업데이트
 	game_time += elapsed_time;
