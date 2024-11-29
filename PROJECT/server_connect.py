@@ -10,7 +10,7 @@ from network_client import NetworkClient
 character_count = 3
 
 SERVER_IP = "127.0.0.1"
-server_ip = ""  # 사용자가 입력할 서버 IP
+server_ip = "127.0.0.1"  # 사용자가 입력할 서버 IP
 input_active = True  # 입력 중인지 여부
 
 SERVER_PORT = 9000

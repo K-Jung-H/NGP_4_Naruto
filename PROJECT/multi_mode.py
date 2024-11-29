@@ -173,6 +173,13 @@ def receive_game_data(client_socket):
             return None
         data += packet
 
+        # 클라이언트의 IPv4 주소 출력
+    client_ipv4 = network_client.get_ipv4_address()
+    if client_ipv4:
+        print(f"클라이언트의 IPv4 주소: {client_ipv4}")
+    else:
+        print("IPv4 주소를 가져오는 데 실패했습니다.")
+
     # data += client_socket.recv(data_size)
     # 데이터 언패킹
     unpacked_data = struct.unpack(game_data_format, data)
@@ -191,6 +198,7 @@ def receive_game_data(client_socket):
         for key, value in extra_state_data[p1_state].items():
             setattr(p1, key, value)
 
+    print(unpacked_data[0], unpacked_data[7])
     if unpacked_data[7]:
         # 플레이어 2 업데이트
         p2.x = unpacked_data[8]
