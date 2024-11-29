@@ -191,17 +191,18 @@ def receive_game_data(client_socket):
         for key, value in extra_state_data[p1_state].items():
             setattr(p1, key, value)
 
-    # 플레이어 2 업데이트
-    p2.x = unpacked_data[8]
-    p2.y = unpacked_data[9]
-    p2.dir = unpacked_data[10]
-    p2_state = unpacked_data[11]
-    p2.cur_state = state_mapping.get(p2_state, Idle)
-    p2.frame = unpacked_data[13]
+    if unpacked_data[7]:
+        # 플레이어 2 업데이트
+        p2.x = unpacked_data[8]
+        p2.y = unpacked_data[9]
+        p2.dir = unpacked_data[10]
+        p2_state = unpacked_data[11]
+        p2.cur_state = state_mapping.get(p2_state, Idle)
+        p2.frame = unpacked_data[13]
 
-    if p2_state in extra_state_data:
-        for key, value in extra_state_data[p2_state].items():
-            setattr(p2, key, value)
+        if p2_state in extra_state_data:
+            for key, value in extra_state_data[p2_state].items():
+                setattr(p2, key, value)
 
     # print(unpacked_data[5], unpacked_data[12])
 
@@ -319,13 +320,17 @@ def init():
             p1 = ITACHI_MULTI(1)
         game_world.add_object(p1, 1)
 
-        if unpacked_data[12] == 1:
-            p2 = NARUTO_MULTI(2)
-        elif unpacked_data[12] == 2:
-            p2 = SASUKE_MULTI(2)
-        elif unpacked_data[12] == 3:
+        if unpacked_data[12]:
+            if unpacked_data[12] == 1:
+                p2 = NARUTO_MULTI(2)
+            elif unpacked_data[12] == 2:
+                p2 = SASUKE_MULTI(2)
+            elif unpacked_data[12] == 3:
+                p2 = ITACHI_MULTI(2)
+            game_world.add_object(p2, 1)
+        else:
             p2 = ITACHI_MULTI(2)
-        game_world.add_object(p2, 1)
+            game_world.add_object(p2, 1)
 
         p1_mug = p1.char_name
         p2_mug = p2.char_name
