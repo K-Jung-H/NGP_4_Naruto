@@ -3,23 +3,60 @@
 #define MAX_ROOMS 4
 
 
-struct Room 
+enum ClientSessionState
 {
-	int room_id;         // 방 번호
-	int player_count;    // 현재 방에 들어온 플레이어 수
-	SOCKET players[2];   // 방에 들어온 플레이어의 소켓
+	SESSION_LOBBY,  // 방 입장 전
+	SESSION_ROOM,   // 방 입장
+	SESSION_INGAME  // 인게임
 };
 
-class Room_Server 
+enum PacketType
+{
+	PACKET_ROOM_LIST,     // 방 목록
+	PACKET_ROOM_JOIN,     // 방 입장
+	PACKET_GAME_START,    // 게임 시작
+	PACKET_GAME_STATE,    // 게임 상태
+	PACKET_CHAT_MESSAGE   // 채팅 메시지
+};
+
+struct Packet
+{
+	PacketType type;
+	int length;
+	char data[256];
+};
+
+struct ClientSession
+{
+	SOCKET socket;
+	ClientSessionState state;
+	int room_id;
+	int player_id;
+};
+
+class R_Server 
 {
 private:
-	Room rooms[MAX_ROOMS];  // 방 배열
+	std::vector<ClientSession> client_sessions;
+	struct Room {
+		int room_id;
+		int player_count;
+		SOCKET players[2];
+	};
+	std::vector<Room> rooms;
+
+	CRITICAL_SECTION cs_sessions;
 
 public:
-	Room_Server();
-	bool JoinRoom(int room_id, SOCKET client_n, int& player_number);
-	void LeaveRoom(int room_id, SOCKET client_n);
-	void BroadcastRoomStatus(); // 모든 방 상태를 전송
+	R_Server();
+	~R_Server();
+	void Start();
+	void BroadcastRoomList(ClientSession* client);
+	void SendPacketToClient(ClientSession* client, Packet* packet);
+	bool JoinRoom(int room_id, ClientSession* client);
+	void HandlePacket(ClientSession* client, Packet* packet);
+	void UpdateGameState(ClientSession* client, Packet* packet);
+	void BroadcastGameState();
 };
 
 class Timer {

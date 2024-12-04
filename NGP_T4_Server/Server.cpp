@@ -3,64 +3,180 @@
 #include "Server.h"
 
 
-Room_Server::Room_Server() 
+R_Server::R_Server()
 {
-	InitializeCriticalSection(&cs_key_queue);
-	for (int i = 0; i < MAX_ROOMS; ++i)
+	InitializeCriticalSection(&cs_sessions);
+	for (int i = 1; i <= 4; ++i)
 	{
-		rooms[i].room_id = i + 1;
-		rooms[i].player_count = 0;
-		for (int j = 0; j < 2; ++j)
-		{
-			rooms[i].players[j] = INVALID_SOCKET;
-		}
+		rooms.push_back({ i, 0, { INVALID_SOCKET, INVALID_SOCKET } });
 	}
 }
 
-bool Room_Server::JoinRoom(int room_id, SOCKET client_n, int& player_number) //입장
+R_Server::~R_Server()
 {
-	if (room_id < 1 || room_id > MAX_ROOMS) return false;
+	DeleteCriticalSection(&cs_sessions);
+}
+
+void R_Server::Start() 
+{
+	WSADATA wsaData;
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+	{
+		std::cerr << "WSAStartup failed." << std::endl;
+		return;
+	}
+
+	SOCKET server_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (server_socket == INVALID_SOCKET) 
+	{
+		std::cerr << "Socket creation failed." << std::endl;
+		WSACleanup();
+		return;
+	}
+
+	sockaddr_in server_addr = {};
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(9000);
+	server_addr.sin_addr.s_addr = INADDR_ANY;
+
+	if (bind(server_socket, (sockaddr*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) 
+	{
+		std::cerr << "Bind failed." << std::endl;
+		closesocket(server_socket);
+		WSACleanup();
+		return;
+	}
+
+	if (listen(server_socket, SOMAXCONN) == SOCKET_ERROR)
+	{
+		std::cerr << "Listen failed." << std::endl;
+		closesocket(server_socket);
+		WSACleanup();
+		return;
+	}
+
+	std::cout << "Server started on port 9000." << std::endl;
+
+	while (true) {
+		SOCKET client_socket = accept(server_socket, nullptr, nullptr);
+		if (client_socket == INVALID_SOCKET)
+		{
+			std::cerr << "Accept failed." << std::endl;
+			continue;
+		}
+
+		ClientSession new_client = { client_socket, SESSION_LOBBY, 0, 0 };
+		EnterCriticalSection(&cs_sessions);
+		client_sessions.push_back(new_client);
+		LeaveCriticalSection(&cs_sessions);
+
+		std::thread client_thread([this, new_client]()
+			{
+			char buffer[512];
+			while (true) {
+				int result = recv(new_client.socket, buffer, sizeof(buffer), 0);
+				if (result <= 0) {
+					std::cerr << "Client disconnected." << std::endl;
+					closesocket(new_client.socket);
+					return;
+				}
+
+				Packet* packet = reinterpret_cast<Packet*>(buffer);
+				HandlePacket(&new_client, packet);
+			}
+			});
+		client_thread.detach();
+	}
+}
+
+void R_Server::BroadcastRoomList(ClientSession* client)
+{
+	Packet packet = { PACKET_ROOM_LIST, 0 };
+	std::string room_list;
+	for (auto& room : rooms) 
+	{
+		room_list += "Room " + std::to_string(room.room_id) + ": " +
+			std::to_string(room.player_count) + "/2\n";
+	}
+	strcpy(packet.data, room_list.c_str());
+	packet.length = room_list.size();
+	SendPacketToClient(client, &packet);
+}
+
+void R_Server::SendPacketToClient(ClientSession* client, Packet* packet)
+{
+	if (client == nullptr || client->socket == INVALID_SOCKET) return;
+	send(client->socket, reinterpret_cast<char*>(packet), sizeof(Packet), 0);
+}
+
+bool R_Server::JoinRoom(int room_id, ClientSession* client)
+{
+	if (room_id < 1 || room_id > rooms.size()) return false;
 
 	Room& room = rooms[room_id - 1];
+	if (room.player_count >= 2) return false;
 
-	EnterCriticalSection(&cs_key_queue);
-	if (room.player_count < 2)
-	{
-		// 방에 공간이 있는 경우
-		room.players[room.player_count] = client_n;
-		player_number = room.player_count + 1; // 플레이어 번호 설정
-		room.player_count++;
-		LeaveCriticalSection(&cs_key_queue);
-		return true;
-	}
-	LeaveCriticalSection(&cs_key_queue);
-	return false; // 방이 가득 찬 경우
+	room.players[room.player_count++] = client->socket;
+	client->room_id = room_id;
+	client->state = SESSION_ROOM;
+	return true;
 }
 
-void Room_Server::LeaveRoom(int room_id, SOCKET client_n) //퇴장
+void R_Server::HandlePacket(ClientSession* client, Packet* packet)
 {
-	if (room_id < 1 || room_id > MAX_ROOMS) return;
-
-	Room& room = rooms[room_id - 1];
-	EnterCriticalSection(&cs_key_queue);
-	for (int i = 0; i < 2; ++i) {
-		if (room.players[i] == client_n) 
+	switch (client->state) {
+	case SESSION_LOBBY:
+		if (packet->type == PACKET_ROOM_LIST) 
 		{
-			room.players[i] = INVALID_SOCKET;
-			room.player_count--;
-			break;
+			BroadcastRoomList(client);
 		}
+		else if (packet->type == PACKET_ROOM_JOIN) 
+		{
+			int room_id = std::atoi(packet->data);
+			if (JoinRoom(room_id, client)) 
+			{
+				BroadcastRoomList(client);
+			}
+			else
+			{
+				std::cerr << "Room join failed." << std::endl;
+			}
+		}
+		break;
+
+	case SESSION_ROOM:
+		if (packet->type == PACKET_CHAT_MESSAGE)
+		{
+			std::cout << "Chat from client: " << packet->data << std::endl;
+		}
+		break;
+
+	case SESSION_INGAME:
+		if (packet->type == PACKET_GAME_STATE)
+		{
+			UpdateGameState(client, packet);
+		}
+		break;
 	}
-	LeaveCriticalSection(&cs_key_queue);
 }
 
-void Room_Server::BroadcastRoomStatus() 
+void R_Server::UpdateGameState(ClientSession* client, Packet* packet)
 {
-	// Room 상태를 클라이언트에 전송 (예: 소켓 사용)
-	for (int i = 0; i < MAX_ROOMS; ++i) 
+	std::cout << "Updating game state for client." << std::endl;
+}
+
+void R_Server::BroadcastGameState()
 {
-		std::cout << "Room " << rooms[i].room_id << ": "
-			<< rooms[i].player_count << "/2 players\n";
+	Packet packet = { PACKET_GAME_STATE, 0 };
+	strcpy(packet.data, "Game state update.");
+	packet.length = strlen(packet.data);
+
+	for (auto& client : client_sessions)
+	{
+		if (client.state == SESSION_INGAME)
+		{
+			SendPacketToClient(&client, &packet);
+		}
 	}
 }
 
