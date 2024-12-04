@@ -1,7 +1,26 @@
 #pragma once
 #include "Object.h"
+#define MAX_ROOMS 4
 
 
+struct Room 
+{
+	int room_id;         // 방 번호
+	int player_count;    // 현재 방에 들어온 플레이어 수
+	SOCKET players[2];   // 방에 들어온 플레이어의 소켓
+};
+
+class Room_Server 
+{
+private:
+	Room rooms[MAX_ROOMS];  // 방 배열
+
+public:
+	Room_Server();
+	bool JoinRoom(int room_id, SOCKET client_n, int& player_number);
+	void LeaveRoom(int room_id, SOCKET client_n);
+	void BroadcastRoomStatus(); // 모든 방 상태를 전송
+};
 
 class Timer {
 public:

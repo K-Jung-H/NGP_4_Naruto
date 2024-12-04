@@ -2,6 +2,68 @@
 #include "stdafx.h"
 #include "Server.h"
 
+
+Room_Server::Room_Server() 
+{
+	InitializeCriticalSection(&cs_key_queue);
+	for (int i = 0; i < MAX_ROOMS; ++i)
+	{
+		rooms[i].room_id = i + 1;
+		rooms[i].player_count = 0;
+		for (int j = 0; j < 2; ++j)
+		{
+			rooms[i].players[j] = INVALID_SOCKET;
+		}
+	}
+}
+
+bool Room_Server::JoinRoom(int room_id, SOCKET client_n, int& player_number) //입장
+{
+	if (room_id < 1 || room_id > MAX_ROOMS) return false;
+
+	Room& room = rooms[room_id - 1];
+
+	EnterCriticalSection(&cs_key_queue);
+	if (room.player_count < 2)
+	{
+		// 방에 공간이 있는 경우
+		room.players[room.player_count] = client_n;
+		player_number = room.player_count + 1; // 플레이어 번호 설정
+		room.player_count++;
+		LeaveCriticalSection(&cs_key_queue);
+		return true;
+	}
+	LeaveCriticalSection(&cs_key_queue);
+	return false; // 방이 가득 찬 경우
+}
+
+void Room_Server::LeaveRoom(int room_id, SOCKET client_n) //퇴장
+{
+	if (room_id < 1 || room_id > MAX_ROOMS) return;
+
+	Room& room = rooms[room_id - 1];
+	EnterCriticalSection(&cs_key_queue);
+	for (int i = 0; i < 2; ++i) {
+		if (room.players[i] == client_n) 
+		{
+			room.players[i] = INVALID_SOCKET;
+			room.player_count--;
+			break;
+		}
+	}
+	LeaveCriticalSection(&cs_key_queue);
+}
+
+void Room_Server::BroadcastRoomStatus() 
+{
+	// Room 상태를 클라이언트에 전송 (예: 소켓 사용)
+	for (int i = 0; i < MAX_ROOMS; ++i) 
+{
+		std::cout << "Room " << rooms[i].room_id << ": "
+			<< rooms[i].player_count << "/2 players\n";
+	}
+}
+
 void Server::EnqueueKeyInput(int client_n, const Key_Info& keyInfo)
 {
 	EnterCriticalSection(&cs_key_queue);
