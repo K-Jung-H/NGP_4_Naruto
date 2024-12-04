@@ -5,7 +5,9 @@
 #include <windows.h>
 
 #define SERVERPORT 9000
-#define MULTICASTIP "235.7.8.9"
+
+
+// #define Sever_Debug_Mode
 
 DWORD WINAPI ServerMain(LPVOID arg);
 DWORD WINAPI ProcessClient(LPVOID arg);
@@ -43,11 +45,6 @@ DWORD WINAPI ServerMain(LPVOID arg)
     SOCKET listen_sock = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_sock == INVALID_SOCKET)
         err_quit("socket()");
-
-    // UDP 소켓 생성
-    //SOCKET listen_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    //if (listen_sock == INVALID_SOCKET)
-    //    err_quit("socket()");
 
     //==============================================================
     int optval = 1; // 1은 비활성화, 0은 활성화
@@ -239,6 +236,13 @@ DWORD WINAPI ProcessClient(LPVOID arg)
     else if (Client_N == 2)
         server_program.Add_P2(player, CHARACTER_ITACHI);
 
+#ifdef Sever_Debug_Mode
+    if (Client_N = 1 && server_program.Get_Player(2) == NULL)
+    {
+        Object* dummy_player = new Player();
+        server_program.Add_P2(dummy_player, CHARACTER_ITACHI);
+    }
+#endif
 
     Key_Info keyInfo;
     while (true)

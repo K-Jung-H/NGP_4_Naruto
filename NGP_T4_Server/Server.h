@@ -100,7 +100,7 @@ public:
 
 	void Update_Character_Select(float Elapsed_time);
 	void Update_Game_World(float Elapsed_time);
-	void Update_Collision() {};
+	void Update_Collision();
 	void Broadcast_GameData_All(Game_Data* data);
 	
 	int Get_Key_Input_Buffer_size() { return keyQueue.size(); }
