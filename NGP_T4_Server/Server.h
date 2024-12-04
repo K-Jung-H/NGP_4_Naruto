@@ -43,15 +43,6 @@ private:
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_time;
 };
 
-
-
-enum class Server_Mode
-{
-	Character_Select,
-	Game_Play,
-	ETC
-};
-
 class Server
 {
 private:
@@ -69,8 +60,6 @@ private:
 
 	SOCKET client1_socket = INVALID_SOCKET;
     SOCKET client2_socket = INVALID_SOCKET;
-
-	Server_Mode sever_mode = Server_Mode::ETC;
 
 	Player* p1_ptr = NULL;
 	Player* p2_ptr = NULL;
@@ -98,9 +87,8 @@ public:
 	void Decoding(std::pair<int, Key_Info>* key_info);
 	Game_Data* Encoding();
 
-	void Update_Character_Select(float Elapsed_time);
-	void Update_Game_World(float Elapsed_time);
-	void Update_Collision();
+	void Update_Server(float Elapsed_time);
+	void Update_Collision() {};
 	void Broadcast_GameData_All(Game_Data* data);
 	
 	int Get_Key_Input_Buffer_size() { return keyQueue.size(); }

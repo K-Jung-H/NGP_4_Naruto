@@ -5,9 +5,7 @@
 #include <windows.h>
 
 #define SERVERPORT 9000
-
-
-// #define Sever_Debug_Mode
+#define MULTICASTIP "235.7.8.9"
 
 DWORD WINAPI ServerMain(LPVOID arg);
 DWORD WINAPI ProcessClient(LPVOID arg);
@@ -45,6 +43,11 @@ DWORD WINAPI ServerMain(LPVOID arg)
     SOCKET listen_sock = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_sock == INVALID_SOCKET)
         err_quit("socket()");
+
+    // UDP 소켓 생성
+    //SOCKET listen_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    //if (listen_sock == INVALID_SOCKET)
+    //    err_quit("socket()");
 
     //==============================================================
     int optval = 1; // 1은 비활성화, 0은 활성화
@@ -178,12 +181,7 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
 
         // float로 경과 시간 받기
         float ElapsedTime = server_program.Get_ElapsedTime();
-
-        // 캐릭터선택 모드 업데이트
-
-
-        // 게임 실행 모드 업데이트
-        server_program.Update_Game_World(ElapsedTime);
+        server_program.Update_Server(ElapsedTime);
         server_program.Update_Collision();
         Game_Data* sending_data = server_program.Encoding();
         server_program.Broadcast_GameData_All(sending_data);
@@ -219,30 +217,22 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
     int Client_N = clientInfo->player_N;
 
-    // 잘못된 값 들어오면 사전 차단
-    if (Client_N != 1 && Client_N != 2)
-    {
-        std::cout << "Wrong Client_N:" << Client_N << std::endl;
-        return 0;
-    }
-
-    server_program.Add_Client_Socket(client_sock, Client_N);
-    std::cout << Client_N << "P 클라이언트 연결됨: IP 주소=" << addr << ", 포트 번호=" << ntohs(clientaddr.sin_port) << "\r\n";
-
     Object* player = new Player();
 
+    Object* test_player = new Player();
+    server_program.Add_P2(test_player, CHARACTER_NARUTO);
+
     if (Client_N == 1)
-        server_program.Add_P1(player, CHARACTER_NARUTO);
+        server_program.Add_P1(player, CHARACTER_ITACHI);
     else if (Client_N == 2)
         server_program.Add_P2(player, CHARACTER_ITACHI);
+    else
+        std::cout << "Client_N 에서 오류 발생" << std::endl;
 
-#ifdef Sever_Debug_Mode
-    if (Client_N = 1 && server_program.Get_Player(2) == NULL)
-    {
-        Object* dummy_player = new Player();
-        server_program.Add_P2(dummy_player, CHARACTER_ITACHI);
-    }
-#endif
+    server_program.Add_Client_Socket(client_sock, Client_N);
+    
+    std::cout << Client_N << "P 클라이언트 연결됨: IP 주소=" << addr << ", 포트 번호=" << ntohs(clientaddr.sin_port) << "\r\n";
+
 
     Key_Info keyInfo;
     while (true)
