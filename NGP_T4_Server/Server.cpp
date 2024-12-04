@@ -84,7 +84,14 @@ void Server::Add_Skill_Object(Object* skill_ptr)
 	
 }
 
-void Server::Update_Server(float elapsed_time)
+void Server::Update_Character_Select(float elapsed_time)
+{
+	// 선택정보 업데이트
+
+
+}
+
+void Server::Update_Game_World(float elapsed_time)
 {
 	// 시간 업데이트
 	game_time += elapsed_time;
@@ -113,6 +120,69 @@ void Server::Update_Server(float elapsed_time)
 
 }
 
+void Server::Update_Collision()
+{
+	BoundingBox* p1_box = NULL;
+	BoundingBox* p2_box = NULL;
+	std::string_view p1_ID;
+	std::string_view p2_ID;
+
+
+	if (p1_ptr != NULL)
+	{
+		p1_ptr->Get_Player_BoundingBox();
+		p1_ID = std::string_view(p1_ptr->player_ID, std::strlen(p1_ptr->player_ID));
+	}
+
+	if (p2_ptr != NULL)
+	{
+		p2_ptr->Get_Player_BoundingBox();
+		p2_ID = std::string_view(p2_ptr->player_ID, std::strlen(p2_ptr->player_ID));
+	}
+
+	// 일반 공격중이 아니면 NULL 반환함
+	BoundingBox* p1_normal_attack_box = p1_ptr->Get_Normal_Attack_BoundingBox();
+	BoundingBox* p2_normal_attack_box = p2_ptr->Get_Normal_Attack_BoundingBox();
+
+	if (p1_box != NULL && p2_normal_attack_box != NULL)
+	{
+		bool is_hurt = p1_box->intersects(p2_normal_attack_box);
+		p1_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
+	}
+
+	if (p2_box != NULL && p1_normal_attack_box != NULL)
+	{
+		bool is_hurt = p2_box->intersects(p1_normal_attack_box);
+		p2_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
+	}
+
+
+	for (Attack* attack_ptr : Stage_Attack_Object_List)
+	{
+		if (attack_ptr != NULL)
+		{
+			BoundingBox* attack_obj_box = attack_ptr->Get_Attack_BoundingBox();
+			std::string_view attack_ID(attack_ptr->player_ID, std::strlen(attack_ptr->player_ID));
+
+			if (p1_ID != attack_ID)
+			{
+				bool is_hurt = p1_box->intersects(attack_obj_box);
+
+				// 공격 타입 보고 결정하기
+				p1_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
+				p1_ptr->Get_StateMachine()->changeState(State::Hit_Hard, EVENT_NONE);
+			}
+			else if (p2_ID != attack_ID)
+			{
+				bool is_hurt = p2_box->intersects(attack_obj_box);
+
+				// 공격 타입 보고 결정하기
+				p2_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
+				p1_ptr->Get_StateMachine()->changeState(State::Hit_Hard, EVENT_NONE);
+			}
+		}
+	}
+}
 
 void Server::Decoding(std::pair<int, Key_Info>* key_info)
 {

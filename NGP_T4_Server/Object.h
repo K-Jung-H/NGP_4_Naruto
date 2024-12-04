@@ -1,5 +1,6 @@
 #pragma once
 #include "algorithm"
+#include "Collider.h"
 
 struct Key_State 
 {
@@ -53,6 +54,8 @@ protected:
 
 	Key_State key_state;
 
+	BoundingBox* player_boundingbox = NULL;
+	BoundingBox* normal_attack_boundingbox = NULL;
 	int sp = 0;
 public:
 	char player_ID[32] = { 0, };
@@ -101,6 +104,8 @@ public:
 	int Get_SP() { return sp; };
 	void Set_SP(int player_sp) { sp = player_sp; };
 
+	virtual BoundingBox* Get_Player_BoundingBox() = 0;
+	virtual BoundingBox* Get_Normal_Attack_BoundingBox() = 0;
 private:
 
 	void enterState(State state, int key_event);
@@ -122,6 +127,9 @@ public:
 	}
 
 	void doAction(State state, float Elapsed_time) override;
+	virtual BoundingBox* Get_Player_BoundingBox() override;
+	virtual BoundingBox* Get_Normal_Attack_BoundingBox() override;
+
 };
 
 class Sasuke_StateMachine : public StateMachine
@@ -135,6 +143,8 @@ public:
 	}
 
 	void doAction(State state, float Elapsed_time) override;
+	virtual BoundingBox* Get_Player_BoundingBox() override;
+	virtual BoundingBox* Get_Normal_Attack_BoundingBox() override;
 };
 
 class Itachi_StateMachine : public StateMachine
@@ -148,6 +158,8 @@ public:
 	}
 
 	void doAction(State state, float Elapsed_time) override;
+	virtual BoundingBox* Get_Player_BoundingBox() override;
+	virtual BoundingBox* Get_Normal_Attack_BoundingBox() override;
 };
 
 class Object
@@ -192,6 +204,28 @@ public:
 	void synchronize_state_machine();
 
 	void Print_info();
+	BoundingBox* Get_Player_BoundingBox() 
+	{
+		BoundingBox* ptr = NULL;
+		if (state_machine != NULL)
+			ptr = state_machine->Get_Player_BoundingBox();
+		return ptr;
+	};
+
+	BoundingBox* Get_Normal_Attack_BoundingBox()
+	{
+		BoundingBox* ptr = NULL;
+		if (state_machine != NULL)
+		{
+			int player_state = state_machine->Get_State();
+			if (player_state == STATE_ATTACK_NORMAL_1 ||
+				player_state == STATE_ATTACK_NORMAL_2 ||
+				player_state == STATE_ATTACK_NORMAL_3 ||
+				player_state == STATE_ATTACK_NORMAL_4)
+				ptr = state_machine->Get_Normal_Attack_BoundingBox();
+		}
+		return ptr;
+	}
 };
 
 
@@ -202,8 +236,11 @@ public:
 class Attack : public Object
 {
 private:
+	BoundingBox* attack_boundingbox = NULL;
+
 	float sprite_frame_value = 0.0f;
 	Player* target_ptr = NULL;	// 이타치 - 아마테라스
+
 public:
 	bool life = true;
 	int selected_character_type = 0;
@@ -221,6 +258,8 @@ public:
 	}
 
 	void  update(float Elapsed_time) override;
+	BoundingBox* Get_Attack_BoundingBox();
+
 	int Get_Sprite_Index(float Elapsed_time, int sprite_range, bool index_loop);
 	void Set_Target(Player* player_ptr) { target_ptr = player_ptr; } // 아마테라스 용
 

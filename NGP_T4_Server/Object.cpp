@@ -747,6 +747,139 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
     Set_Draw_Direction();
 }
+BoundingBox* Naruto_StateMachine::Get_Player_BoundingBox()
+{
+    switch (currentState)
+    {
+    case State::Idle:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Run:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Jump:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Attack_Normal:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Attack_Run:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Attack_Jump:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Attack_Shuriken:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Attack_Skill_1:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Attack_Skill_2:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Hit_Easy:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    case State::Hit_Hard:
+    {
+        player_boundingbox->left = pos.x;
+        player_boundingbox->right = pos.x;
+        player_boundingbox->top = pos.y;
+        player_boundingbox->bottom = pos.y;
+    }
+    break;
+    }
+
+    return player_boundingbox;
+}
+BoundingBox* Naruto_StateMachine::Get_Normal_Attack_BoundingBox()
+{
+    switch (combo_stack)
+    {
+    case 1:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+    case 2:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+    case 3:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+    case 4:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+
+    }
+    
+    return normal_attack_boundingbox;
+}
 
 void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
 {
@@ -1070,6 +1203,47 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
     }
 
     Set_Draw_Direction();
+}
+BoundingBox* Sasuke_StateMachine::Get_Player_BoundingBox()
+{
+    return player_boundingbox;
+}
+BoundingBox* Sasuke_StateMachine::Get_Normal_Attack_BoundingBox()
+{
+    switch (combo_stack)
+    {
+    case 1:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+    case 2:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+    case 3:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+    case 4:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+
+    }
+
+    return normal_attack_boundingbox;
 }
 
 void Itachi_StateMachine::doAction(State state, float ElapsedTime)
@@ -1395,6 +1569,48 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
 
     Set_Draw_Direction();
 }
+BoundingBox* Itachi_StateMachine::Get_Player_BoundingBox()
+{
+    return player_boundingbox;
+}
+BoundingBox* Itachi_StateMachine::Get_Normal_Attack_BoundingBox()
+{
+    switch (combo_stack)
+    {
+    case 1:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+    case 2:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+    case 3:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+    case 4:
+        if (sprite_index == 4)
+        {
+            sprite_index = 3;
+            attack_action = false;
+        }
+        break;
+
+    }
+
+    return normal_attack_boundingbox;
+}
+
 //========================================================
 
 void Player::Set_Character(int n, Server* server_ptr)
@@ -1412,7 +1628,6 @@ void Player::Set_Character(int n, Server* server_ptr)
     {
         state_machine->Set_Server(server_ptr);
         std::memcpy(state_machine->player_ID, player_ID, sizeof(player_ID));
-        // std::copy(this->player_ID, this->player_ID + 32, state_machine->player_ID);
     }
 }
 
@@ -1441,7 +1656,6 @@ void Player::update(float Elapsed_time)
         state_machine->Set_SP(sp);
         state_machine->update(Elapsed_time);
         synchronize_state_machine();
-        std::cout << "sp - " << state_machine->Get_SP() << std::endl;
     }
 }
 
@@ -1672,6 +1886,51 @@ void Attack::update(float Elapsed_time)
 
     if ((Ground_X_Min - 50) > pos.x || pos.x > (Ground_X_Max + 50))
         life = false;
+}
+
+BoundingBox* Attack::Get_Attack_BoundingBox()
+{
+    switch (selected_character_type)
+    {
+    case 1: // 나루토
+    {
+        if (attack_type == 2)
+        {
+            // 스프라이트 번호에 따라 모양 변경
+        }
+        else if (attack_type == 3)
+        {
+            // 스프라이트 번호에 따라 모양 변경
+        }
+    }
+    break;
+    case 2: // 사스케
+    {
+        if (attack_type == 2)
+        {
+            // 스프라이트 번호에 따라 모양 변경
+        }
+        else if (attack_type == 3)
+        {
+            // 스프라이트 번호에 따라 모양 변경
+        }
+    }
+    break;
+    case 3: // 이타치
+    {
+        if (attack_type == 2)
+        {
+            // 스프라이트 번호에 따라 모양 변경
+        }
+        else if (attack_type == 3)
+        {
+            // 스프라이트 번호에 따라 모양 변경
+        }
+    }
+    break;
+    }
+
+    return attack_boundingbox;
 }
 
 void Attack::Print_info()
