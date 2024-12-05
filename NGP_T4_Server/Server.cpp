@@ -120,8 +120,11 @@ void Server::Update_Game_World(float elapsed_time)
 
 }
 
-void Server::Update_Collision()
+void Server::Update_Collision(float Elapsed_time)
 {
+	if (p1_ptr == NULL || p2_ptr == NULL)
+		return;
+
 	BoundingBox* p1_box = NULL;
 	BoundingBox* p2_box = NULL;
 	std::string_view p1_ID;
@@ -153,14 +156,20 @@ void Server::Update_Collision()
 	{
 		bool is_hurt = p1_box->intersects(p2_normal_attack_box);
 		if (is_hurt)
+		{
 			p1_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
+			p1_ptr->hp -= Normal_Damage;
+		}
 	}
 
 	if (p2_box != NULL && p1_normal_attack_box != NULL)
 	{
 		bool is_hurt = p2_box->intersects(p1_normal_attack_box);
-		if(is_hurt)
+		if (is_hurt)
+		{
 			p2_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
+			p2_ptr->hp -= Normal_Damage;
+		}
 	}
 
 
@@ -176,23 +185,54 @@ void Server::Update_Collision()
 				if (p1_ID != attack_ID)
 				{
 					bool is_hurt = p1_box->intersects(attack_obj_box);
-					if(is_hurt && attack_ptr->attack_type == 1)
-						p1_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE); // 공격 타입 보고 결정하기
-					else if (is_hurt)
-						p1_ptr->Get_StateMachine()->changeState(State::Hit_Hard, EVENT_NONE); // 공격 타입 보고 결정하기
 
+					if (is_hurt && attack_ptr->Has_Target()) // 타겟이 있는 공격 객체 == 아마테라스					
+						p1_ptr->hp -= DOT_Damage * Elapsed_time;
+					else if (is_hurt && attack_ptr->attack_type == 1) // 수리검
+					{
+						p1_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE); 
+						p1_ptr->hp -= Shuriken_Damage;
+					}
+					else if (is_hurt) // 스킬 객체
+					{
+						float player_x_pos = p1_ptr->Get_StateMachine()->Get_Pos().x;
+						float attack_x_pos = attack_ptr->pos.x;
+
+						if (player_x_pos < attack_x_pos) // 오른쪽에서 날아오는 걸 맞았다면
+							p1_ptr->Get_StateMachine()->X_Direction = true;		
+						else if (player_x_pos < attack_x_pos) // 왼쪽에서 날아오는 걸 맞았다면
+							p1_ptr->Get_StateMachine()->X_Direction = false;
+
+						p1_ptr->Get_StateMachine()->changeState(State::Hit_Hard, EVENT_NONE); 
+						p1_ptr->hp -= Skill_Damage;
+					}
 				}
 				else if (p2_ID != attack_ID)
 				{
 					bool is_hurt = p2_box->intersects(attack_obj_box);
 
-					if (is_hurt && attack_ptr->attack_type == 1)
+					if (is_hurt && attack_ptr->Has_Target()) // 타겟이 있는 공격 객체 == 아마테라스					
+						p2_ptr->hp -= DOT_Damage * Elapsed_time;
+					else if (is_hurt && attack_ptr->attack_type == 1) // 수리검
 					{
-						p2_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE); // 공격 타입 보고 결정하기
+						p2_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
+						p2_ptr->hp -= Shuriken_Damage;
+
 						attack_ptr->life = false;
 					}
-					else if (is_hurt)
-						p2_ptr->Get_StateMachine()->changeState(State::Hit_Hard, EVENT_NONE); // 공격 타입 보고 결정하기
+					else if (is_hurt) // 스킬 객체
+					{
+						float player_x_pos = p2_ptr->Get_StateMachine()->Get_Pos().x;
+						float attack_x_pos = attack_ptr->pos.x;
+
+						if (player_x_pos < attack_x_pos) // 오른쪽에서 날아오는 걸 맞았다면
+							p2_ptr->Get_StateMachine()->X_Direction = true;
+						else if (player_x_pos < attack_x_pos) // 왼쪽에서 날아오는 걸 맞았다면
+							p2_ptr->Get_StateMachine()->X_Direction = false;
+
+						p2_ptr->Get_StateMachine()->changeState(State::Hit_Hard, EVENT_NONE);
+						p2_ptr->hp -= Skill_Damage;
+					}
 				}
 			}
 		}
@@ -352,13 +392,13 @@ Game_Data* Server::Encoding()
 		etc_info.game_time = game_time;
 		if (p1_ptr != NULL)
 		{
-			etc_info.player1_hp = p1_ptr->hp;
+			etc_info.player1_hp = int(p1_ptr->hp);
 			etc_info.player1_sp = p1_ptr->sp;
 		}
 
 		if (p2_ptr != NULL)
 		{
-			etc_info.player2_hp = p2_ptr->hp;
+			etc_info.player2_hp = int(p2_ptr->hp);
 			etc_info.player2_sp = p2_ptr->sp;
 		}
 	}

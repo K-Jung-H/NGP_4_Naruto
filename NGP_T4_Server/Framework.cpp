@@ -9,6 +9,10 @@
 
 #define Sever_Debug_Mode
 
+#define P1_CHARACTER CHARACTER_ITACHI
+#define P2_CHARACTER CHARACTER_SASUKE
+#define DUMMY_CHARACTER CHARACTER_SASUKE
+
 DWORD WINAPI ServerMain(LPVOID arg);
 DWORD WINAPI ProcessClient(LPVOID arg);
 DWORD WINAPI ServerUpdateThread(LPVOID arg);
@@ -184,7 +188,7 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
 
         // 게임 실행 모드 업데이트
         server_program.Update_Game_World(ElapsedTime);
-        server_program.Update_Collision();
+        server_program.Update_Collision(ElapsedTime);
         Game_Data* sending_data = server_program.Encoding();
         server_program.Broadcast_GameData_All(sending_data);
 
@@ -232,15 +236,15 @@ DWORD WINAPI ProcessClient(LPVOID arg)
     Object* player = new Player();
 
     if (Client_N == 1)
-        server_program.Add_P1(player, CHARACTER_SASUKE);
+        server_program.Add_P1(player, P1_CHARACTER);
     else if (Client_N == 2)
-        server_program.Add_P2(player, CHARACTER_ITACHI);
+        server_program.Add_P2(player, P2_CHARACTER);
 
 #ifdef Sever_Debug_Mode
     if (Client_N = 1 && server_program.Get_Player(2) == NULL)
     {
         Object* dummy_player = new Player();
-        server_program.Add_P2(dummy_player, CHARACTER_ITACHI);
+        server_program.Add_P2(dummy_player, DUMMY_CHARACTER);
     }
 #endif
 
