@@ -75,11 +75,15 @@ public:
 	bool Y_Direction = false; // Down: false, Up: true
 	bool is_air = false;
 
+	bool teleport_able = true;
+	float teleport_cooltime = 0.0f;
 
 	float attack_after_time = 0.0f;
 	bool attack_combo = false;
-	bool attack_action = false;
 	int combo_stack = 0;
+	bool attack_action = false;
+
+	bool attack_collision = false;
 
 	StateMachine() { 
 		currentState = State::Idle;
@@ -196,7 +200,7 @@ private:
 
 	
 public:
-	int hp = 400;
+	float hp = 400.0f;
 	int sp = 0;
 	int state = 0;
 	int selected_character_type = 0;
@@ -206,7 +210,7 @@ public:
 		sp_elapsed_time = 0.0f;
 		selected_character_type = 0;
 		state = 0;
-		hp = 400;
+		hp = 400.0f;
 		sp = 0;
 	}
 
@@ -277,7 +281,7 @@ public:
 	BoundingBox* Get_Attack_BoundingBox();
 
 	int Get_Sprite_Index(float Elapsed_time, int sprite_range, bool index_loop);
-	void Set_Target(Player* player_ptr) { target_ptr = player_ptr; } // 아마테라스 용
-
+	void Set_Target(Player* player_ptr) { target_ptr = player_ptr; } // 아마테라스 전용
+	bool Has_Target() { return (target_ptr != NULL); }
 	void Print_info();
 };

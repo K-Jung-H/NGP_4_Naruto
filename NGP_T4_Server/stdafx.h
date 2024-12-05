@@ -93,6 +93,12 @@
 #define Ground_X_Max 1623
 
 #define Player_Attack_Combo_Time_Limit 1.0f
+#define Player_Teleport_Time_Limit 2.0f
+
+#define Shuriken_Damage 10
+#define Skill_Damage 80
+#define Normal_Damage 20
+#define DOT_Damage 1
 
 static float PIXEL_PER_METER = (10.0 / 0.3); // 10 pixel 30 cm
 static float  RUN_SPEED_KMPH = 50.0f; // Km / Hour

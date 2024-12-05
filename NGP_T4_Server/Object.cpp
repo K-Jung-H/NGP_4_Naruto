@@ -41,6 +41,15 @@ void StateMachine::start()
 
 void StateMachine::update(float Elapsed_time)
 {
+    if (teleport_able == false)
+    {
+        teleport_cooltime += Elapsed_time;
+        if (teleport_cooltime >= Player_Teleport_Time_Limit)
+        {
+            teleport_able = true;
+            teleport_cooltime = 0.0f;
+        }
+    }
     // 현재 상태에 따른 동작을 수행
     doAction(currentState, Elapsed_time);
 }
@@ -93,7 +102,9 @@ void StateMachine::handleEvent(int key_event)
 
 
         if (key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
-            changeState(State::Teleport, key_event);
+            if (teleport_able)
+                changeState(State::Teleport, key_event);
+
     }
     break;
 
@@ -126,7 +137,8 @@ void StateMachine::handleEvent(int key_event)
             }
 
         if (key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
-            changeState(State::Teleport, key_event);
+            if (teleport_able)
+                changeState(State::Teleport, key_event);
     }
     break;
 
@@ -149,7 +161,8 @@ void StateMachine::handleEvent(int key_event)
             changeState(State::Attack_Shuriken, key_event);
 
         if(key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
-            changeState(State::Teleport, key_event);
+            if(teleport_able)
+                changeState(State::Teleport, key_event);
 
     }
     break;
@@ -201,6 +214,7 @@ void StateMachine::handleEvent(int key_event)
     {
         if (attack_action == false)
             changeState(State::Idle, key_event);
+
     }
     break;
 
@@ -222,6 +236,11 @@ void StateMachine::handleEvent(int key_event)
     {
         if (is_easy_hit == false)
             changeState(State::Idle, key_event);
+
+        if (key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
+            if (teleport_able)
+                changeState(State::Teleport, key_event);
+
     }
     break;
 
@@ -230,6 +249,9 @@ void StateMachine::handleEvent(int key_event)
         if (is_hard_hit == false && (Move_Left != Move_Right))
             changeState(State::Run, key_event);
 
+        if (key_event == EVENT_SKILL_TELEPORT_KEY_DOWN)
+            if (teleport_able)
+                changeState(State::Teleport, key_event);
     }
     break;
 
@@ -276,7 +298,7 @@ void StateMachine::enterState(State state, int key_event)
     {
         attack_action = true;
         attack_combo = true;
-
+        attack_collision = false;
         if (combo_stack == 0 || combo_stack == 5)
             combo_stack = 1;
     }
@@ -284,10 +306,12 @@ void StateMachine::enterState(State state, int key_event)
 
     case State::Attack_Run:
         attack_action = true;
+        attack_collision = false;
         break;
 
     case State::Attack_Jump:
         attack_action = true;
+        attack_collision = false;
         break;
 
     case State::Attack_Shuriken:
@@ -305,7 +329,7 @@ void StateMachine::enterState(State state, int key_event)
     break;
 
     case State::Teleport:
-        attack_action = true;
+        teleport_able = false;
         break;
 
     case State::Hit_Easy:
@@ -339,6 +363,12 @@ void StateMachine::exitState(State state, int key_event)
     case State::Attack_Normal:
         attack_after_time = 0.0f;
         attack_action = false;
+        attack_collision = false;
+        break;
+
+    case State::Attack_Jump:
+    case State::Attack_Run:
+        attack_collision = false;
         break;
 
     case State::Attack_Skill_1:
@@ -353,10 +383,12 @@ void StateMachine::exitState(State state, int key_event)
 
     case State::Hit_Easy:
         is_protected = false;
+        is_easy_hit = false;
         break;
 
     case State::Hit_Hard:
         is_protected = false;
+        is_hard_hit = false;
         break;
 
     default:
@@ -525,11 +557,16 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
         // 공격 애니메이션은 0~3까지 있음, 4가 되면 종료하기
         sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 5, false);
 
+        // 공격 판정 스프라이트
+        if (sprite_index == 2 || sprite_index == 3)
+            attack_collision = true;
+
         // 한대 때리는 애니메이션 끝나면
         if (sprite_index == 4)
         {
             sprite_index = 3;
             attack_action = false;
+            attack_collision = false;
         }
 
     }
@@ -544,10 +581,15 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
         sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 6, false);
 
+        // 공격 판정 스프라이트
+        if (sprite_index == 3 || sprite_index == 4)
+            attack_collision = true;
+
         if (sprite_index == 5)
         {
             sprite_index = 4;
             attack_action = false;
+            attack_collision = false;
         }
     }
     break;
@@ -570,10 +612,15 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
         sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 5, false);
 
+        // 공격 판정 스프라이트
+        if (sprite_index == 3 || sprite_index == 4)
+            attack_collision = true;
+
         if (sprite_index == 4)
         {
             sprite_index = 4;
             attack_action = false;
+            attack_collision = false;
         }
     }
     break;
@@ -703,12 +750,13 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
     case State::Hit_Easy: // 0 ~ 1
     {
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 3, false);
+        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 3, false);
 
         if (sprite_index == 2)
         {
             sprite_index = 1;
             is_easy_hit = false;
+            is_protected = false;
 
         }
     }
@@ -718,10 +766,28 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
     {
         sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 5, false);
 
+        pos.y +=  0.3f * RUN_SPEED_PPS * ElapsedTime * (1.0f - (sprite_index * 2));
+
+        if (pos.y > Ground_Y)
+        {
+            if (X_Direction == false) // 왼쪽을 보고 있다면, 오른쪽으로 날아가기
+            {
+                pos.x += RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+            else // 오른쪽을 보고 있다면, 왼쪽으로 날아가기
+            {
+                pos.x -= RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+        }
+        else
+            pos.y = Ground_Y;
+           
+
         if (sprite_index == 4)
         {
             sprite_index = 3;
             is_hard_hit = false;
+            is_protected = false;
         }
     }
     break;
@@ -760,10 +826,21 @@ BoundingBox* Naruto_StateMachine::Get_Player_BoundingBox()
 
     player_boundingbox->top = pos.y + 70;
     player_boundingbox->bottom = pos.y - 70;
+
+    if (is_protected)
+        player_boundingbox->active = false;
+    else
+        player_boundingbox->active = true;
+
     return player_boundingbox;
 }
 BoundingBox* Naruto_StateMachine::Get_Normal_Attack_BoundingBox()
 {
+    if (attack_collision)
+        normal_attack_boundingbox->active = true;
+    else
+        normal_attack_boundingbox->active = false;
+
     if (currentState == State::Attack_Normal)
     {
         switch (combo_stack)
@@ -925,26 +1002,46 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
         else
             sprite_index = 0;
 
+
+        // 공격 판정 스프라이트
+        if (combo_stack == 1 && (sprite_index == 2 || sprite_index == 3))
+            attack_collision = true;
+        else if (combo_stack == 2 && (sprite_index == 3 || sprite_index == 4))
+            attack_collision = true;
+        else if (combo_stack == 3 && (sprite_index == 5 || sprite_index == 6))
+            attack_collision = true;
+        else if (combo_stack == 4 && (sprite_index == 4 || sprite_index == 5))
+            attack_collision = true;
+
+
         // 한대 때리는 애니메이션 끝나면
         if (combo_stack == 1 && sprite_index == 4)
         {
             sprite_index = 3;
             attack_action = false;
+            attack_collision = false;
+
         }
         else if (combo_stack == 2 && sprite_index == 5)
         {
             sprite_index = 4;
             attack_action = false;
+            attack_collision = false;
+
         }
         else if (combo_stack == 3 && sprite_index == 7)
         {
             sprite_index = 6;
             attack_action = false;
+            attack_collision = false;
+
         }
         else if (combo_stack == 4 && sprite_index == 6)
         {
             sprite_index = 5;
             attack_action = false;
+            attack_collision = false;
+
         }
 
     }
@@ -959,10 +1056,17 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
 
         sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 7, false);
 
+        // 공격 판정 스프라이트
+        if (sprite_index == 4 || sprite_index == 5)
+            attack_collision = true;
+
+
         if (sprite_index == 6)
         {
             sprite_index = 5;
             attack_action = false;
+            attack_collision = false;
+
         }
     }
     break;
@@ -985,10 +1089,16 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
 
         sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 6, false);
 
+        // 공격 판정 스프라이트
+        if (sprite_index == 3 || sprite_index == 4)
+            attack_collision = true;
+
         if (sprite_index == 5)
         {
             sprite_index = 4;
             attack_action = false;
+            attack_collision = false;
+
         }
     }
     break;
@@ -1150,10 +1260,27 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
     {
         sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 5, false);
 
+        pos.y += 0.3f * RUN_SPEED_PPS * ElapsedTime * (1.0f - (sprite_index * 2));
+
+        if (pos.y > Ground_Y)
+        {
+            if (X_Direction == false) // 왼쪽을 보고 있다면, 오른쪽으로 날아가기
+            {
+                pos.x += RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+            else // 오른쪽을 보고 있다면, 왼쪽으로 날아가기
+            {
+                pos.x -= RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+        }
+        else
+            pos.y = Ground_Y;
+
         if (sprite_index == 4)
         {
             sprite_index = 3;
             is_hard_hit = false;
+            is_protected = false;
         }
     }
     break;
@@ -1190,10 +1317,21 @@ BoundingBox* Sasuke_StateMachine::Get_Player_BoundingBox()
 
     player_boundingbox->top = pos.y + 70;
     player_boundingbox->bottom = pos.y - 70;
+
+    if (is_protected)
+        player_boundingbox->active = false;
+    else
+        player_boundingbox->active = true;
+
     return player_boundingbox;
 }
 BoundingBox* Sasuke_StateMachine::Get_Normal_Attack_BoundingBox()
 {
+    if (attack_collision)
+        normal_attack_boundingbox->active = true;
+    else
+        normal_attack_boundingbox->active = false;
+
     if (currentState == State::Attack_Normal)
     {
         switch (combo_stack)
@@ -1355,26 +1493,45 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
         else
             sprite_index = 0;
 
+
+        // 공격 판정 스프라이트
+        if (combo_stack == 1 && (sprite_index == 2 || sprite_index == 3))
+            attack_collision = true;
+        else if (combo_stack == 2 && (sprite_index == 2 || sprite_index == 3))
+            attack_collision = true;
+        else if (combo_stack == 3 && (sprite_index == 3 || sprite_index == 4))
+            attack_collision = true;
+        else if (combo_stack == 4 && (sprite_index == 4 || sprite_index == 5))
+            attack_collision = true;
+
         // 한대 때리는 애니메이션 끝나면
         if (combo_stack == 1 && sprite_index == 4)
         {
             sprite_index = 3;
             attack_action = false;
+            attack_collision = false;
+
         }
         else if (combo_stack == 2 && sprite_index == 4)
         {
             sprite_index = 3;
             attack_action = false;
+            attack_collision = false;
+
         }
         else if (combo_stack == 3 && sprite_index == 5)
         {
             sprite_index = 4;
             attack_action = false;
+            attack_collision = false;
+
         }
         else if (combo_stack == 4 && sprite_index == 6)
         {
             sprite_index = 5;
             attack_action = false;
+            attack_collision = false;
+
         }
 
     }
@@ -1389,10 +1546,16 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
 
         sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 6, false);
 
+        // 공격 판정 스프라이트
+        if (sprite_index == 3 || sprite_index == 4)
+            attack_collision = true;
+
         if (sprite_index == 5)
         {
             sprite_index = 4;
             attack_action = false;
+            attack_collision = false;
+
         }
     }
     break;
@@ -1415,10 +1578,16 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
 
         sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 4, false);
 
+        // 공격 판정 스프라이트
+        if (sprite_index == 1 || sprite_index == 2)
+            attack_collision = true;
+
         if (sprite_index == 3)
         {
             sprite_index = 2;
             attack_action = false;
+            attack_collision = false;
+
         }
     }
     break;
@@ -1579,10 +1748,27 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
     {
         sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 5, false);
 
+        pos.y += 0.3f * RUN_SPEED_PPS * ElapsedTime * (1.0f - (sprite_index * 2));
+
+        if (pos.y > Ground_Y)
+        {
+            if (X_Direction == false) // 왼쪽을 보고 있다면, 오른쪽으로 날아가기
+            {
+                pos.x += RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+            else // 오른쪽을 보고 있다면, 왼쪽으로 날아가기
+            {
+                pos.x -= RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+        }
+        else
+            pos.y = Ground_Y;
+
         if (sprite_index == 4)
         {
             sprite_index = 3;
             is_hard_hit = false;
+            is_protected = false;
         }
     }
     break;
@@ -1619,10 +1805,22 @@ BoundingBox* Itachi_StateMachine::Get_Player_BoundingBox()
 
     player_boundingbox->top = pos.y + 70;
     player_boundingbox->bottom = pos.y - 70;
+
+    if (is_protected)
+        player_boundingbox->active = false;
+    else
+        player_boundingbox->active = true;
+
+
     return player_boundingbox;
 }
 BoundingBox* Itachi_StateMachine::Get_Normal_Attack_BoundingBox()
 {
+    if (attack_collision)
+        normal_attack_boundingbox->active = true;
+    else
+        normal_attack_boundingbox->active = false;
+
     if (currentState == State::Attack_Normal)
     {
         switch (combo_stack)
@@ -1818,7 +2016,7 @@ void Player::Print_info()
         break;
     }
 
-    std::cout << "pos x: " << pos_x << ", pos y: " << pos_y << ", " "Direction: " << direction
+    std::cout << "hp: " << hp << ", pos: (" << pos_x << ", " << pos_y << "), " "Direction: " << direction
         << ", " << "State: " << state << ", " << "Sprite_index: " << sprite_index << std::endl;
 }
 
