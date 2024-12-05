@@ -153,18 +153,19 @@ def init():
     dup_on = False
     dup_wait_time = 0
     mode_choose = mode_choose_mode.mode_choose_result()
-    global network_client
-    network_client = game_framework.get_socket()
-    if network_client:
-        print("소켓 재사용")
-        game_framework.set_data_handler(handle_char_select_data)
-        game_framework.start_receiver_thread()
-        # receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
-        # receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
-        # receiver_thread.start()
-        pass
-    else:
-        print("전역소켓 설정안된듯")
+    # global network_client
+    # network_client = game_framework.get_socket()
+    # if network_client:
+    #     print("소켓 재사용")
+    game_framework.set_data_handler(handle_char_select_data)
+    game_framework.reset_stop_event()
+    game_framework.start_receiver_thread()
+    # receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
+    # receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
+    # receiver_thread.start()
+    pass
+    # else:
+    #     print("전역소켓 설정안된듯")
 
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image

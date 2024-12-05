@@ -110,6 +110,7 @@ def receive_game_data_loop():
     finally:
         network_client.client_socket.close()
         print("Receiver thread terminated.")
+        pass
 
 def start_receiver_thread():
     global receiver_thread
@@ -122,6 +123,11 @@ def stop_receiver_thread():
     stop_event.set()
     if receiver_thread:
         receiver_thread.join()
+
+def reset_stop_event():
+    """stop_event 초기화."""
+    global stop_event
+    stop_event.clear()
 
 def set_socket(client_socket):
     global network_client

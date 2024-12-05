@@ -30,8 +30,12 @@ def init():
     global network_client
     network_client = game_framework.get_socket()
     if network_client:
-        network_client.disconnect()
+        game_framework.network_client.disconnect()
         print("소켓 해제")
+        game_framework.stop_receiver_thread()
+        game_framework.stop_key_listener()
+        game_framework.network_client = None
+        print("타이틀 초기화 테스트 : ", game_framework.get_socket())
         pass
 
 def finish():

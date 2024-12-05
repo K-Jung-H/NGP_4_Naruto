@@ -316,7 +316,7 @@ def init():
         data = b""
         while len(data) < data_size:
             # print(data_size)
-            packet = network_client.client_socket.recv(data_size - len(data))
+            packet = game_framework.network_client.client_socket.recv(data_size - len(data))
             if not packet:
                 print("연결이 종료되었습니다.")
                 return None
