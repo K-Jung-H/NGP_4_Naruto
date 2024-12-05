@@ -99,7 +99,7 @@ def key_listener():
 
 # 각 구조체의 포맷 정의
 position_format = "2f"  # Position 구조체
-player_info_format = "32s2f?3i"  # Player_Info 구조체
+player_info_format = "32s2f?3i?"  # Player_Info 구조체
 attack_info_format = "2f?2i"  # Attack_Info 구조체
 etc_info_format = "5i"  # ETC_Info 구조체
 game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_format}"  # Game_Data 전체 포맷
@@ -198,25 +198,26 @@ def receive_game_data(client_socket):
         for key, value in extra_state_data[p1_state].items():
             setattr(p1, key, value)
 
-    print(unpacked_data[0], unpacked_data[7])
-    if unpacked_data[7]:
+    # print(unpacked_data[0], unpacked_data[8])
+    print("p1 ready : ", unpacked_data[7], "p2 ready : ", unpacked_data[15])
+    if unpacked_data[8]:
         # 플레이어 2 업데이트
-        p2.x = unpacked_data[8]
-        p2.y = unpacked_data[9]
-        p2.dir = unpacked_data[10]
-        p2_state = unpacked_data[11]
+        p2.x = unpacked_data[9]
+        p2.y = unpacked_data[10]
+        p2.dir = unpacked_data[11]
+        p2_state = unpacked_data[12]
         p2.cur_state = state_mapping.get(p2_state, Idle)
-        p2.frame = unpacked_data[13]
+        p2.frame = unpacked_data[14]
 
         if p2_state in extra_state_data:
             for key, value in extra_state_data[p2_state].items():
                 setattr(p2, key, value)
 
-    # print(unpacked_data[5], unpacked_data[12])
+    # print(unpacked_data[5], unpacked_data[13])
 
     # 각 공격 데이터를 슬라이싱하여 그룹화
     attacks = [
-        unpacked_data[i:i + 5] for i in range(14, 14 + 18 * 5, 5)
+        unpacked_data[i:i + 5] for i in range(16, 16 + 18 * 5, 5)
     ]
 
     for i, attack in enumerate(attacks):
