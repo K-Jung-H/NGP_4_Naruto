@@ -2070,7 +2070,19 @@ BoundingBox* Attack::Get_Attack_BoundingBox()
     break;
     case 2: // »ç½ºÄÉ
     {
-        if (attack_type == 2) // È­µÐ
+        if (attack_type == 1)
+        {
+            int x_range = 22;
+            int y_range = 18;
+
+            int distance_x = 0;
+            int distance_y = 0;
+            attack_boundingbox->left = pos.x + distance_x - x_range;
+            attack_boundingbox->right = pos.x + distance_x + x_range;
+            attack_boundingbox->top = pos.y + distance_y + y_range;
+            attack_boundingbox->bottom = pos.y + distance_y - y_range;
+        }
+        else if (attack_type == 2) // È­µÐ
         {
             int x_range_left = 140;
             int x_range_right = 140;
@@ -2114,7 +2126,19 @@ BoundingBox* Attack::Get_Attack_BoundingBox()
     break;
     case 3: // ÀÌÅ¸Ä¡
     {
-        if (attack_type == 2) // È­µÐ
+        if (attack_type == 1)
+        {
+            int x_range = 22;
+            int y_range = 18;
+
+            int distance_x = 0;
+            int distance_y = 0;
+            attack_boundingbox->left = pos.x + distance_x - x_range;
+            attack_boundingbox->right = pos.x + distance_x + x_range;
+            attack_boundingbox->top = pos.y + distance_y + y_range;
+            attack_boundingbox->bottom = pos.y + distance_y - y_range;
+        }
+        else if (attack_type == 2) // È­µÐ
         {
             int x_range_left = 140;
             int x_range_right = 140;
