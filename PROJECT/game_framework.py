@@ -7,6 +7,9 @@ import keyboard
 pressed_keys = set()
 Input_thread_running = False
 client_Input_thread = None
+receiver_thread = None
+data_handler = None  # 데이터를 처리할 콜백 함수
+stop_event = threading.Event()
 
 running = None
 stack = None
@@ -21,6 +24,14 @@ key_codes = {
     'l': 76, ';': 59, ',': 44, '/': 47, '.': 46,
     'f': 76, 'g': 59, 'c': 44, 'v': 46, 'b': 47
 }
+
+# 데이터 포맷 정의
+position_format = "2f"
+player_info_format = "32s2f?3i?"
+attack_info_format = "2f?2i"
+etc_info_format = "5i"
+game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_format}"
+data_size = struct.calcsize(game_data_format)
 
 def send_key_info(key_name, key_action):
     """키 정보를 패킹하여 서버로 전송"""
@@ -66,6 +77,51 @@ def stop_key_listener():
     if client_Input_thread and client_Input_thread.is_alive():
         client_Input_thread.join()
         print("Key listener thread stopped.")
+
+def set_data_handler(handler):
+    global data_handler
+    data_handler = handler
+
+def receive_game_data(client_socket):
+    """서버로부터 고정된 크기의 게임 데이터를 수신."""
+    data = b""
+    while len(data) < data_size:
+        packet = client_socket.recv(data_size - len(data))
+        if not packet:
+            print("연결이 종료되었습니다.")
+            return None
+        data += packet
+
+    # 데이터 언패킹
+    unpacked_data = struct.unpack(game_data_format, data)
+    return unpacked_data
+
+def receive_game_data_loop():
+    """서버로부터 데이터를 계속 수신하고 핸들러에 전달."""
+    try:
+        while not stop_event.is_set():
+            unpacked_data = receive_game_data(network_client.client_socket)
+            if unpacked_data is None:  # 연결 종료
+                break
+            if data_handler:
+                data_handler(unpacked_data)  # 언패킹된 데이터 전달
+    except Exception as e:
+        print(f"Error in receive thread: {e}")
+    finally:
+        network_client.client_socket.close()
+        print("Receiver thread terminated.")
+
+def start_receiver_thread():
+    global receiver_thread
+    receiver_thread = threading.Thread(target=receive_game_data_loop)
+    receiver_thread.daemon = True
+    receiver_thread.start()
+
+def stop_receiver_thread():
+    global receiver_thread
+    stop_event.set()
+    if receiver_thread:
+        receiver_thread.join()
 
 def set_socket(client_socket):
     global network_client

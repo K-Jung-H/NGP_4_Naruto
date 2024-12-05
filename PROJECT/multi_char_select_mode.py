@@ -22,6 +22,21 @@ game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_
 # 데이터 크기 계산
 data_size = struct.calcsize(game_data_format)
 
+def handle_char_select_data(data):
+    # 플레이어 1과 2의 상태 확인
+    p1_ready = data[7]
+    p2_ready = data[15]
+    p1_selected_char = data[5]
+    p2_selected_char = data[13]
+
+    # 캐릭터 선택 상태 출력
+    print(f"Player 1 Ready: {p1_ready}, Selected Character: {p1_selected_char}")
+    print(f"Player 2 Ready: {p2_ready}, Selected Character: {p2_selected_char}")
+
+    # 필요에 따라 추가 로직 작성
+    if p1_ready and p2_ready:
+        print("Both players are ready! Starting the game...")
+
 def receive_game_data(client_socket):
     global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time
 
@@ -142,9 +157,11 @@ def init():
     network_client = game_framework.get_socket()
     if network_client:
         print("소켓 재사용")
-        receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
-        receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
-        receiver_thread.start()
+        game_framework.set_data_handler(handle_char_select_data)
+        game_framework.start_receiver_thread()
+        # receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
+        # receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
+        # receiver_thread.start()
         pass
     else:
         print("전역소켓 설정안된듯")
