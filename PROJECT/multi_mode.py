@@ -173,12 +173,12 @@ def receive_game_data(client_socket):
             return None
         data += packet
 
-        # 클라이언트의 IPv4 주소 출력
-    client_ipv4 = network_client.get_ipv4_address()
-    if client_ipv4:
-        print(f"클라이언트의 IPv4 주소: {client_ipv4}")
-    else:
-        print("IPv4 주소를 가져오는 데 실패했습니다.")
+    # # 클라이언트의 IPv4 주소 출력
+    # client_ipv4 = network_client.get_ipv4_address()
+    # if client_ipv4:
+    #     print(f"클라이언트의 IPv4 주소: {client_ipv4}")
+    # else:
+    #     print("IPv4 주소를 가져오는 데 실패했습니다.")
 
     # data += client_socket.recv(data_size)
     # 데이터 언패킹
