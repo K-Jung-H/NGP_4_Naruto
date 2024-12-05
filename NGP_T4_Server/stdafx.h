@@ -115,14 +115,14 @@ struct Player_Info
 	int player_state = 0;
 	int selected_character = 0;
 	int sprite_index = 0;
-
-	Player_Info() : player_ID("Unknown_Player"), pos(), X_Direction(false), player_state(0), selected_character(0), sprite_index(0) {}
+	//Player_Info() : player_ID("Unknown_Player"), pos(), X_Direction(false), player_state(0), selected_character(0), sprite_index(0) {}
+	bool player_ready = false;
+	Player_Info() : player_ID("Unknown_Player"), pos(), X_Direction(false), player_state(0), selected_character(0), sprite_index(0), player_ready(false) {}
 };
 
 
 struct Attack_Info
 {
-
 	Position  pos;
 	bool X_Direction;		// Left: false, Right: true
 	
@@ -158,10 +158,16 @@ struct Game_Data
 
 struct Key_Info
 {
-//	int client_info;			// 클라이언트 식별
+	//bool type;
 	int key_name;			// 키 정보
 	int key_action;			// 키 상태  down : 1, up : 2
 };
+
+//struct Name_Info
+//{
+//	bool type;
+//	char name[11];
+//};
 
 struct Client_Info
 {

@@ -50,7 +50,6 @@ void StateMachine::handleEvent(int key_event)
     // 현재 방향키 눌린 상태 - 텔레포트 방향 정하는 용도
     key_state.update(key_event);
 
-
     if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
         Move_Left = true;
     else if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
@@ -523,7 +522,7 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
     case State::Attack_Normal:
     {
         // 공격 애니메이션은 0~3까지 있음, 4가 되면 종료하기
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false);
+        sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 5, false);
 
         // 한대 때리는 애니메이션 끝나면
         if (sprite_index == 4)
@@ -542,7 +541,7 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
         else if (Move_Right) // 오른쪽으로 이동
             pos.x += 0.4f * RUN_SPEED_PPS * ElapsedTime;
 
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 6, false);
+        sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 6, false);
 
         if (sprite_index == 5)
         {
@@ -568,7 +567,7 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
                 pos.x += 0.1f * RUN_SPEED_PPS * ElapsedTime;
         }
 
-        sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false);
+        sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 5, false);
 
         if (sprite_index == 4)
         {
@@ -747,137 +746,109 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
     Set_Draw_Direction();
 }
+
 BoundingBox* Naruto_StateMachine::Get_Player_BoundingBox()
 {
-    switch (currentState)
-    {
-    case State::Idle:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Run:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Jump:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Attack_Normal:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Attack_Run:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Attack_Jump:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Attack_Shuriken:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Attack_Skill_1:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Attack_Skill_2:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Hit_Easy:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    case State::Hit_Hard:
-    {
-        player_boundingbox->left = pos.x;
-        player_boundingbox->right = pos.x;
-        player_boundingbox->top = pos.y;
-        player_boundingbox->bottom = pos.y;
-    }
-    break;
-    }
+    int x_range = 30;
+    int y_range = 70;
 
+    player_boundingbox->left = pos.x - 30;
+    player_boundingbox->right = pos.x + 30;
+
+    player_boundingbox->top = pos.y + 70;
+    player_boundingbox->bottom = pos.y - 70;
     return player_boundingbox;
 }
 BoundingBox* Naruto_StateMachine::Get_Normal_Attack_BoundingBox()
 {
-    switch (combo_stack)
+    if (currentState == State::Attack_Normal)
     {
-    case 1:
-        if (sprite_index == 4)
+        switch (combo_stack)
         {
-            sprite_index = 3;
-            attack_action = false;
+        case 1:
+        {
+            int x_range = 50;
+            int y_range = 20;
+
+            int distance_x = 40 * (X_Direction ? 1 : -1);
+            int distance_y = 10;
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
-    case 2:
-        if (sprite_index == 4)
+        case 2:
         {
-            sprite_index = 3;
-            attack_action = false;
+
+            int x_range = 50;
+            int y_range = 40;
+
+
+            int distance_x = 30 * (X_Direction ? 1 : -1);
+            int distance_y = 20;
+
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
-    case 3:
-        if (sprite_index == 4)
+        case 3:
         {
-            sprite_index = 3;
-            attack_action = false;
-        }
-        break;
-    case 4:
-        if (sprite_index == 4)
-        {
-            sprite_index = 3;
-            attack_action = false;
+            int x_range = 50;
+            int y_range = 60;
+
+            int distance_x = 30 * (X_Direction ? 1 : -1);
+            int distance_y = 10;
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
 
+        case 4:
+        {
+            int x_range = 40;
+            int y_range = 80;
+
+            int distance_x = 0 * (X_Direction ? 1 : -1);
+            int distance_y = 0;
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
+        }
+        break;
+
+        }
     }
-    
+    else if (currentState == State::Attack_Run)
+    {
+        int x_range = 40;
+        int y_range = 50;
+
+        int distance_x = 30 * (X_Direction ? 1 : -1);
+        int distance_y = -20;
+        normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+        normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+        normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+        normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
+    }
+    else if (currentState == State::Attack_Jump)
+    {
+        int x_range = 50;
+        int y_range = 60;
+
+        int distance_x = 30 * (X_Direction ? 1 : -1);
+        int distance_y = 20;
+        normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+        normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+        normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+        normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
+
+    }
     return normal_attack_boundingbox;
 }
 
@@ -945,9 +916,9 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
         else if (combo_stack == 2)
             sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 6, false);
         else if (combo_stack == 3)
-            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 8, false);
+            sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 8, false);
         else if (combo_stack == 4)
-            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 7, false);
+            sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 7, false);
         else
             sprite_index = 0;
 
@@ -1206,43 +1177,106 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
 }
 BoundingBox* Sasuke_StateMachine::Get_Player_BoundingBox()
 {
+    int x_range = 30;
+    int y_range = 70;
+
+    player_boundingbox->left = pos.x - 30;
+    player_boundingbox->right = pos.x + 30;
+
+    player_boundingbox->top = pos.y + 70;
+    player_boundingbox->bottom = pos.y - 70;
     return player_boundingbox;
 }
 BoundingBox* Sasuke_StateMachine::Get_Normal_Attack_BoundingBox()
 {
-    switch (combo_stack)
+    if (currentState == State::Attack_Normal)
     {
-    case 1:
-        if (sprite_index == 4)
+        switch (combo_stack)
         {
-            sprite_index = 3;
-            attack_action = false;
+        case 1:
+        {
+            int x_range = 80;
+            int y_range = 30;
+
+            int distance_x = 60 * (X_Direction ? 1 : -1);
+            int distance_y = 0;
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
-    case 2:
-        if (sprite_index == 4)
+        case 2:
         {
-            sprite_index = 3;
-            attack_action = false;
+
+            int x_range = 90;
+            int y_range = 30;
+
+
+            int distance_x = 60 * (X_Direction ? 1 : -1);
+            int distance_y = 10;
+
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
-    case 3:
-        if (sprite_index == 4)
+        case 3:
         {
-            sprite_index = 3;
-            attack_action = false;
+            int x_range = 105;
+            int y_range = 70;
+
+            int distance_x = 90 * (X_Direction ? 1 : -1);
+            int distance_y = 0;
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
-    case 4:
-        if (sprite_index == 4)
+
+        case 4:
         {
-            sprite_index = 3;
-            attack_action = false;
+            int x_range = 105;
+            int y_range = 80;
+
+            int distance_x = 90 * (X_Direction ? 1 : -1);
+            int distance_y = 20;
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
+
+        }
+    }
+    else if (currentState == State::Attack_Run)
+    {
+        int x_range = 100;
+        int y_range = 30;
+
+        int distance_x = 60 * (X_Direction ? 1 : -1);
+        int distance_y = -20;
+        normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+        normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+        normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+        normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
+    }
+    else if (currentState == State::Attack_Jump)
+    {
+        int x_range = 90;
+        int y_range = 50;
+
+        int distance_x = 10 * (X_Direction ? 1 : -1);
+        int distance_y = -10;
+        normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+        normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+        normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+        normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
 
     }
-
     return normal_attack_boundingbox;
 }
 
@@ -1306,13 +1340,13 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
     {
         // 공격 애니메이션은 4, 4, 5, 6
         if (combo_stack == 1)
-            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false);
+            sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 5, false);
         else if (combo_stack == 2)
-            sprite_index = Get_Sprite_Index(ElapsedTime * 12.0f, 5, false);
+            sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 5, false);
         else if (combo_stack == 3)
-            sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 6, false);
+            sprite_index = Get_Sprite_Index(ElapsedTime * 24.0f, 6, false);
         else if (combo_stack == 4)
-            sprite_index = Get_Sprite_Index(ElapsedTime * 18.0f, 7, false);
+            sprite_index = Get_Sprite_Index(ElapsedTime * 24.0f, 7, false);
         else
             sprite_index = 0;
 
@@ -1571,57 +1605,121 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
 }
 BoundingBox* Itachi_StateMachine::Get_Player_BoundingBox()
 {
+    int x_range = 30;
+    int y_range = 70;
+
+    player_boundingbox->left = pos.x - 30;
+    player_boundingbox->right = pos.x + 30;
+
+    player_boundingbox->top = pos.y + 70;
+    player_boundingbox->bottom = pos.y - 70;
     return player_boundingbox;
 }
 BoundingBox* Itachi_StateMachine::Get_Normal_Attack_BoundingBox()
 {
-    switch (combo_stack)
+    if (currentState == State::Attack_Normal)
     {
-    case 1:
-        if (sprite_index == 4)
+        switch (combo_stack)
         {
-            sprite_index = 3;
-            attack_action = false;
+        case 1:
+        {
+            int x_range = 50;
+            int y_range = 50;
+
+            int distance_x = 30 * (X_Direction ? 1 : -1);
+            int distance_y = 20;
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
-    case 2:
-        if (sprite_index == 4)
+        case 2:
         {
-            sprite_index = 3;
-            attack_action = false;
+
+            int x_range = 80;
+            int y_range = 30;
+
+
+            int distance_x = 50 * (X_Direction ? 1 : -1);
+            int distance_y = 10;
+
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
-    case 3:
-        if (sprite_index == 4)
+        case 3:
         {
-            sprite_index = 3;
-            attack_action = false;
+            int x_range = 80;
+            int y_range = 50;
+
+            int distance_x = 50 * (X_Direction ? 1 : -1);
+            int distance_y = 20;
+
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
-    case 4:
-        if (sprite_index == 4)
+
+        case 4:
         {
-            sprite_index = 3;
-            attack_action = false;
+            int x_range = 60;
+            int y_range = 80;
+
+            int distance_x = 50 * (X_Direction ? 1 : -1);
+            int distance_y = 60;
+            normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+            normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+            normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+            normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
         }
         break;
+
+        }
+    }
+    else if (currentState == State::Attack_Run)
+    {
+        int x_range = 70;
+        int y_range = 50;
+
+        int distance_x = 50 * (X_Direction ? 1 : -1);
+        int distance_y = 0;
+        normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+        normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+        normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+        normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
+    }
+    else if (currentState == State::Attack_Jump)
+    {
+        int x_range = 80;
+        int y_range = 40;
+
+        int distance_x = 10 * (X_Direction ? 1 : -1);
+        int distance_y = 0;
+        normal_attack_boundingbox->left = pos.x + distance_x - x_range;
+        normal_attack_boundingbox->right = pos.x + distance_x + x_range;
+        normal_attack_boundingbox->top = pos.y + distance_y + y_range;
+        normal_attack_boundingbox->bottom = pos.y + distance_y - y_range;
 
     }
-
     return normal_attack_boundingbox;
 }
 
 //========================================================
 
-void Player::Set_Character(int n, Server* server_ptr)
+void Player::Set_Character(int select_character, Server* server_ptr)
 {
-    selected_character_type = n;
+    selected_character_type = select_character;
 
-    if (n == CHARACTER_NARUTO)
+    if (select_character == CHARACTER_NARUTO)
         state_machine = new Naruto_StateMachine();
-    else if (n == CHARACTER_SASUKE)
+    else if (select_character == CHARACTER_SASUKE)
         state_machine = new Sasuke_StateMachine();
-    else if (n == CHARACTER_ITACHI)
+    else if (select_character == CHARACTER_ITACHI)
         state_machine = new Itachi_StateMachine();
 
     if (state_machine != NULL)
@@ -1894,37 +1992,160 @@ BoundingBox* Attack::Get_Attack_BoundingBox()
     {
     case 1: // 나루토
     {
+        if (attack_type == 1)
+        {
+            int x_range = 22;
+            int y_range = 18;
+
+            int distance_x = 0;
+            int distance_y = 0;
+            attack_boundingbox->left = pos.x + distance_x - x_range;
+            attack_boundingbox->right = pos.x + distance_x + x_range;
+            attack_boundingbox->top = pos.y + distance_y + y_range;
+            attack_boundingbox->bottom = pos.y + distance_y - y_range;
+        }
         if (attack_type == 2)
         {
-            // 스프라이트 번호에 따라 모양 변경
+            int x_range_left = 0;
+            int x_range_right = 0;
+
+            if (X_Direction == false)
+            {
+                x_range_left = 220;
+                x_range_right = 80;
+            }
+            else if (X_Direction == true)
+            {
+                x_range_left = 80;
+                x_range_right = 220;
+            }
+
+            int y_range_top = 110;
+            int y_range_bottom = 130;
+
+            // 공격 범위 설정
+            attack_boundingbox->left = pos.x - x_range_left;
+            attack_boundingbox->right = pos.x + x_range_right;
+            attack_boundingbox->top = pos.y + y_range_top;
+            attack_boundingbox->bottom = pos.y - y_range_bottom;
+
+            if (sprite_index > 5)
+                attack_boundingbox->active = true;
+            else
+                attack_boundingbox->active = false;
         }
         else if (attack_type == 3)
         {
-            // 스프라이트 번호에 따라 모양 변경
+            int x_range_left = 0;
+            int x_range_right = 0;
+
+            if (X_Direction == false) 
+            {
+                x_range_left = 200;
+                x_range_right = 270;
+            }
+            else if (X_Direction == true)
+            {
+                x_range_left = 270;
+                x_range_right = 200;
+            }
+
+            // y_range는 방향과 관계없이 고정값 사용
+            int y_range_top = 180;
+            int y_range_bottom = 130;
+
+            // 공격 범위 설정
+            attack_boundingbox->left = pos.x - x_range_left;
+            attack_boundingbox->right = pos.x + x_range_right;
+            attack_boundingbox->top = pos.y + y_range_top;
+            attack_boundingbox->bottom = pos.y - y_range_bottom;
+
+            if (sprite_index > 5)
+                attack_boundingbox->active = true;
+            else
+                attack_boundingbox->active = false;
+
         }
     }
     break;
     case 2: // 사스케
     {
-        if (attack_type == 2)
+        if (attack_type == 2) // 화둔
         {
-            // 스프라이트 번호에 따라 모양 변경
+            int x_range_left = 140;
+            int x_range_right = 140;
+
+            int y_range_top = 150;
+            int y_range_bottom = 40;
+
+            // 공격 범위 설정
+            attack_boundingbox->left = pos.x - x_range_left;
+            attack_boundingbox->right = pos.x + x_range_right;
+            attack_boundingbox->top = pos.y + y_range_top;
+            attack_boundingbox->bottom = pos.y - y_range_bottom;
+
+            if (sprite_index > 3)
+                attack_boundingbox->active = true;
+            else
+                attack_boundingbox->active = false;
+
         }
-        else if (attack_type == 3)
+        else if (attack_type == 3) // 치도리
         {
-            // 스프라이트 번호에 따라 모양 변경
+            int x_range_left = 130;
+            int x_range_right = 130;
+
+            int y_range_top = 70;
+            int y_range_bottom = 70;
+
+            // 공격 범위 설정
+            attack_boundingbox->left = pos.x - x_range_left;
+            attack_boundingbox->right = pos.x + x_range_right;
+            attack_boundingbox->top = pos.y + y_range_top;
+            attack_boundingbox->bottom = pos.y - y_range_bottom;
+
+            if (sprite_index > 6)
+                attack_boundingbox->active = true;
+            else
+                attack_boundingbox->active = false;
+
         }
     }
     break;
     case 3: // 이타치
     {
-        if (attack_type == 2)
+        if (attack_type == 2) // 화둔
         {
-            // 스프라이트 번호에 따라 모양 변경
+            int x_range_left = 140;
+            int x_range_right = 140;
+
+            int y_range_top = 150;
+            int y_range_bottom = 40;
+
+            // 공격 범위 설정
+            attack_boundingbox->left = pos.x - x_range_left;
+            attack_boundingbox->right = pos.x + x_range_right;
+            attack_boundingbox->top = pos.y + y_range_top;
+            attack_boundingbox->bottom = pos.y - y_range_bottom;
+
+            if (sprite_index > 3)
+                attack_boundingbox->active = true;
+            else
+                attack_boundingbox->active = false;
         }
         else if (attack_type == 3)
         {
-            // 스프라이트 번호에 따라 모양 변경
+            int x_range_left = 110;
+            int x_range_right = 110;
+
+            int y_range_top = 90;
+            int y_range_bottom = 30;
+
+            // 공격 범위 설정
+            attack_boundingbox->left = pos.x - x_range_left;
+            attack_boundingbox->right = pos.x + x_range_right;
+            attack_boundingbox->top = pos.y + y_range_top;
+            attack_boundingbox->bottom = pos.y - y_range_bottom;
         }
     }
     break;

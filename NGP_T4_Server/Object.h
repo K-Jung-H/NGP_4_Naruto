@@ -120,7 +120,11 @@ class Naruto_StateMachine : public StateMachine
 {
 public:
 	Naruto_StateMachine() { 
+		lastState = State::Idle;
 		currentState = State::Idle; 
+		player_boundingbox = new BoundingBox();
+		normal_attack_boundingbox = new BoundingBox();
+
 		sprite_index = 0;
 		pos.x = 500;
 		pos.y = Ground_Y;
@@ -136,7 +140,10 @@ class Sasuke_StateMachine : public StateMachine
 {
 public:
 	Sasuke_StateMachine() { 
+		lastState = State::Idle;
 		currentState = State::Idle; 
+		player_boundingbox = new BoundingBox();
+		normal_attack_boundingbox = new BoundingBox();
 		sprite_index = 0;
 		pos.x = 500;
 		pos.y = Ground_Y;
@@ -151,7 +158,10 @@ class Itachi_StateMachine : public StateMachine
 {
 public:
 	Itachi_StateMachine() { 
+		lastState = State::Idle;
 		currentState = State::Idle; 
+		player_boundingbox = new BoundingBox();
+		normal_attack_boundingbox = new BoundingBox();
 		sprite_index = 0;
 		pos.x = 500;
 		pos.y = Ground_Y;
@@ -181,7 +191,7 @@ public:
 class Player : public Object
 {
 private:
-	StateMachine* state_machine;
+	StateMachine* state_machine = NULL;
 	float sp_elapsed_time;
 
 	
@@ -221,7 +231,9 @@ public:
 			if (player_state == STATE_ATTACK_NORMAL_1 ||
 				player_state == STATE_ATTACK_NORMAL_2 ||
 				player_state == STATE_ATTACK_NORMAL_3 ||
-				player_state == STATE_ATTACK_NORMAL_4)
+				player_state == STATE_ATTACK_NORMAL_4 ||
+				player_state == STATE_ATTACK_RUN ||
+				player_state == STATE_ATTACK_JUMP)
 				ptr = state_machine->Get_Normal_Attack_BoundingBox();
 		}
 		return ptr;
@@ -255,6 +267,7 @@ public:
 		attack_type = a_t;
 		pos = p;
 		X_Direction = x_dir;
+		attack_boundingbox = new BoundingBox();
 	}
 
 	void  update(float Elapsed_time) override;

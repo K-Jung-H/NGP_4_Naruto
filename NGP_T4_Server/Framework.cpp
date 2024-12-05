@@ -232,7 +232,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
     Object* player = new Player();
 
     if (Client_N == 1)
-        server_program.Add_P1(player, CHARACTER_NARUTO);
+        server_program.Add_P1(player, CHARACTER_SASUKE);
     else if (Client_N == 2)
         server_program.Add_P2(player, CHARACTER_ITACHI);
 

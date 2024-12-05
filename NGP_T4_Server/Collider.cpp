@@ -4,8 +4,10 @@
 
 bool BoundingBox::intersects(BoundingBox* other)
 {
-    if (this->active && other->active)
-        return !(right < other->left || left > other->right || bottom > other->top || top < other->bottom);
+    if (!this->active || !other->active)
+        return false;
 
-    return false;
+    bool noCollision = (right < other->left || left > other->right || bottom > other->top || top < other->bottom);
+    return !noCollision;
+
 }
