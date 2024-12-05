@@ -1,11 +1,106 @@
+import struct
+import threading
+import time
+
 from pico2d import *
 import game_framework
 import play_mode
 import mode_choose_mode
 import title_mode
 import multi_mode
+from network_client import NetworkClient
 
 character_count = 3
+
+# 각 구조체의 포맷 정의
+position_format = "2f"  # Position 구조체
+player_info_format = "32s2f?3i?"  # Player_Info 구조체
+attack_info_format = "2f?2i"  # Attack_Info 구조체
+etc_info_format = "5i"  # ETC_Info 구조체
+game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_format}"  # Game_Data 전체 포맷
+
+# 데이터 크기 계산
+data_size = struct.calcsize(game_data_format)
+
+def receive_game_data(client_socket):
+    global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time
+
+    data = b""
+    while len(data) < data_size:
+        # print(data_size)
+        packet = client_socket.recv(data_size - len(data))
+        if not packet:
+            print("연결이 종료되었습니다.")
+            return None
+        data += packet
+
+    # # 클라이언트의 IPv4 주소 출력
+    # client_ipv4 = network_client.get_ipv4_address()
+    # if client_ipv4:
+    #     print(f"클라이언트의 IPv4 주소: {client_ipv4}")
+    # else:
+    #     print("IPv4 주소를 가져오는 데 실패했습니다.")
+
+    # data += client_socket.recv(data_size)
+    # 데이터 언패킹
+    unpacked_data = struct.unpack(game_data_format, data)
+    # print("Unpacked data:", unpacked_data)  # 디버깅용
+
+    # 플레이어 1 업데이트
+    # p1.x = unpacked_data[1]
+    # p1.y = unpacked_data[2]
+    # p1.dir = unpacked_data[3]
+    # p1_state = unpacked_data[4]
+    # p1.cur_state = state_mapping.get(p1_state, Idle)  # 기본값은 Idle로 설정
+    # p1.frame = unpacked_data[6]
+    #
+    # # extra_state_data에 여러개의 값이 있는 경우를 위한 for?
+    # if p1_state in extra_state_data:
+    #     for key, value in extra_state_data[p1_state].items():
+    #         setattr(p1, key, value)
+    #
+    # print(unpacked_data[0], unpacked_data[8])
+    print("p1 ready : ", unpacked_data[7], "p2 ready : ", unpacked_data[15])
+    # if unpacked_data[8]:
+    #     # 플레이어 2 업데이트
+    #     p2.x = unpacked_data[9]
+    #     p2.y = unpacked_data[10]
+    #     p2.dir = unpacked_data[11]
+    #     p2_state = unpacked_data[12]
+    #     p2.cur_state = state_mapping.get(p2_state, Idle)
+    #     p2.frame = unpacked_data[14]
+    #
+    #     if p2_state in extra_state_data:
+    #         for key, value in extra_state_data[p2_state].items():
+    #             setattr(p2, key, value)
+
+    print("p1 select char : ", unpacked_data[5], "p2 select char : ", unpacked_data[13])
+
+    p1_hp = unpacked_data[-5]
+    p1_chakra = unpacked_data[-4]
+    p2_hp = unpacked_data[-3]
+    p2_chakra = unpacked_data[-2]
+    game_time = unpacked_data[-1]
+
+def receive_game_data_loop(client_socket):
+    """서버로부터 데이터를 계속 수신하고 게임 객체를 업데이트."""
+    count = 0  # 수신 횟수 카운트
+    start_time = time.time()  # 시작 시간
+    while True:
+        # try:
+        #     receive_game_data(client_socket)
+        # except Exception as e:
+        #     print(f"데이터 수신 중 오류 발생: {e}")
+        #     break
+        receive_game_data(client_socket)
+        count += 1
+
+        # 1초가 지났는지 확인
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= 1.0:
+            print(f"초당 수신 횟수: {count}")
+            count = 0  # 카운트 초기화
+            start_time = time.time()  # 시간 초기화
 
 def init():
     global image1, naruto, sasuke, itachi
@@ -43,6 +138,17 @@ def init():
     dup_on = False
     dup_wait_time = 0
     mode_choose = mode_choose_mode.mode_choose_result()
+    global network_client
+    network_client = game_framework.get_socket()
+    if network_client:
+        print("소켓 재사용")
+        receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
+        receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
+        receiver_thread.start()
+        pass
+    else:
+        print("전역소켓 설정안된듯")
+
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
     del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image

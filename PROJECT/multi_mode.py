@@ -199,7 +199,7 @@ def receive_game_data(client_socket):
             setattr(p1, key, value)
 
     # print(unpacked_data[0], unpacked_data[8])
-    print("p1 ready : ", unpacked_data[7], "p2 ready : ", unpacked_data[15])
+    # print("p1 ready : ", unpacked_data[7], "p2 ready : ", unpacked_data[15])
     if unpacked_data[8]:
         # 플레이어 2 업데이트
         p2.x = unpacked_data[9]
@@ -269,7 +269,7 @@ def init():
     global game_data
     global skills
     global health_bar, health_hp, naruto_mug, sasuke_mug, itachi_mug, chakra_image, chakra_frame
-    global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp, p1_mug, p2_mug
+    global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp, p1_mug, p2_mug, receiver_thread
 
     health_bar = load_image('resource/health_bar.png')
     health_hp = load_image('resource/health_hp.png')
@@ -295,11 +295,12 @@ def init():
             pass
         else:
             # 네트워크 클라이언트 초기화 및 연결
-            network_client = NetworkClient(SERVER_IP, SERVER_PORT)
-            network_client.connect()
+            # network_client = NetworkClient(SERVER_IP, SERVER_PORT)
+            # network_client.connect()
+            pass
 
         # 송수신 버퍼 크기 설정
-        new_buf_size = 492
+        new_buf_size = 512
         network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, new_buf_size)
         network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, new_buf_size)
 
@@ -392,19 +393,22 @@ def init():
 
 
     # 키 입력 감지 쓰레드 시작
-    client_Input_thread = threading.Thread(target=key_listener)
-    client_Input_thread.start()
+    # client_Input_thread = threading.Thread(target=key_listener)
+    # client_Input_thread.start()
+    game_framework.start_key_listener()
 
     pass
 def finish():
     global Input_thread_running
-    global network_client
+    global network_client, receiver_thread
     network_client = game_framework.get_socket()
     if network_client:
-        network_client.disconnect()
+        # network_client.disconnect()
+        pass
     if TEST:
         # network_client.disconnect()
         pass
+    # receiver_thread.join()
     game_world.remove_object(p1)
     game_world.remove_object(p2)
     game_world.remove_object(map)

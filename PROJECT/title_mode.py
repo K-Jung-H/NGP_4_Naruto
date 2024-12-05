@@ -27,6 +27,13 @@ def init():
     space_on = False
     space_frame = 0
     space_up = True
+    global network_client
+    network_client = game_framework.get_socket()
+    if network_client:
+        network_client.disconnect()
+        print("소켓 해제")
+        pass
+
 def finish():
     global image1, image2, naruto, sasuke, press_space
     del image1, image2, naruto, sasuke, press_space
