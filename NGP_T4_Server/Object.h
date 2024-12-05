@@ -192,17 +192,20 @@ class Player : public Object
 {
 private:
 	StateMachine* state_machine = NULL;
-	float sp_elapsed_time;
+	float sp_elapsed_time = 0.0f;
 
 	
 public:
-	int hp;
-	int sp;
-	int state;
-	int selected_character_type;
+	int hp = 400;
+	int sp = 0;
+	int state = 0;
+	int selected_character_type = 0;
 
 	Player()
 	{
+		sp_elapsed_time = 0.0f;
+		selected_character_type = 0;
+		state = 0;
 		hp = 400;
 		sp = 0;
 	}

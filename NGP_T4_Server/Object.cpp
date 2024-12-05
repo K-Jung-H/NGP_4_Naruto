@@ -50,14 +50,11 @@ void StateMachine::handleEvent(int key_event)
     // 현재 방향키 눌린 상태 - 텔레포트 방향 정하는 용도
     key_state.update(key_event);
 
-    if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
-        Move_Left = true;
-    else if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN)
-        Move_Right = true;
-    else if (key_event == EVENT_MOVE_LEFT_KEY_UP)
-        Move_Left = false;
-    else if (key_event == EVENT_MOVE_RIGHT_KEY_UP)
-        Move_Right = false;
+    if (attack_action == false)
+    {
+        Move_Left = key_state.left;
+        Move_Right = key_state.right;
+    }
 
     switch (currentState)
     {
@@ -71,7 +68,7 @@ void StateMachine::handleEvent(int key_event)
 
         if (key_event == EVENT_NORMAL_ATTACK_KEY_DOWN)
         {
-            if (attack_combo)
+            if (attack_combo < 4)
                 combo_stack += 1;
 
             changeState(State::Attack_Normal, key_event);
@@ -341,14 +338,17 @@ void StateMachine::exitState(State state, int key_event)
         break;
     case State::Attack_Normal:
         attack_after_time = 0.0f;
+        attack_action = false;
         break;
 
     case State::Attack_Skill_1:
         is_protected = false;
+        attack_action = false;
         break;
 
     case State::Attack_Skill_2:
         is_protected = false;
+        attack_action = false;
         break;
 
     case State::Hit_Easy:
@@ -443,6 +443,7 @@ int  StateMachine::Get_State()
         break;
 
     default:
+        return STATE_IDLE;
         break;
     }
 }
@@ -736,6 +737,8 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
         if (attack_after_time > Player_Attack_Combo_Time_Limit)
         {
             attack_combo = false;
+            attack_action = false;
+
             attack_after_time = 0.0f;
             combo_stack = 0;
         }
@@ -1166,6 +1169,8 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
         if (attack_after_time > Player_Attack_Combo_Time_Limit)
         {
             attack_combo = false;
+            attack_action = false;
+
             attack_after_time = 0.0f;
             combo_stack = 0;
         }
@@ -1593,6 +1598,7 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
         if (attack_after_time > Player_Attack_Combo_Time_Limit)
         {
             attack_combo = false;
+            attack_action = false;
             attack_after_time = 0.0f;
             combo_stack = 0;
         }
@@ -1764,8 +1770,8 @@ void Player::key_update(int key_event)
 
 void Player::Print_info()
 {
-    int pos_x = this->pos.x;
-    int pos_y = this->pos.y;
+    int pos_x = int(this->pos.x);
+    int pos_y = int(this->pos.y);
 
     std::string direction = "";
     if (this->X_Direction == false)
@@ -2180,8 +2186,8 @@ BoundingBox* Attack::Get_Attack_BoundingBox()
 
 void Attack::Print_info()
 {
-    int pos_x = this->pos.x;
-    int pos_y = this->pos.y;
+    int pos_x = int(this->pos.x);
+    int pos_y = int(this->pos.y);
 
     std::string direction = "";
     if (this->X_Direction == false)

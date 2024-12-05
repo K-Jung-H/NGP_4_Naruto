@@ -7,7 +7,7 @@
 #define SERVERPORT 9000
 
 
-// #define Sever_Debug_Mode
+#define Sever_Debug_Mode
 
 DWORD WINAPI ServerMain(LPVOID arg);
 DWORD WINAPI ProcessClient(LPVOID arg);
