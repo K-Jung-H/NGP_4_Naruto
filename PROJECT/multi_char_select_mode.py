@@ -13,12 +13,16 @@ from network_client import NetworkClient
 character_count = 3
 
 def handle_char_select_data(data):
-    global p1_choose, p2_choose, p1_ready, p2_ready
+    global p1_choose, p2_choose, p1_ready, p2_ready, p1_name, p2_name
     # 플레이어 1과 2의 상태 확인
     p1_ready = data[7]
     p2_ready = data[15]
     p1_choose = data[5]
     p2_choose = data[13]
+
+    p1_name = data[0]
+    p2_name = data[8]
+    # print(p1_name, p2_name)
 
     # 캐릭터 선택 상태 출력
     # print(f"Player 1 Ready: {p1_ready}, Selected Character: {p1_selected_char}")
@@ -70,6 +74,9 @@ def init():
     # if network_client:
     #     print("소켓 재사용")
     game_framework.set_data_handler(handle_char_select_data)
+    # init_data = game_framework.receive_game_data(game_framework.network_client.client_socket)
+
+
     game_framework.reset_stop_event()
     game_framework.start_receiver_thread()
     # receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
@@ -111,8 +118,8 @@ def draw():
     dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, 'h', 300 - 160, 370, dir_image.w, dir_image.h)
     dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, '', 900 + 160, 370, dir_image.w, dir_image.h)
     dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, 'h', 900 - 160, 370, dir_image.w, dir_image.h)
-    p1_image.clip_composite_draw(0, 0, 64, 32, 0, '', 900, 520, 120, 60)
-    p2_image.clip_composite_draw(0, 0, 64, 32, 0, '', 300, 520, 120, 60)
+    # p1_image.clip_composite_draw(0, 0, 64, 32, 0, '', 900, 520, 120, 60)
+    # p2_image.clip_composite_draw(0, 0, 64, 32, 0, '', 300, 520, 120, 60)
 
     if p1_choose == 1:
         naruto_back.clip_composite_draw(0, 0, naruto_back.w, naruto_back.h, 0, 'h', 900, 330,
@@ -164,10 +171,21 @@ def draw():
         press_space.clip_composite_draw(0, 0, press_space.w, press_space.h, 0, '', 600, 70 - space_frame,
                                         press_space.w * 0.15, press_space.h * 0.15)
 
+    draw_text(clean_name(p1_name), 800, 520, 50)
+    draw_text(clean_name(p2_name), 150, 520, 50)
 
     if dup_on:
         duplicate.clip_composite_draw(0, 0, 5906, 4135, 0, '', 600, 300, 600, 300)
     update_canvas()
+
+def draw_text(text, x, y, size):
+    # font = load_font("C:/Windows/Fonts/Arial.ttf", size)
+    font = load_font("resource/Arial.ttf", size)
+    font.draw(x, y, text, (0, 0, 0))  # 흰색 텍스트
+
+def clean_name(name_bytes):
+    """바이트 문자열에서 깨끗한 문자열 추출"""
+    return name_bytes.decode('utf-8', errors='ignore').rstrip('\x00').strip()
 
 def update():
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up, dup_wait_time, dup_on
