@@ -15,6 +15,9 @@ running = None
 stack = None
 network_client = None  # 전역 소켓 객체 선언
 
+my_player_name = None
+enemy_player_name = None
+
 KEY_DOWN = 1
 KEY_UP = 2
 
@@ -33,11 +36,13 @@ etc_info_format = "5i"
 game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_format}"
 data_size = struct.calcsize(game_data_format)
 
-def send_key_info(key_name, key_action):
-    """키 정보를 패킹하여 서버로 전송"""
+def send_key_info(key_name, key_action, extra_data):
+    """키 정보를 패킹하여 서버로 전송 (추가 데이터 포함)"""
     key_code = key_codes.get(key_name, 0)  # key_name을 key_code로 변환
     if network_client.client_socket:
-        data = struct.pack('ii', key_code, key_action)
+        # 32바이트로 고정된 문자열 데이터 생성
+        padded_data = extra_data.encode('utf-8').ljust(32, b'\0')  # 32바이트로 패딩
+        data = struct.pack('ii32s', key_code, key_action, padded_data)
         network_client.client_socket.sendall(data)
 
 def key_listener():
@@ -49,13 +54,13 @@ def key_listener():
             if event.event_type == keyboard.KEY_DOWN:
                 key_data = event.name
                 if key_data not in pressed_keys:
-                    send_key_info(key_data, KEY_DOWN)
+                    send_key_info(key_data, KEY_DOWN, "test")
                     pressed_keys.add(key_data)
 
             elif event.event_type == keyboard.KEY_UP:
                 key_data = event.name
                 if key_data in pressed_keys:
-                    send_key_info(key_data, KEY_UP)
+                    send_key_info(key_data, KEY_UP, "test")
                     pressed_keys.remove(key_data)
         except Exception as e:
             print(f"Error in key listener: {e}")
@@ -83,8 +88,9 @@ def set_data_handler(handler):
     data_handler = handler
 
 def receive_game_data(client_socket):
-    """서버로부터 고정된 크기의 게임 데이터를 수신."""
+    """서버로부터 고정된 크기의 게임 데이터를 수신하고, 루프 실행 시간을 출력."""
     data = b""
+
     while len(data) < data_size:
         packet = client_socket.recv(data_size - len(data))
         if not packet:
@@ -98,6 +104,8 @@ def receive_game_data(client_socket):
 
 def receive_game_data_loop():
     """서버로부터 데이터를 계속 수신하고 핸들러에 전달."""
+    count = 0  # 수신 횟수 카운트
+    start_time = time.time()  # 시작 시간
     try:
         while not stop_event.is_set():
             unpacked_data = receive_game_data(network_client.client_socket)
@@ -105,6 +113,13 @@ def receive_game_data_loop():
                 break
             if data_handler:
                 data_handler(unpacked_data)  # 언패킹된 데이터 전달
+                count += 1
+                # 1초가 지났는지 확인
+                elapsed_time = time.time() - start_time
+                if elapsed_time >= 1.0:
+                    print(f"초당 수신 횟수: {count}")
+                    count = 0  # 카운트 초기화
+                    start_time = time.time()  # 시간 초기화
     except Exception as e:
         print(f"Error in receive thread: {e}")
     finally:

@@ -157,110 +157,11 @@ def handle_multi_play_data(unpacked_data):
     p2_chakra = unpacked_data[-2]
     game_time = unpacked_data[-1]
 
-    # 디버깅 정보 출력
-    print(f"Player 1: HP={p1_hp}, Chakra={p1_chakra}")
-    print(f"Player 2: HP={p2_hp}, Chakra={p2_chakra}")
-    print(f"Game Time: {game_time}")
-
-def receive_game_data(client_socket):
-    global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time
-
-    data = b""
-    while len(data) < data_size:
-        # print(data_size)
-        packet = client_socket.recv(data_size - len(data))
-        if not packet:
-            print("연결이 종료되었습니다.")
-            return None
-        data += packet
-
-    # # 클라이언트의 IPv4 주소 출력
-    # client_ipv4 = network_client.get_ipv4_address()
-    # if client_ipv4:
-    #     print(f"클라이언트의 IPv4 주소: {client_ipv4}")
-    # else:
-    #     print("IPv4 주소를 가져오는 데 실패했습니다.")
-
-    # data += client_socket.recv(data_size)
-    # 데이터 언패킹
-    unpacked_data = struct.unpack(game_data_format, data)
-    # print("Unpacked data:", unpacked_data)  # 디버깅용
-
-    # 플레이어 1 업데이트
-    p1.x = unpacked_data[1]
-    p1.y = unpacked_data[2]
-    p1.dir = unpacked_data[3]
-    p1_state = unpacked_data[4]
-    p1.cur_state = state_mapping.get(p1_state, Idle)  # 기본값은 Idle로 설정
-    p1.frame = unpacked_data[6]
-
-    # extra_state_data에 여러개의 값이 있는 경우를 위한 for?
-    if p1_state in extra_state_data:
-        for key, value in extra_state_data[p1_state].items():
-            setattr(p1, key, value)
-
-    # print(unpacked_data[0], unpacked_data[8])
-    # print("p1 ready : ", unpacked_data[7], "p2 ready : ", unpacked_data[15])
-    if unpacked_data[8]:
-        # 플레이어 2 업데이트
-        p2.x = unpacked_data[9]
-        p2.y = unpacked_data[10]
-        p2.dir = unpacked_data[11]
-        p2_state = unpacked_data[12]
-        p2.cur_state = state_mapping.get(p2_state, Idle)
-        p2.frame = unpacked_data[14]
-
-        if p2_state in extra_state_data:
-            for key, value in extra_state_data[p2_state].items():
-                setattr(p2, key, value)
-
-    # print(unpacked_data[5], unpacked_data[13])
-
-    # 각 공격 데이터를 슬라이싱하여 그룹화
-    attacks = [
-        unpacked_data[i:i + 5] for i in range(16, 16 + 18 * 5, 5)
-    ]
-
-    for i, attack in enumerate(attacks):
-        if len(attack) >= 5:  # 공격 데이터가 유효한지 확인
-            if int(attack[3]) > 0:  # 유효한 스킬 데이터만 활성화
-                skills[i].activate(
-                    skill_type=int(attack[3]),
-                    x=attack[0],
-                    y=attack[1],
-                    dir=attack[2],
-                    sprite_index=attack[4]
-                )
-            else:
-                skills[i].deactivate()
-        else:
-            print(f"Invalid attack data at index {i}: {attack}")
-
-    p1.hp = unpacked_data[-5]
-    p1_chakra = unpacked_data[-4]
-    p2.hp = unpacked_data[-3]
-    p2_chakra = unpacked_data[-2]
-    game_time = unpacked_data[-1]
-
-def receive_game_data_loop(client_socket):
-    """서버로부터 데이터를 계속 수신하고 게임 객체를 업데이트."""
-    count = 0  # 수신 횟수 카운트
-    start_time = time.time()  # 시작 시간
-    while True:
-        # try:
-        #     receive_game_data(client_socket)
-        # except Exception as e:
-        #     print(f"데이터 수신 중 오류 발생: {e}")
-        #     break
-        receive_game_data(client_socket)
-        count += 1
-
-        # 1초가 지났는지 확인
-        elapsed_time = time.time() - start_time
-        if elapsed_time >= 1.0:
-            print(f"초당 수신 횟수: {count}")
-            count = 0  # 카운트 초기화
-            start_time = time.time()  # 시간 초기화
+    # # 디버깅 정보 출력
+    # print(f"Player 1: HP={p1_hp}, Chakra={p1_chakra}")
+    # print(f"Player 2: HP={p2_hp}, Chakra={p2_chakra}")
+    # print(f"Game Time: {game_time}")
+    # print(f"Game Time: {game_time}")
 
 def init():
     global network_client
@@ -389,7 +290,7 @@ def init():
         p1.set_background(map)
         p2.set_background(map)
 
-    game_framework.start_key_listener()
+    # game_framework.start_key_listener()
 
     pass
 def finish():

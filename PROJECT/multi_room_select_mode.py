@@ -12,6 +12,8 @@ SERVER_IP = "127.0.0.1"
 
 SERVER_PORT = 9000
 
+name_made = ""
+
 def init():
     global image1, naruto, sasuke, itachi
     global p1_x, p1_y, p2_x, p2_y, p1_choose, p2_choose, p1_image, p2_image, character_back
@@ -64,9 +66,11 @@ def init():
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
     del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
+    game_framework.my_player_name = name_made
+    print("내 이름", game_framework.my_player_name, " 로 설정")
 def handle_events():
     events = get_events()
-    global p1_choose, p2_choose, character_count, dup_on, dup_wait_time
+    global p1_choose, p2_choose, character_count, dup_on, dup_wait_time, name_made
     for event in events:
         if event.type == SDL_QUIT:
             game_framework.quit()
@@ -79,24 +83,13 @@ def handle_events():
             #     dup_on = True
             #     dup_wait_time = get_time()
             game_framework.change_mode(multi_char_select_mode)
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_a:
-            p2_choose = (p2_choose - 1) % character_count
-            if p2_choose == 0:
-                p2_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_d:
-            p2_choose = (p2_choose + 1) % character_count
-            if p2_choose == 0:
-                p2_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_LEFT:
-            p1_choose = (p1_choose - 1) % character_count
-            if p1_choose == 0:
-                p1_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_RIGHT:
-            p1_choose = (p1_choose + 1) % character_count
-            if p1_choose == 0:
-                p1_choose = character_count
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_BACKSPACE:
+            if len(name_made) > 0:  # 문자열이 비어있지 않을 때만 삭제
+                name_made = name_made[:-1]
+        elif event.type == SDL_KEYDOWN:
+            name_made += chr(event.key)
 
 def running():
     pass
@@ -149,6 +142,8 @@ def draw():
     #     itachi_logo.clip_composite_draw(0, 0, itachi_logo.w, itachi_logo.h, 0, '', 300 - 60, 330 - 90,
     #                                     itachi_logo.w * 0.1, itachi_logo.h * 0.1)
 
+    draw_text(f"Name : {name_made}", 200, 300, 50)
+
     if space_up:
         press_space.clip_composite_draw(0, 0, press_space.w, press_space.h, 0, '', 600, 60 + space_frame,
                                         press_space.w * 0.15, press_space.h * 0.15)
@@ -159,6 +154,11 @@ def draw():
     if dup_on:
         duplicate.clip_composite_draw(0, 0, 5906, 4135, 0, '', 600, 300, 600, 300)
     update_canvas()
+
+def draw_text(text, x, y, size):
+    # font = load_font("C:/Windows/Fonts/Arial.ttf", size)
+    font = load_font("resource/Arial.ttf", size)
+    font.draw(x, y, text, (0, 0, 0))  # 흰색 텍스트
 
 def update():
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up, dup_wait_time, dup_on
