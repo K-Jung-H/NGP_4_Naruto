@@ -191,8 +191,8 @@ def draw():
         press_space.clip_composite_draw(0, 0, press_space.w, press_space.h, 0, '', 600, 70 - space_frame,
                                         press_space.w * 0.15, press_space.h * 0.15)
 
-    draw_text(clean_name(p1_name), 800, 520, 50)
-    draw_text(clean_name(p2_name), 150, 520, 50)
+    draw_centered_text(clean_name(p1_name), 900, 520, 50)
+    draw_centered_text(clean_name(p2_name), 300, 520, 50)
 
     if dup_on:
         duplicate.clip_composite_draw(0, 0, 5906, 4135, 0, '', 600, 300, 600, 300)
@@ -202,6 +202,13 @@ def draw_text(text, x, y, size):
     # font = load_font("C:/Windows/Fonts/Arial.ttf", size)
     font = load_font("resource/Arial.ttf", size)
     font.draw(x, y, text, (0, 0, 0))  # 흰색 텍스트
+
+def draw_centered_text(text, center_x, y, font_size):
+    """중앙 정렬된 텍스트를 렌더링."""
+    text_width = len(text) * font_size * 0.5  # 문자열의 너비 계산
+    print(len(text))
+    start_x = center_x - (text_width // 2)  # 중앙 정렬 좌표
+    draw_text(text, start_x, y, font_size)
 
 def clean_name(name_bytes):
     """바이트 문자열에서 깨끗한 문자열 추출"""

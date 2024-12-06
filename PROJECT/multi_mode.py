@@ -396,8 +396,8 @@ def draw():
     elif 900 < fight_frame <= 1500:
         fight.clip_composite_draw(0, 0, 1601, 786, 0, '', 600, int(fight_frame)-600, 473, 228)
 
-    draw_text(p1_name, 800, 520, 20)
-    draw_text(p2_name, 150, 520, 20)
+    draw_text(p1_name, 1200 - len(p1_name) * 15, 480, 20)
+    draw_text(p2_name, 10, 480, 20)
     # print(p1_name, p2_name)
 
     if p1.hp == 0 or p2.hp == 0:
