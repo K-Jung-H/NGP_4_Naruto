@@ -86,6 +86,8 @@ def init():
     # receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
     # receiver_thread.start()
     game_framework.start_key_listener()
+    # 이름 업데이트를 위한 센드
+    game_framework.send_key_info('z', 1, game_framework.my_player_name)
     pass
     # else:
     #     print("전역소켓 설정안된듯")

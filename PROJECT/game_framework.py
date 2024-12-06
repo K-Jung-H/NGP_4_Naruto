@@ -56,13 +56,13 @@ def key_listener():
             if event.event_type == keyboard.KEY_DOWN:
                 key_data = event.name
                 if key_data not in pressed_keys:
-                    send_key_info(key_data, KEY_DOWN, "test")
+                    send_key_info(key_data, KEY_DOWN, my_player_name)
                     pressed_keys.add(key_data)
 
             elif event.event_type == keyboard.KEY_UP:
                 key_data = event.name
                 if key_data in pressed_keys:
-                    send_key_info(key_data, KEY_UP, "test")
+                    send_key_info(key_data, KEY_UP, my_player_name)
                     pressed_keys.remove(key_data)
         except Exception as e:
             print(f"Error in key listener: {e}")
