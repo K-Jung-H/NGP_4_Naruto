@@ -192,6 +192,9 @@ void Server::Update_Collision(float Elapsed_time)
 					{
 						p1_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE); 
 						p1_ptr->hp -= Shuriken_Damage;
+
+						attack_ptr->life = false;
+
 					}
 					else if (is_hurt) // ½ºÅ³ °´Ã¼
 					{
