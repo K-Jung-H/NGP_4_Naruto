@@ -23,8 +23,6 @@ from server_connect import server_ip
 TEST = True
 LOCAL = False
 
-Input_thread_running = True
-
 # 서버 설정
 if TEST:
     if LOCAL:
@@ -38,68 +36,9 @@ else:
 
 SERVER_PORT = 9000
 
-pressed_keys = set()
-# 키 동작 정의
-KEY_DOWN = 1
-KEY_UP = 2
-
-# key_name에 해당하는 키 코드 매핑 예시
-key_codes = {
-    'a': 65,
-    'd': 68,
-    's': 83,
-    'w': 87,
-    'left': 65,
-    'right': 68,
-    'down': 83,
-    'up': 87,
-    'l': 76,
-    ';': 59,
-    ',': 44,
-    '/': 47,
-    '.': 46,
-    'f': 76,
-    'g': 59,
-    'c': 44,
-    'v': 46,
-    'b': 47
-}
-
-def send_key_info(key_name, key_action):
-    """키 정보를 패킹하여 서버로 전송"""
-    key_code = key_codes.get(key_name, 0)  # key_name을 key_code로 변환
-    data = struct.pack('ii', key_code, key_action)
-    network_client.client_socket.sendall(data)
-
-
-# 키 입력을 감지하고 서버로 전송하는 함수
-def key_listener():
-    global Input_thread_running
-    while Input_thread_running:
-        event = keyboard.read_event()
-        if event.event_type == keyboard.KEY_DOWN:
-            key_data = event.name
-            # 키가 처음 눌린 경우에만 서버로 전송
-            if key_data not in pressed_keys:
-                if TEST:
-                    # 서버로 키 다운 정보 전송
-                    send_key_info(key_data, KEY_DOWN)
-                # 눌린 키로 등록
-                pressed_keys.add(key_data)
-
-        elif event.event_type == keyboard.KEY_UP:
-            key_data = event.name
-            # 키가 처음 떼어진 경우에만 서버로 전송
-            if key_data in pressed_keys:
-                if TEST:
-                    # 서버로 키 업 정보 전송
-                    send_key_info(key_data, KEY_UP)  # 키 업 전송
-                # 눌린 키에서 제거
-                pressed_keys.remove(key_data)
-
 # 각 구조체의 포맷 정의
 position_format = "2f"  # Position 구조체
-player_info_format = "32s2f?3i"  # Player_Info 구조체
+player_info_format = "32s2f?3i?"  # Player_Info 구조체
 attack_info_format = "2f?2i"  # Attack_Info 구조체
 etc_info_format = "5i"  # ETC_Info 구조체
 game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_format}"  # Game_Data 전체 포맷
@@ -161,6 +100,68 @@ extra_state_data = {
     STATE_ATTACK_SKILL_3: {"skill_num": 'skill1'},
 }
 
+def handle_multi_play_data(unpacked_data):
+    """멀티플레이 모드에서 언패킹된 데이터 처리."""
+    global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time
+
+    # 플레이어 1 업데이트
+    p1.x = unpacked_data[1]
+    p1.y = unpacked_data[2]
+    p1.dir = unpacked_data[3]
+    p1_state = unpacked_data[4]
+    p1.cur_state = state_mapping.get(p1_state, Idle)  # 기본값은 Idle로 설정
+    p1.frame = unpacked_data[6]
+
+    # 추가 상태 데이터가 있을 경우 처리
+    if p1_state in extra_state_data:
+        for key, value in extra_state_data[p1_state].items():
+            setattr(p1, key, value)
+
+    # 플레이어 2가 활성화된 경우 업데이트
+    if unpacked_data[8]:  # p2가 활성화된 경우
+        p2.x = unpacked_data[9]
+        p2.y = unpacked_data[10]
+        p2.dir = unpacked_data[11]
+        p2_state = unpacked_data[12]
+        p2.cur_state = state_mapping.get(p2_state, Idle)
+        p2.frame = unpacked_data[14]
+
+        if p2_state in extra_state_data:
+            for key, value in extra_state_data[p2_state].items():
+                setattr(p2, key, value)
+
+    # 공격 데이터를 처리
+    attacks = [
+        unpacked_data[i:i + 5] for i in range(16, 16 + 18 * 5, 5)
+    ]
+
+    for i, attack in enumerate(attacks):
+        if len(attack) >= 5:  # 공격 데이터 유효성 검사
+            if int(attack[3]) > 0:  # 유효한 스킬 데이터만 활성화
+                skills[i].activate(
+                    skill_type=int(attack[3]),
+                    x=attack[0],
+                    y=attack[1],
+                    dir=attack[2],
+                    sprite_index=attack[4]
+                )
+            else:
+                skills[i].deactivate()
+        else:
+            print(f"Invalid attack data at index {i}: {attack}")
+
+    # 게임 상태 정보 업데이트
+    p1_hp = unpacked_data[-5]
+    p1_chakra = unpacked_data[-4]
+    p2_hp = unpacked_data[-3]
+    p2_chakra = unpacked_data[-2]
+    game_time = unpacked_data[-1]
+
+    # 디버깅 정보 출력
+    print(f"Player 1: HP={p1_hp}, Chakra={p1_chakra}")
+    print(f"Player 2: HP={p2_hp}, Chakra={p2_chakra}")
+    print(f"Game Time: {game_time}")
+
 def receive_game_data(client_socket):
     global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time
 
@@ -172,6 +173,13 @@ def receive_game_data(client_socket):
             print("연결이 종료되었습니다.")
             return None
         data += packet
+
+    # # 클라이언트의 IPv4 주소 출력
+    # client_ipv4 = network_client.get_ipv4_address()
+    # if client_ipv4:
+    #     print(f"클라이언트의 IPv4 주소: {client_ipv4}")
+    # else:
+    #     print("IPv4 주소를 가져오는 데 실패했습니다.")
 
     # data += client_socket.recv(data_size)
     # 데이터 언패킹
@@ -191,23 +199,26 @@ def receive_game_data(client_socket):
         for key, value in extra_state_data[p1_state].items():
             setattr(p1, key, value)
 
-    # 플레이어 2 업데이트
-    p2.x = unpacked_data[8]
-    p2.y = unpacked_data[9]
-    p2.dir = unpacked_data[10]
-    p2_state = unpacked_data[11]
-    p2.cur_state = state_mapping.get(p2_state, Idle)
-    p2.frame = unpacked_data[13]
+    # print(unpacked_data[0], unpacked_data[8])
+    # print("p1 ready : ", unpacked_data[7], "p2 ready : ", unpacked_data[15])
+    if unpacked_data[8]:
+        # 플레이어 2 업데이트
+        p2.x = unpacked_data[9]
+        p2.y = unpacked_data[10]
+        p2.dir = unpacked_data[11]
+        p2_state = unpacked_data[12]
+        p2.cur_state = state_mapping.get(p2_state, Idle)
+        p2.frame = unpacked_data[14]
 
-    if p2_state in extra_state_data:
-        for key, value in extra_state_data[p2_state].items():
-            setattr(p2, key, value)
+        if p2_state in extra_state_data:
+            for key, value in extra_state_data[p2_state].items():
+                setattr(p2, key, value)
 
-    # print(unpacked_data[5], unpacked_data[12])
+    # print(unpacked_data[5], unpacked_data[13])
 
     # 각 공격 데이터를 슬라이싱하여 그룹화
     attacks = [
-        unpacked_data[i:i + 5] for i in range(14, 14 + 18 * 5, 5)
+        unpacked_data[i:i + 5] for i in range(16, 16 + 18 * 5, 5)
     ]
 
     for i, attack in enumerate(attacks):
@@ -225,9 +236,9 @@ def receive_game_data(client_socket):
         else:
             print(f"Invalid attack data at index {i}: {attack}")
 
-    p1_hp = unpacked_data[-5]
+    p1.hp = unpacked_data[-5]
     p1_chakra = unpacked_data[-4]
-    p2_hp = unpacked_data[-3]
+    p2.hp = unpacked_data[-3]
     p2_chakra = unpacked_data[-2]
     game_time = unpacked_data[-1]
 
@@ -259,7 +270,7 @@ def init():
     global game_data
     global skills
     global health_bar, health_hp, naruto_mug, sasuke_mug, itachi_mug, chakra_image, chakra_frame
-    global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp, p1_mug, p2_mug
+    global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp, p1_mug, p2_mug, receiver_thread
 
     health_bar = load_image('resource/health_bar.png')
     health_hp = load_image('resource/health_hp.png')
@@ -285,26 +296,27 @@ def init():
             pass
         else:
             # 네트워크 클라이언트 초기화 및 연결
-            network_client = NetworkClient(SERVER_IP, SERVER_PORT)
-            network_client.connect()
+            # network_client = NetworkClient(SERVER_IP, SERVER_PORT)
+            # network_client.connect()
+            pass
 
         # 송수신 버퍼 크기 설정
-        new_buf_size = 492
-        network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, new_buf_size)
-        network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, new_buf_size)
+        # new_buf_size = 512
+        # network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, new_buf_size)
+        # network_client.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, new_buf_size)
+        #
+        # recv_buf_size = network_client.client_socket.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
+        # send_buf_size = network_client.client_socket.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
+        #
+        # print(f"수신 버퍼 크기: {recv_buf_size} bytes")
+        # print(f"송신 버퍼 크기: {send_buf_size} bytes")
 
-        recv_buf_size = network_client.client_socket.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
-        send_buf_size = network_client.client_socket.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
-
-        print(f"수신 버퍼 크기: {recv_buf_size} bytes")
-        print(f"송신 버퍼 크기: {send_buf_size} bytes")
-
-        game_framework.set_socket(network_client)
+        # game_framework.set_socket(network_client)
 
         data = b""
         while len(data) < data_size:
             # print(data_size)
-            packet = network_client.client_socket.recv(data_size - len(data))
+            packet = game_framework.network_client.client_socket.recv(data_size - len(data))
             if not packet:
                 print("연결이 종료되었습니다.")
                 return None
@@ -319,13 +331,17 @@ def init():
             p1 = ITACHI_MULTI(1)
         game_world.add_object(p1, 1)
 
-        if unpacked_data[12] == 1:
-            p2 = NARUTO_MULTI(2)
-        elif unpacked_data[12] == 2:
-            p2 = SASUKE_MULTI(2)
-        elif unpacked_data[12] == 3:
+        if unpacked_data[12]:
+            if unpacked_data[12] == 1:
+                p2 = NARUTO_MULTI(2)
+            elif unpacked_data[12] == 2:
+                p2 = SASUKE_MULTI(2)
+            elif unpacked_data[12] == 3:
+                p2 = ITACHI_MULTI(2)
+            game_world.add_object(p2, 1)
+        else:
             p2 = ITACHI_MULTI(2)
-        game_world.add_object(p2, 1)
+            game_world.add_object(p2, 1)
 
         p1_mug = p1.char_name
         p2_mug = p2.char_name
@@ -336,12 +352,10 @@ def init():
             game_world.add_object(skill, 2)
             skill.set_background(map)
 
-
-
-
-        receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
-        receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
-        receiver_thread.start()
+        game_framework.set_data_handler(handle_multi_play_data)
+        # receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
+        # receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
+        # receiver_thread.start()
         # receiver_thread = threading.Thread(target=Decoding, args=(network_client.client_socket,))
         # receiver_thread.start()
 
@@ -375,27 +389,23 @@ def init():
         p1.set_background(map)
         p2.set_background(map)
 
-
-
-    # 키 입력 감지 쓰레드 시작
-    client_Input_thread = threading.Thread(target=key_listener)
-    client_Input_thread.start()
+    game_framework.start_key_listener()
 
     pass
 def finish():
-    global Input_thread_running
-    global network_client
+    global network_client, receiver_thread
     network_client = game_framework.get_socket()
     if network_client:
-        network_client.disconnect()
+        # network_client.disconnect()
+        pass
     if TEST:
         # network_client.disconnect()
         pass
+    # receiver_thread.join()
     game_world.remove_object(p1)
     game_world.remove_object(p2)
     game_world.remove_object(map)
     game_world.objects[2] = []
-    Input_thread_running = False
 
 def handle_events():
     events = get_events()
@@ -474,6 +484,9 @@ def draw():
     elif 900 < fight_frame <= 1500:
         fight.clip_composite_draw(0, 0, 1601, 786, 0, '', 600, int(fight_frame)-600, 473, 228)
 
+    if p1.hp == 0 or p2.hp == 0:
+
+        ko.clip_composite_draw(0, 0, 473, 228, 0, '', 600, 300, 473, 228)
     update_canvas()
 
 def update():

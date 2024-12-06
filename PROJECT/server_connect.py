@@ -10,7 +10,7 @@ from network_client import NetworkClient
 character_count = 3
 
 SERVER_IP = "127.0.0.1"
-server_ip = ""  # 사용자가 입력할 서버 IP
+server_ip = "127.0.0.1"  # 사용자가 입력할 서버 IP
 input_active = True  # 입력 중인지 여부
 
 SERVER_PORT = 9000
@@ -73,22 +73,27 @@ def handle_events():
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()
-            game_framework.change_mode(multi_room_select_mode)
+            # game_framework.change_mode(multi_room_select_mode)
+            pass
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_RETURN:
-            global network_client
-            network_client = game_framework.get_socket()
-            if network_client:
-                print("소켓 재사용 중")
-            else:
-                network_client = NetworkClient(server_ip, SERVER_PORT)
-                game_framework.set_socket(network_client)
-                network_client.connect()
-                if not network_client.is_connected:
-                    print("서버 안열림 or ip 잘못 치심")
-                    game_framework.change_mode(mode_choose_mode)
-                    break
+            # global network_client
+            # network_client = game_framework.get_socket()
+            print("서버 커넥트 소켓 유무 테스트 : ", game_framework.get_socket())
+            # print("서버 커넥트 소켓 유무 테스트 : ", network_client)
+            # if network_client:
+            #     print("소켓 재사용 중")
+            #     game_framework.network_client = None
+            # else:
+            network_client = NetworkClient(server_ip, SERVER_PORT)
+            game_framework.set_socket(network_client)
+            game_framework.network_client.connect()
+            if not network_client.is_connected:
+                print("서버 안열림 or ip 잘못 치심")
+                mode_choose_mode.connect_fail_flag = True
+                game_framework.change_mode(mode_choose_mode)
+                break
             game_framework.change_mode(multi_room_select_mode)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_BACKSPACE:
             if len(server_ip) > 0:  # 문자열이 비어있지 않을 때만 삭제
@@ -178,7 +183,8 @@ def draw():
     update_canvas()
 
 def draw_text(text, x, y, size):
-    font = load_font("C:/Windows/Fonts/Arial.ttf", size)
+    # font = load_font("C:/Windows/Fonts/Arial.ttf", size)
+    font = load_font("resource/Arial.ttf", size)
     font.draw(x, y, text, (0, 0, 0))  # 흰색 텍스트
 
 def update():

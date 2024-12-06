@@ -31,6 +31,20 @@ class NetworkClient:
         self.is_connected = False
         print("서버와의 연결이 종료되었습니다.")
 
+    def get_ipv4_address(self):
+        """
+        클라이언트의 IPv4 주소를 반환합니다.
+        """
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                # 임의의 외부 주소로 연결 (데이터 전송 없이 IP를 알아냄)
+                s.connect(("8.8.8.8", 80))
+                return s.getsockname()[0]
+        except Exception as e:
+            print(f"IPv4 주소 가져오기 오류: {e}")
+            return None
+
     def __del__(self):
         # 객체 소멸 시 disconnect 호출
         self.disconnect()
+
