@@ -13,7 +13,7 @@ from network_client import NetworkClient
 character_count = 3
 
 def handle_char_select_data(data):
-    global p1_choose, p2_choose
+    global p1_choose, p2_choose, p1_ready, p2_ready
     # 플레이어 1과 2의 상태 확인
     p1_ready = data[7]
     p2_ready = data[15]
@@ -34,7 +34,7 @@ def init():
     global vs, press_space
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up
     global duplicate, dup_on, dup_wait_time, dir_image, mode_choose
-    global naruto_back, sasuke_back, itachi_back, naruto_logo, sasuke_logo, itachi_logo
+    global naruto_back, sasuke_back, itachi_back, naruto_logo, sasuke_logo, itachi_logo, ready_logo
     image1 = load_image('resource/title_main.png')
     naruto = load_image('resource/naruto_idle.png')
     sasuke = load_image('resource/sasuke_idle.png')
@@ -52,6 +52,7 @@ def init():
     naruto_logo = load_image('resource/naruto_logo1.png')
     sasuke_logo = load_image('resource/sasuke_logo.png')
     itachi_logo = load_image('resource/itachi_logo.png')
+    ready_logo = load_image('resource/ready.png')
     p1_x = 900
     p1_y = 360
     p2_x = 300
@@ -97,22 +98,6 @@ def handle_events():
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_a:
-            p2_choose = (p2_choose - 1) % character_count
-            if p2_choose == 0:
-                p2_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_d:
-            p2_choose = (p2_choose + 1) % character_count
-            if p2_choose == 0:
-                p2_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_LEFT:
-            p1_choose = (p1_choose - 1) % character_count
-            if p1_choose == 0:
-                p1_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_RIGHT:
-            p1_choose = (p1_choose + 1) % character_count
-            if p1_choose == 0:
-                p1_choose = character_count
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
 
@@ -167,12 +152,18 @@ def draw():
         itachi_logo.clip_composite_draw(0, 0, itachi_logo.w, itachi_logo.h, 0, '', 300 - 60, 330 - 90,
                                         itachi_logo.w * 0.1, itachi_logo.h * 0.1)
 
+    if p1_ready:
+        ready_logo.clip_composite_draw(0, 0, ready_logo.w, ready_logo.h, 0, '', 900, 120, ready_logo.w*0.3, ready_logo.h*0.3)
+    if p2_ready:
+        ready_logo.clip_composite_draw(0, 0, ready_logo.w, ready_logo.h, 0, '', 300, 120, ready_logo.w*0.3, ready_logo.h*0.3)
+
     if space_up:
         press_space.clip_composite_draw(0, 0, press_space.w, press_space.h, 0, '', 600, 60 + space_frame,
                                         press_space.w * 0.15, press_space.h * 0.15)
     else:
         press_space.clip_composite_draw(0, 0, press_space.w, press_space.h, 0, '', 600, 70 - space_frame,
                                         press_space.w * 0.15, press_space.h * 0.15)
+
 
     if dup_on:
         duplicate.clip_composite_draw(0, 0, 5906, 4135, 0, '', 600, 300, 600, 300)

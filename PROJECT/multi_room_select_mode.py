@@ -89,7 +89,12 @@ def handle_events():
             if len(name_made) > 0:  # 문자열이 비어있지 않을 때만 삭제
                 name_made = name_made[:-1]
         elif event.type == SDL_KEYDOWN:
-            name_made += chr(event.key)
+            # ASCII 범위로 필터링: 알파벳(a-z, A-Z), 숫자(0-9)만 처리
+            if event.key is not None and 32 <= event.key <= 126:  # ASCII 범위 확인
+                if len(name_made) < 32:  # char[32] 크기를 넘지 않도록 제한
+                    name_made += chr(event.key)
+                else:
+                    print("Name cannot exceed 32 characters.")
 
 def running():
     pass
