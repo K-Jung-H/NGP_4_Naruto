@@ -236,9 +236,9 @@ def receive_game_data(client_socket):
         else:
             print(f"Invalid attack data at index {i}: {attack}")
 
-    p1_hp = unpacked_data[-5]
+    p1.hp = unpacked_data[-5]
     p1_chakra = unpacked_data[-4]
-    p2_hp = unpacked_data[-3]
+    p2.hp = unpacked_data[-3]
     p2_chakra = unpacked_data[-2]
     game_time = unpacked_data[-1]
 
@@ -448,8 +448,8 @@ def draw():
     game_world.render()
     health_bar.clip_composite_draw(0, 0, 402, 22, 0, '', 300, 570, 402, 30)
     health_bar.clip_composite_draw(0, 0, 402, 22, 0, '', 900, 570, 402, 30)
-    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 300 - (400 - p2.hp) // 2, 570, p2.hp, 28)
-    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 900 - (400 - p1.hp) // 2, 570, p1.hp, 28)
+    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 300 - (400 - p2_hp) // 2, 570, p2_hp, 28)
+    health_hp.clip_composite_draw(0, 0, 8, 9, 0, '', 900 - (400 - p1_hp) // 2, 570, p1_hp, 28)
     if p2_chakra >= 30:
         chakra_image.clip_composite_draw(int(chakra_frame) * 32, 0, 32, 56, 0, '', 120, 520, 32, 56)
     if p2_chakra >= 60:
