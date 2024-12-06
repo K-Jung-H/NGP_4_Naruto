@@ -12,6 +12,9 @@ from network_client import NetworkClient
 
 character_count = 3
 
+p1_ready = False
+p2_ready = False
+
 def handle_char_select_data(data):
     global p1_choose, p2_choose, p1_ready, p2_ready, p1_name, p2_name
     # 플레이어 1과 2의 상태 확인
@@ -90,6 +93,8 @@ def init():
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
     del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
+
+
 def handle_events():
     events = get_events()
     global p1_choose, p2_choose, character_count, dup_on, dup_wait_time
@@ -99,6 +104,19 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
+            # 이게 원래 써야되는 코드
+            # print(game_framework.my_player_name, clean_name(p1_name))
+            # if clean_name(p1_name) == game_framework.my_player_name:
+            #     game_framework.my_player_num = 1
+            #     game_framework.enemy_player_name = clean_name(p2_name)
+            #     print(game_framework.my_player_name, p1_name)
+            # elif clean_name(p2_name) == game_framework.my_player_name:
+            #     game_framework.my_player_num = 2
+            #     game_framework.enemy_player_name = clean_name(p1_name)
+            # 테스트용
+            game_framework.my_player_num = 1
+            game_framework.enemy_player_name = clean_name(p2_name)
+            print(game_framework.my_player_name, game_framework.enemy_player_name)
             game_framework.change_mode(multi_mode)
             # if p1_choose != p2_choose:
             #     game_framework.change_mode(play_mode)
