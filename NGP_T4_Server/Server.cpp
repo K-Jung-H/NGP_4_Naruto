@@ -58,16 +58,19 @@ void Server::Add_P1(Object* p_ptr, int select_character)
 {
 	p1_ptr = static_cast<Player*>(p_ptr);
 	
-	char player_id[32] = "player_1";
+	char player_id[32] = "Server_P1";
 	std::memcpy(p1_ptr->player_ID, player_id, sizeof(player_id));
 
 	p1_ptr->Set_Character(select_character, this);
+
+	server_mode = Server_Mode::Character_Select;
 }
+
 void Server::Add_P2(Object* p_ptr, int select_character) 
 {
 	p2_ptr = static_cast<Player*>(p_ptr);
 
-	char player_id[32] = "player_2";
+	char player_id[32] = "Server_P2";
 	std::memcpy(p2_ptr->player_ID, player_id, sizeof(player_id));
 
 	p2_ptr->Set_Character(select_character, this);
@@ -252,11 +255,75 @@ void Server::Decoding(std::pair<int, Key_Info>* key_info)
 
 	int key = EVENT_NONE;
 
+	if (server_mode == Server_Mode::Character_Select)
+		Select_Mode_Decoding(key_info);
+	else if (server_mode == Server_Mode::Game_Play)
+		Game_Mode_Decoding(key_info);
+
+}
+
+void Server::Select_Mode_Decoding(std::pair<int, Key_Info>* key_info)
+{
+	int client_n = key_info->first;
+	Key_Info key_value = key_info->second;
+	int key = EVENT_NONE;
+
 	switch (key_value.key_name)
 	{
 	case 'a':
 	case 'A':
-		if(key_value.key_action == 1)
+		if (key_value.key_action == 1)
+			key = EVENT_MOVE_LEFT_KEY_DOWN;
+		else
+			key = EVENT_MOVE_LEFT_KEY_UP;
+		break;
+
+	case 'd':
+	case 'D':
+		if (key_value.key_action == 1)
+			key = EVENT_MOVE_RIGHT_KEY_DOWN;
+		else
+			key = EVENT_MOVE_RIGHT_KEY_UP;
+		break;
+	default:
+		break;
+	}
+
+	if (std::memcmp(key_value.player_ID, "None", 4) == 0)
+	{
+		if (p1_ptr != NULL)	p1_ptr->key_update(key);
+		if (p2_ptr != NULL)	p2_ptr->key_update(key);
+	}
+	else
+	{
+		// None이 아니고 이름이 들어있다면 이름 저장 + 캐릭터 선택 
+		if (p1_ptr != NULL && client_n == 1)
+			if (std::memcmp(key_value.player_ID, "None", 4) != 0)
+			{
+				std::memcpy(p1_ptr->player_ID, key_value.player_ID, sizeof(key_value.player_ID));
+				p1_ptr->key_update(key);
+			}
+
+		// None이 아니고 이름이 들어있다면 이름 저장 + 캐릭터 선택
+		if (p2_ptr != NULL && client_n == 2)
+			if (std::memcmp(key_value.player_ID, "None", 4) != 0)
+			{
+				std::memcpy(p2_ptr->player_ID, key_value.player_ID, sizeof(key_value.player_ID));
+				p2_ptr->key_update(key);
+			}
+	}
+}
+void Server::Game_Mode_Decoding(std::pair<int, Key_Info>* key_info)
+{
+	int client_n = key_info->first;
+	Key_Info key_value = key_info->second;
+	int key = EVENT_NONE;
+
+	switch (key_value.key_name)
+	{
+	case 'a':
+	case 'A':
+		if (key_value.key_action == 1)
 			key = EVENT_MOVE_LEFT_KEY_DOWN;
 		else
 			key = EVENT_MOVE_LEFT_KEY_UP;
@@ -326,19 +393,21 @@ void Server::Decoding(std::pair<int, Key_Info>* key_info)
 		break;
 	}
 
-#ifndef Debug_Mode
-	if (client_n == 1 && p1_ptr != NULL)
-		p1_ptr->key_update(key);
-	else if (client_n == 2 && p2_ptr != NULL)
-		p2_ptr->key_update(key);
-#endif
-
-#ifdef Debug_Mode
-	if (client_n == 1 && p1_ptr != NULL)
-		p1_ptr->key_update(key);
-#endif
+	// "None"이 들어오면 아무 입력 없는 업데이트
+	if (std::memcmp(key_value.player_ID, "None", 4) == 0)
+	{
+		if (p1_ptr != NULL)	p1_ptr->key_update(key);
+		if (p2_ptr != NULL)	p2_ptr->key_update(key);
+	}
+	else
+	{
+		// P1의 입력이라면 복사
+		if (p1_ptr != NULL && std::memcmp(key_value.player_ID, p1_ptr->player_ID, 32) == 0)
+			p1_ptr->key_update(key);
+		else if (p2_ptr != NULL && std::memcmp(key_value.player_ID, p2_ptr->player_ID, 32) == 0)
+			p2_ptr->key_update(key);
+	}
 }
-
 
 Game_Data* Server::Encoding()
 {
@@ -418,43 +487,46 @@ void Server::Broadcast_GameData_All(Game_Data* data)
 
 	// 현재 시간과 마지막 시간 비교
 	auto now = std::chrono::steady_clock::now();
-	auto elapsed_time = std::chrono::duration_cast<std::chrono::seconds>(now - last_time).count();
-	if (elapsed_time >= 1) 
-	{ 
-		// 1초가 경과한 경우
+	auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time).count();
+
+	if (elapsed_time >= 1000) { // 1초가 경과한 경우
+		// 디버그 메시지 출력
 		std::wstring debug_message = L"Broadcast_GameData_All 호출 횟수 (1초): " + std::to_wstring(call_count.load()) + L"\n";
 		OutputDebugString(debug_message.c_str());
 
+		// 1초 타이머 리셋
+		last_time = now;
+		call_count = 0; // 호출 횟수 초기화
+
 		// 출력 (업데이트와 분리)
-		system("cls");
-		std::cout << "=== Debug Info ===\n";
+		{
+			system("cls");
+			std::cout << "=== Debug Info ===\n";
 
-		// 플레이어 정보 출력
-		if (p1_ptr)
-		{
-			std::cout << "p1 - ";
-			p1_ptr->Print_info();
-		}
-		if (p2_ptr)
-		{
-			std::cout << "p2 - ";
-			p2_ptr->Print_info();
-		}
-
-		// 공격 객체 정보 출력
-		int i = 0;
-		for (Object* obj_ptr : Stage_Attack_Object_List)
-		{
-			if (obj_ptr)
+			// 플레이어 정보 출력
+			if (p1_ptr)
 			{
-				std::cout << "Attack_Info " << i << ": ";
-				obj_ptr->Print_info();
+				std::cout << p1_ptr->player_ID << " - ";
+				p1_ptr->Print_info();
 			}
-			++i;
-		}
+			if (p2_ptr)
+			{
+				std::cout << p2_ptr->player_ID << " - ";
+				p2_ptr->Print_info();
+			}
 
-		call_count = 0; // 카운터 초기화
-		last_time = now; // 타이머 갱신
+			// 공격 객체 정보 출력
+			int i = 0;
+			for (Object* obj_ptr : Stage_Attack_Object_List)
+			{
+				if (obj_ptr)
+				{
+					std::cout << "Attack_Info " << i << ": ";
+					obj_ptr->Print_info();
+				}
+				++i;
+			}
+		}
 	}
 
 

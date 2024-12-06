@@ -144,7 +144,7 @@ DWORD WINAPI ServerMain(LPVOID arg)
 // 서버 업데이트 스레드
 DWORD WINAPI ServerUpdateThread(LPVOID arg)
 {
-    int target_fps =100;  // 목표 FPS 설정 (60FPS)
+    int target_fps =200;  // 목표 FPS 설정 (60FPS)
     server_program.Set_FrameRate(target_fps);  // 서버 타이머 시작
     
     while (true)
@@ -152,7 +152,8 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
         // 플레이어가 하나라도 연결되면 서버 업데이트
         if (server_program.Get_Player(1) == NULL && server_program.Get_Player(2) == NULL)
         {
-            // 연결된 플레이어가 없으면 업데이트 안 함
+            // 연결된 플레이어가 없으면 타이머 대기
+            server_program.Wait();
             continue;
         }
 
@@ -162,9 +163,13 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
         // 큐에 저장된 키 입력이 없다면
         if (server_program.Get_Key_Input_Buffer_size() == 0)
         {
-            keyInfo.first = 1;
+            // 이름이 None 인 플레이어의 키입력을 받는 것으로 동작
+            std::strncpy(keyInfo.second.player_ID, "None", sizeof(keyInfo.second.player_ID) - 1);
+            keyInfo.second.player_ID[sizeof(keyInfo.second.player_ID) - 1] = '\0';
             keyInfo.second.key_action = 1;
             keyInfo.second.key_name = 0;
+
+            keyInfo.first = 1;
             server_program.Decoding(&keyInfo);
 
             keyInfo.first = 2;
@@ -268,7 +273,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
         else if (retval > 0)
         {
             // 전달받은 Key_Info 정보 출력
-            std::cout << "Player: " << Client_N 
+            std::cout << "Player: " << keyInfo.player_ID 
                 << ", Received KeyCode: " << keyInfo.key_name 
                 << ", ActionType: " << (keyInfo.key_action == 1 ? "Down" : (keyInfo.key_action == 2 ? "Up" : "Unknown")) 
                 << "\r\n";
