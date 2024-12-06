@@ -98,7 +98,7 @@
 #define Shuriken_Damage 10
 #define Skill_Damage 80
 #define Normal_Damage 20
-#define DOT_Damage 1
+#define DOT_Damage 3
 
 static float PIXEL_PER_METER = (10.0 / 0.3); // 10 pixel 30 cm
 static float  RUN_SPEED_KMPH = 50.0f; // Km / Hour
@@ -164,16 +164,10 @@ struct Game_Data
 
 struct Key_Info
 {
-	//bool type;
 	int key_name;			// 키 정보
 	int key_action;			// 키 상태  down : 1, up : 2
+	char player_ID[32];
 };
-
-//struct Name_Info
-//{
-//	bool type;
-//	char name[11];
-//};
 
 struct Client_Info
 {
