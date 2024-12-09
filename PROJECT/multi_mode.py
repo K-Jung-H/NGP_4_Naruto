@@ -228,9 +228,9 @@ def init():
     # game_framework.set_socket(network_client)
 
     data = b""
-    while len(data) < data_size:
+    while len(data) < game_framework.data_size:
         # print(data_size)
-        packet = game_framework.network_client.client_socket.recv(data_size - len(data))
+        packet = game_framework.network_client.client_socket.recv(game_framework.data_size - len(data))
         if not packet:
             print("연결이 종료되었습니다.")
             return None

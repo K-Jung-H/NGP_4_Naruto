@@ -20,6 +20,7 @@ def handle_char_select_data(data):
     # 플레이어 1과 2의 상태 확인
     p1_ready = data[7]
     p2_ready = data[15]
+    print(p1_ready, p2_ready)
     p1_choose = data[5]
     p2_choose = data[13]
 
@@ -31,18 +32,6 @@ def handle_char_select_data(data):
     # print(f"Player 1 Ready: {p1_ready}, Selected Character: {p1_selected_char}")
     # print(f"Player 2 Ready: {p2_ready}, Selected Character: {p2_selected_char}")
 
-    # 필요에 따라 추가 로직 작성
-    if p1_ready and p2_ready:
-        print("Both players are ready! Starting the game...")
-        print(game_framework.my_player_name, clean_name(p1_name))
-        if clean_name(p1_name) == game_framework.my_player_name:
-            game_framework.my_player_num = 1
-            game_framework.enemy_player_name = clean_name(p2_name)
-            print(game_framework.my_player_name, p1_name)
-        elif clean_name(p2_name) == game_framework.my_player_name:
-            game_framework.my_player_num = 2
-            game_framework.enemy_player_name = clean_name(p1_name)
-        game_framework.change_mode(multi_mode)
 
 def init():
     global image1, naruto, sasuke, itachi
@@ -142,8 +131,19 @@ def handle_events():
             # game_framework.my_player_num = 1
             # game_framework.enemy_player_name = clean_name(p2_name)
             # print(game_framework.my_player_name, game_framework.enemy_player_name)
-
-            game_framework.change_mode(multi_mode)
+            # 필요에 따라 추가 로직 작성
+            if p1_ready and p2_ready:
+                print("Both players are ready! Starting the game...")
+                if clean_name(p1_name) == game_framework.my_player_name:
+                    game_framework.my_player_num = 1
+                    game_framework.enemy_player_name = clean_name(p2_name)
+                elif clean_name(p2_name) == game_framework.my_player_name:
+                    game_framework.my_player_num = 2
+                    game_framework.enemy_player_name = clean_name(p1_name)
+                print('내 플레이어 번호 : ', game_framework.my_player_num)
+                print('내 이름 : ', game_framework.my_player_name)
+                print('적 이름 : ', game_framework.enemy_player_name)
+                game_framework.change_mode(multi_mode)
             # if p1_choose != p2_choose:
             #     game_framework.change_mode(play_mode)
             # else:
