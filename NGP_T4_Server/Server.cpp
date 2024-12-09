@@ -258,6 +258,27 @@ void Server::Update_Collision(float Elapsed_time)
 		}
 	}
 
+	if (p1_ptr->hp < 0.0f)
+	{
+		if(p1_ptr->Get_StateMachine()->Get_State() != 13)
+			p1_ptr->Get_StateMachine()->changeState(State::Lose, EVENT_NONE);
+		if (p2_ptr->Get_StateMachine()->Get_State() != 12)
+			p2_ptr->Get_StateMachine()->changeState(State::Win, EVENT_NONE);
+	}
+	else if(p2_ptr->hp < 0.0f)
+	{
+		if (p1_ptr->Get_StateMachine()->Get_State() != 12)
+			p1_ptr->Get_StateMachine()->changeState(State::Win, EVENT_NONE);
+		if (p2_ptr->Get_StateMachine()->Get_State() != 13)
+			p2_ptr->Get_StateMachine()->changeState(State::Lose, EVENT_NONE);
+	}
+
+	// 아마테라스 겹치는 경우 객체 처리
+	Check_Overlap();
+}
+
+void Server::Check_Overlap()
+{
 	// 아마테라스 겹치는 경우 객체 처리
 	for (int i = 0; i < Stage_Attack_Object_List.size(); ++i)
 	{

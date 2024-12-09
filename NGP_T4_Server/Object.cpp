@@ -255,6 +255,12 @@ void StateMachine::handleEvent(int key_event)
     }
     break;
 
+    case State::Lose:
+    case State::Win:
+    {
+        // 승패가 결정되면 키입력 반응 X
+    }
+
     default:
         break;
     }
@@ -798,6 +804,44 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
     }
     break;
 
+    case State::Win: // 0 ~ 7
+    {
+        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 8);
+        
+        if (pos.y > Ground_Y_Min)
+            pos.y += 1.2 * RUN_SPEED_PPS * ElapsedTime * -2.0f;
+        else if (pos.y <= Ground_Y_Min)
+        {
+            pos.y = float(Ground_Y_Min);
+        }
+    }
+    break;
+
+    case State::Lose:
+    {
+        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 5, false);
+
+        pos.y += 0.3f * RUN_SPEED_PPS * ElapsedTime * (1.0f - (sprite_index * 2));
+
+        if (pos.y > Ground_Y_Min)
+        {
+            if (X_Direction == false) // 왼쪽을 보고 있다면, 오른쪽으로 날아가기
+            {
+                pos.x += RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+            else // 오른쪽을 보고 있다면, 왼쪽으로 날아가기
+            {
+                pos.x -= RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+        }
+        else
+            pos.y = Ground_Y_Min;
+
+        if (sprite_index == 4)
+            sprite_index = 3;
+    }
+    break;
+
 
     default:
         break;
@@ -821,7 +865,6 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
     Stage_Area_Check();
     Set_Draw_Direction();
 }
-
 BoundingBox* Naruto_StateMachine::Get_Player_BoundingBox()
 {
     int x_range = 30;
@@ -1291,6 +1334,43 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
     }
     break;
 
+    case State::Win: // 0 ~ 11
+    {
+        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 12);
+
+        if (pos.y > Ground_Y_Min)
+            pos.y += 1.2 * RUN_SPEED_PPS * ElapsedTime * -2.0f;
+        else if (pos.y <= Ground_Y_Min)
+        {
+            pos.y = float(Ground_Y_Min);
+        }
+    }
+    break;
+
+    case State::Lose:
+    {
+        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 5, false);
+
+        pos.y += 0.3f * RUN_SPEED_PPS * ElapsedTime * (1.0f - (sprite_index * 2));
+
+        if (pos.y > Ground_Y_Min)
+        {
+            if (X_Direction == false) // 왼쪽을 보고 있다면, 오른쪽으로 날아가기
+            {
+                pos.x += RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+            else // 오른쪽을 보고 있다면, 왼쪽으로 날아가기
+            {
+                pos.x -= RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+        }
+        else
+            pos.y = Ground_Y_Min;
+
+        if (sprite_index == 4)
+            sprite_index = 3;
+    }
+    break;
 
     default:
         break;
@@ -1780,6 +1860,43 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
     }
     break;
 
+    case State::Win: // 0 ~ 16
+    {
+        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 16);
+
+        if (pos.y > Ground_Y_Min)
+            pos.y += 1.2 * RUN_SPEED_PPS * ElapsedTime * -2.0f;
+        else if (pos.y <= Ground_Y_Min)
+        {
+            pos.y = float(Ground_Y_Min);
+        }
+    }
+    break;
+
+    case State::Lose:
+    {
+        sprite_index = Get_Sprite_Index(ElapsedTime * 6.0f, 5, false);
+
+        pos.y += 0.3f * RUN_SPEED_PPS * ElapsedTime * (1.0f - (sprite_index * 2));
+
+        if (pos.y > Ground_Y_Min)
+        {
+            if (X_Direction == false) // 왼쪽을 보고 있다면, 오른쪽으로 날아가기
+            {
+                pos.x += RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+            else // 오른쪽을 보고 있다면, 왼쪽으로 날아가기
+            {
+                pos.x -= RUN_SPEED_PPS * 0.5f * ElapsedTime;
+            }
+        }
+        else
+            pos.y = Ground_Y_Min;
+
+        if (sprite_index == 4)
+            sprite_index = 3;
+    }
+    break;
 
     default:
         break;
@@ -1959,8 +2076,8 @@ void Player::update(float Elapsed_time)
             sp_elapsed_time = 0.0f;
             sp += SP_RESTORE_DEGREE;
         }
-
         state_machine->Set_SP(sp);
+
         state_machine->update(Elapsed_time);
         synchronize_state_machine();
     }
