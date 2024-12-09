@@ -19,6 +19,7 @@ from multi_player_render import (SASUKE_MULTI, NARUTO_MULTI, ITACHI_MULTI, Idle,
 from multi_skill_render import SkillObject
 import time  # 시간 측정을 위해 추가
 from server_connect import server_ip
+import multi_char_select_mode
 
 TEST = True
 LOCAL = False
@@ -237,25 +238,41 @@ def init():
         data += packet
     unpacked_data = struct.unpack(game_data_format, data)
 
-    if unpacked_data[5] == 1:
+    if multi_char_select_mode.p1_choose_result() == 1:
         p1 = NARUTO_MULTI(1)
-    elif unpacked_data[5] == 2:
+    elif multi_char_select_mode.p1_choose_result() == 2:
         p1 = SASUKE_MULTI(1)
-    elif unpacked_data[5] == 3:
+    elif multi_char_select_mode.p1_choose_result() == 3:
         p1 = ITACHI_MULTI(1)
     game_world.add_object(p1, 1)
 
-    if unpacked_data[12]:
-        if unpacked_data[12] == 1:
-            p2 = NARUTO_MULTI(2)
-        elif unpacked_data[12] == 2:
-            p2 = SASUKE_MULTI(2)
-        elif unpacked_data[12] == 3:
-            p2 = ITACHI_MULTI(2)
-        game_world.add_object(p2, 1)
-    else:
-        p2 = ITACHI_MULTI(2)
-        game_world.add_object(p2, 1)
+    if multi_char_select_mode.p2_choose_result() == 1:
+        p2 = NARUTO_MULTI(1)
+    elif multi_char_select_mode.p2_choose_result() == 2:
+        p2 = SASUKE_MULTI(1)
+    elif multi_char_select_mode.p2_choose_result() == 3:
+        p2 = ITACHI_MULTI(1)
+    game_world.add_object(p2, 1)
+
+    # if unpacked_data[5] == 1:
+    #     p1 = NARUTO_MULTI(1)
+    # elif unpacked_data[5] == 2:
+    #     p1 = SASUKE_MULTI(1)
+    # elif unpacked_data[5] == 3:
+    #     p1 = ITACHI_MULTI(1)
+    # game_world.add_object(p1, 1)
+    #
+    # if unpacked_data[12]:
+    #     if unpacked_data[12] == 1:
+    #         p2 = NARUTO_MULTI(2)
+    #     elif unpacked_data[12] == 2:
+    #         p2 = SASUKE_MULTI(2)
+    #     elif unpacked_data[12] == 3:
+    #         p2 = ITACHI_MULTI(2)
+    #     game_world.add_object(p2, 1)
+    # else:
+    #     p2 = ITACHI_MULTI(2)
+    #     game_world.add_object(p2, 1)
 
     p1_mug = p1.char_name
     p2_mug = p2.char_name
