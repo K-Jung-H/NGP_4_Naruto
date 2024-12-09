@@ -13,6 +13,7 @@ class Map:
         self.round3map = load_image('resource/round3.png')
         self.cw = get_canvas_width()
         self.ch = get_canvas_height()
+        self.window_left, self.window_bottom = 0, 0
         if mode_choose_mode.mode_choose_result() == '1p':
             if play_mode.round_num == 1:
                 self.w = self.madahashimap.w

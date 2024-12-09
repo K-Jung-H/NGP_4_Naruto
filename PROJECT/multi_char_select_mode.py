@@ -20,18 +20,12 @@ def handle_char_select_data(data):
     # 플레이어 1과 2의 상태 확인
     p1_ready = data[7]
     p2_ready = data[15]
-    print(p1_ready, p2_ready)
+
     p1_choose = data[5]
     p2_choose = data[13]
 
     p1_name = data[0]
     p2_name = data[8]
-    # print(p1_name, p2_name)
-
-    # 캐릭터 선택 상태 출력
-    # print(f"Player 1 Ready: {p1_ready}, Selected Character: {p1_selected_char}")
-    # print(f"Player 2 Ready: {p2_ready}, Selected Character: {p2_selected_char}")
-
 
 def init():
     global image1, naruto, sasuke, itachi
@@ -132,23 +126,26 @@ def handle_events():
             # game_framework.enemy_player_name = clean_name(p2_name)
             # print(game_framework.my_player_name, game_framework.enemy_player_name)
             # 필요에 따라 추가 로직 작성
-            if p1_ready and p2_ready:
-                print("Both players are ready! Starting the game...")
-                if clean_name(p1_name) == game_framework.my_player_name:
-                    game_framework.my_player_num = 1
-                    game_framework.enemy_player_name = clean_name(p2_name)
-                elif clean_name(p2_name) == game_framework.my_player_name:
-                    game_framework.my_player_num = 2
-                    game_framework.enemy_player_name = clean_name(p1_name)
-                print('내 플레이어 번호 : ', game_framework.my_player_num)
-                print('내 이름 : ', game_framework.my_player_name)
-                print('적 이름 : ', game_framework.enemy_player_name)
-                game_framework.change_mode(multi_mode)
+            # if p1_ready and p2_ready:
+            #     print("Both players are ready! Starting the game...")
+            # if clean_name(p1_name) == game_framework.my_player_name and p2_ready:
+            #     game_framework.my_player_num = 1
+            #     game_framework.enemy_player_name = clean_name(p2_name)
+            #     game_framework.change_mode(multi_mode)
+            # elif clean_name(p2_name) == game_framework.my_player_name and p1_ready:
+            #     game_framework.my_player_num = 2
+            #     game_framework.enemy_player_name = clean_name(p1_name)
+            #     game_framework.change_mode(multi_mode)
+            # print('내 플레이어 번호 : ', game_framework.my_player_num)
+            # print('내 이름 : ', game_framework.my_player_name)
+            # print('적 이름 : ', game_framework.enemy_player_name)
+            # game_framework.change_mode(multi_mode)
             # if p1_choose != p2_choose:
             #     game_framework.change_mode(play_mode)
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()
+            pass
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
 
@@ -230,7 +227,7 @@ def draw_text(text, x, y, size):
 def draw_centered_text(text, center_x, y, font_size):
     """중앙 정렬된 텍스트를 렌더링."""
     text_width = len(text) * font_size * 0.5  # 문자열의 너비 계산
-    print(len(text))
+    # print(len(text))
     start_x = center_x - (text_width // 2)  # 중앙 정렬 좌표
     draw_text(text, start_x, y, font_size)
 
@@ -254,6 +251,15 @@ def update():
     if get_time() - dup_wait_time > 1:
         dup_on = False
 
+    if p1_ready and p2_ready:
+        print("Both players are ready! Starting the game...")
+        if clean_name(p1_name) == game_framework.my_player_name:
+            game_framework.my_player_num = 1
+            game_framework.enemy_player_name = clean_name(p2_name)
+        elif clean_name(p2_name) == game_framework.my_player_name:
+            game_framework.my_player_num = 2
+            game_framework.enemy_player_name = clean_name(p1_name)
+        game_framework.change_mode(multi_mode)
 
 def p1_choose_result():
     global p1_choose
