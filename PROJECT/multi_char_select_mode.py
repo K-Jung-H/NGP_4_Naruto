@@ -42,6 +42,7 @@ def init():
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up
     global duplicate, dup_on, dup_wait_time, dir_image, mode_choose
     global naruto_back, sasuke_back, itachi_back, naruto_logo, sasuke_logo, itachi_logo, ready_logo
+    global p1_name, p2_name
     image1 = load_image('resource/title_main.png')
     naruto = load_image('resource/naruto_idle.png')
     sasuke = load_image('resource/sasuke_idle.png')
@@ -85,6 +86,19 @@ def init():
     # receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
     # receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
     # receiver_thread.start()
+
+    data = b""
+    while len(data) < game_framework.data_size:
+        # print(data_size)
+        packet = game_framework.network_client.client_socket.recv(game_framework.data_size - len(data))
+        if not packet:
+            print("연결이 종료되었습니다.")
+            return None
+        data += packet
+    unpacked_data = struct.unpack(game_framework.game_data_format, data)
+    p1_name = unpacked_data[0]
+    p2_name = unpacked_data[8]
+
     game_framework.start_key_listener()
     # 이름 업데이트를 위한 센드
     game_framework.send_key_info('z', 1, game_framework.my_player_name)
