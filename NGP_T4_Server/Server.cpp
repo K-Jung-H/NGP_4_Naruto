@@ -54,26 +54,20 @@ void Server::Remove_Client_Socket(int playerNum)
 	}
 }
 
-void Server::Add_P1(Object* p_ptr, int select_character)
+void Server::Add_P1(Player* p_ptr)
 {
-	p1_ptr = static_cast<Player*>(p_ptr);
+	p1_ptr = p_ptr;
 	
 	char player_id[32] = "Server_P1";
 	std::memcpy(p1_ptr->player_ID, player_id, sizeof(player_id));
-
-	p1_ptr->Set_Character(select_character, this);
-
-	server_mode = Server_Mode::Character_Select;
 }
 
-void Server::Add_P2(Object* p_ptr, int select_character) 
+void Server::Add_P2(Player* p_ptr)
 {
-	p2_ptr = static_cast<Player*>(p_ptr);
+	p2_ptr = p_ptr;
 
 	char player_id[32] = "Server_P2";
 	std::memcpy(p2_ptr->player_ID, player_id, sizeof(player_id));
-
-	p2_ptr->Set_Character(select_character, this);
 }
 
 void Server::Add_Skill_Object(Object* skill_ptr)
@@ -90,7 +84,13 @@ void Server::Add_Skill_Object(Object* skill_ptr)
 void Server::Update_Character_Select(float elapsed_time)
 {
 	// 선택정보 업데이트
-
+	if(p1_ptr != NULL && p2_ptr != NULL)
+		if (p1_ptr->game_ready && p2_ptr->game_ready)
+		{
+			p1_ptr->Set_Character(this);
+			p2_ptr->Set_Character(this);
+			server_mode = Server_Mode::Game_Play;
+		}
 
 }
 
@@ -274,25 +274,27 @@ void Server::Select_Mode_Decoding(std::pair<int, Key_Info>* key_info)
 	case 'A':
 		if (key_value.key_action == 1)
 			key = EVENT_MOVE_LEFT_KEY_DOWN;
-		else
-			key = EVENT_MOVE_LEFT_KEY_UP;
 		break;
 
 	case 'd':
 	case 'D':
 		if (key_value.key_action == 1)
 			key = EVENT_MOVE_RIGHT_KEY_DOWN;
-		else
-			key = EVENT_MOVE_RIGHT_KEY_UP;
 		break;
+
+	case 32:
+		if (key_value.key_action == 1)
+			key = EVENT_PLAYER_SELECT_CHARACTER;
+		break;
+
 	default:
 		break;
 	}
 
 	if (std::memcmp(key_value.player_ID, "None", 4) == 0)
 	{
-		if (p1_ptr != NULL)	p1_ptr->key_update(key);
-		if (p2_ptr != NULL)	p2_ptr->key_update(key);
+		if (p1_ptr != NULL)	p1_ptr->key_update(key, Server_Mode::Character_Select);
+		if (p2_ptr != NULL)	p2_ptr->key_update(key, Server_Mode::Character_Select);
 	}
 	else
 	{
@@ -301,7 +303,7 @@ void Server::Select_Mode_Decoding(std::pair<int, Key_Info>* key_info)
 			if (std::memcmp(key_value.player_ID, "None", 4) != 0)
 			{
 				std::memcpy(p1_ptr->player_ID, key_value.player_ID, sizeof(key_value.player_ID));
-				p1_ptr->key_update(key);
+				p1_ptr->key_update(key, Server_Mode::Character_Select);
 			}
 
 		// None이 아니고 이름이 들어있다면 이름 저장 + 캐릭터 선택
@@ -309,7 +311,7 @@ void Server::Select_Mode_Decoding(std::pair<int, Key_Info>* key_info)
 			if (std::memcmp(key_value.player_ID, "None", 4) != 0)
 			{
 				std::memcpy(p2_ptr->player_ID, key_value.player_ID, sizeof(key_value.player_ID));
-				p2_ptr->key_update(key);
+				p2_ptr->key_update(key, Server_Mode::Character_Select);
 			}
 	}
 }
@@ -396,16 +398,16 @@ void Server::Game_Mode_Decoding(std::pair<int, Key_Info>* key_info)
 	// "None"이 들어오면 아무 입력 없는 업데이트
 	if (std::memcmp(key_value.player_ID, "None", 4) == 0)
 	{
-		if (p1_ptr != NULL)	p1_ptr->key_update(key);
-		if (p2_ptr != NULL)	p2_ptr->key_update(key);
+		if (p1_ptr != NULL)	p1_ptr->key_update(key, Server_Mode::Game_Play);
+		if (p2_ptr != NULL)	p2_ptr->key_update(key, Server_Mode::Game_Play);
 	}
 	else
 	{
 		// P1의 입력이라면 복사
 		if (p1_ptr != NULL && std::memcmp(key_value.player_ID, p1_ptr->player_ID, 32) == 0)
-			p1_ptr->key_update(key);
+			p1_ptr->key_update(key, Server_Mode::Game_Play);
 		else if (p2_ptr != NULL && std::memcmp(key_value.player_ID, p2_ptr->player_ID, 32) == 0)
-			p2_ptr->key_update(key);
+			p2_ptr->key_update(key, Server_Mode::Game_Play);
 	}
 }
 
@@ -430,7 +432,7 @@ Game_Data* Server::Encoding()
 			temp_info.player_state = temp_player->state;
 			temp_info.sprite_index = temp_player->sprite_index;
 			temp_info.X_Direction = temp_player->X_Direction;
-
+			temp_info.player_ready = temp_player->game_ready;
 		}
 		sending_data->players[i] = temp_info;
 	}
@@ -549,13 +551,11 @@ Player* Server::Get_Player(int Client)
 	if (Client == 1)
 	{
 		if (p1_ptr != NULL)
-			if (p1_ptr->Get_StateMachine() != NULL)
 				return p1_ptr;
 	}
 	else if (Client == 2)
 	{
 		if (p2_ptr != NULL)
-			if (p2_ptr->Get_StateMachine() != NULL)
 				return p2_ptr;
 	}
 	

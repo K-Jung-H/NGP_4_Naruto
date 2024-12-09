@@ -1915,15 +1915,13 @@ BoundingBox* Itachi_StateMachine::Get_Normal_Attack_BoundingBox()
 
 //========================================================
 
-void Player::Set_Character(int select_character, Server* server_ptr)
+void Player::Set_Character(Server* server_ptr)
 {
-    selected_character_type = select_character;
-
-    if (select_character == CHARACTER_NARUTO)
+    if (selected_character_type == CHARACTER_NARUTO)
         state_machine = new Naruto_StateMachine();
-    else if (select_character == CHARACTER_SASUKE)
+    else if (selected_character_type == CHARACTER_SASUKE)
         state_machine = new Sasuke_StateMachine();
-    else if (select_character == CHARACTER_ITACHI)
+    else if (selected_character_type == CHARACTER_ITACHI)
         state_machine = new Itachi_StateMachine();
 
     if (state_machine != NULL)
@@ -1961,9 +1959,25 @@ void Player::update(float Elapsed_time)
     }
 }
 
-void Player::key_update(int key_event)
+void Player::key_update(int key_event, Server_Mode mode)
 {
-    state_machine->handleEvent(key_event);
+    if (mode == Server_Mode::Character_Select)
+    {
+        if (key_event == EVENT_MOVE_RIGHT_KEY_DOWN && selected_character_type < 3)
+            selected_character_type += 1;
+        else if (key_event == EVENT_MOVE_LEFT_KEY_DOWN && selected_character_type > 1)
+            selected_character_type -= 1;
+        else if (key_event == EVENT_PLAYER_SELECT_CHARACTER)
+        {
+            if ((1 <= selected_character_type && selected_character_type <= 3))
+                game_ready = true;
+        }
+    }
+    if (mode == Server_Mode::Game_Play)
+    {
+        if (state_machine != NULL)
+            state_machine->handleEvent(key_event);
+    }
 }
 
 void Player::Print_info()

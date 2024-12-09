@@ -183,6 +183,7 @@ private:
 public:
 	Server() 
 	{ 
+		server_mode = Server_Mode::Character_Select;
 		InitializeCriticalSection(&cs_key_queue); 
 		Stage_Attack_Object_List.fill(nullptr);
 	}
@@ -194,8 +195,8 @@ public:
 	bool Add_Client_Socket(SOCKET clientSocket, int playerNum);
 	void Remove_Client_Socket(int playerNum);
 
-	void Add_P1(Object* p_ptr, int n);
-	void Add_P2(Object* p_ptr, int n);
+	void Add_P1(Player* p_ptr);
+	void Add_P2(Player* p_ptr);
 
 	void Add_Skill_Object(Object* skill_ptr);
 
@@ -216,6 +217,6 @@ public:
 	Player* Get_Player(int Client);
 	void Remove_Player(int Client);
 
-
+	Server_Mode Get_Server_Mode() { return server_mode; };
 };
 
