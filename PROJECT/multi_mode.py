@@ -112,7 +112,8 @@ def handle_multi_play_data(unpacked_data):
     p1.y = unpacked_data[2]
     p1.dir = unpacked_data[3]
     p1_state = unpacked_data[4]
-    p1.cur_state = state_mapping.get(p1_state, Idle)  # 기본값은 Idle로 설정
+
+    # p1.cur_state = state_mapping.get(p1_state, Idle)  # 기본값은 Idle로 설정
     p1.frame = unpacked_data[6]
 
     # 추가 상태 데이터가 있을 경우 처리
@@ -120,18 +121,22 @@ def handle_multi_play_data(unpacked_data):
         for key, value in extra_state_data[p1_state].items():
             setattr(p1, key, value)
 
+    p1.change_state(state_mapping.get(p1_state, Idle), None)
+
     # 플레이어 2가 활성화된 경우 업데이트
     if unpacked_data[8]:  # p2가 활성화된 경우
         p2.x = unpacked_data[9]
         p2.y = unpacked_data[10]
         p2.dir = unpacked_data[11]
         p2_state = unpacked_data[12]
-        p2.cur_state = state_mapping.get(p2_state, Idle)
+        # p2.cur_state = state_mapping.get(p2_state, Idle)
         p2.frame = unpacked_data[14]
 
         if p2_state in extra_state_data:
             for key, value in extra_state_data[p2_state].items():
                 setattr(p2, key, value)
+
+        p2.change_state(state_mapping.get(p2_state, Idle), None)
 
     # 공격 데이터를 처리
     attacks = [
@@ -174,7 +179,7 @@ def init():
     global game_data
     global skills
     global health_bar, health_hp, naruto_mug, sasuke_mug, itachi_mug, chakra_image, chakra_frame
-    global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp, p1_mug, p2_mug, receiver_thread
+    global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp, p1_mug, p2_mug, receiver_thread, p_bgm
     global p1_name, p2_name
 
     health_bar = load_image('resource/health_bar.png')
@@ -192,6 +197,10 @@ def init():
 
     map = Map()
     game_world.add_object(map, 1)
+
+    p_bgm = load_music('sound/playsound.mp3')
+    p_bgm.set_volume(8)
+    p_bgm.repeat_play()
 
     # if TEST:
     global network_client

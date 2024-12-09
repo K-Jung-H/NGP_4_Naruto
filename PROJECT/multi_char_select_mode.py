@@ -133,6 +133,7 @@ def handle_events():
             game_framework.my_player_num = 1
             game_framework.enemy_player_name = clean_name(p2_name)
             print(game_framework.my_player_name, game_framework.enemy_player_name)
+
             game_framework.change_mode(multi_mode)
             # if p1_choose != p2_choose:
             #     game_framework.change_mode(play_mode)
