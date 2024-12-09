@@ -56,6 +56,8 @@
 #define EVENT_SKILL_TELEPORT_KEY_DOWN 17
 #define EVENT_SKILL_TELEPORT_KEY_UP 18
 
+#define EVENT_PLAYER_SELECT_CHARACTER 19
+
 #define LEFT false
 #define RIGHT true
 
@@ -88,7 +90,9 @@
 #define STATE_ATTACK_JUMP 15
 #define STATE_TELEPORT 16
 
-#define Ground_Y 120
+
+#define Ground_Y_Min 120
+#define Ground_Y_Max 718
 #define Ground_X_Min 0
 #define Ground_X_Max 1623
 
@@ -121,7 +125,6 @@ struct Player_Info
 	int player_state = 0;
 	int selected_character = 0;
 	int sprite_index = 0;
-	//Player_Info() : player_ID("Unknown_Player"), pos(), X_Direction(false), player_state(0), selected_character(0), sprite_index(0) {}
 	bool player_ready = false;
 	Player_Info() : player_ID("Unknown_Player"), pos(), X_Direction(false), player_state(0), selected_character(0), sprite_index(0), player_ready(false) {}
 };

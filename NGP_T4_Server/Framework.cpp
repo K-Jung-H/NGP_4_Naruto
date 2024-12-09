@@ -152,7 +152,8 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
         // 플레이어가 하나라도 연결되면 서버 업데이트
         if (server_program.Get_Player(1) == NULL && server_program.Get_Player(2) == NULL)
         {
-            // 연결된 플레이어가 없으면 업데이트 안 함
+            // 연결된 플레이어가 없으면 타이머 대기
+            server_program.Wait();
             continue;
         }
 
@@ -162,9 +163,13 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
         // 큐에 저장된 키 입력이 없다면
         if (server_program.Get_Key_Input_Buffer_size() == 0)
         {
-            keyInfo.first = 1;
+            // 이름이 None 인 플레이어의 키입력을 받는 것으로 동작
+            std::strncpy(keyInfo.second.player_ID, "None", sizeof(keyInfo.second.player_ID) - 1);
+            keyInfo.second.player_ID[sizeof(keyInfo.second.player_ID) - 1] = '\0';
             keyInfo.second.key_action = 1;
             keyInfo.second.key_name = 0;
+
+            keyInfo.first = 1;
             server_program.Decoding(&keyInfo);
 
             keyInfo.first = 2;
@@ -183,12 +188,14 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
         // float로 경과 시간 받기
         float ElapsedTime = server_program.Get_ElapsedTime();
 
-        // 캐릭터선택 모드 업데이트
+        if (server_program.Get_Server_Mode() == Server_Mode::Character_Select)    // 캐릭터선택 모드 업데이트
+            server_program.Update_Character_Select(ElapsedTime);
+        else if (server_program.Get_Server_Mode() == Server_Mode::Game_Play)     // 게임 실행 모드 업데이트
+        {
+            server_program.Update_Game_World(ElapsedTime);
+            server_program.Update_Collision(ElapsedTime);
+        }
 
-
-        // 게임 실행 모드 업데이트
-        server_program.Update_Game_World(ElapsedTime);
-        server_program.Update_Collision(ElapsedTime);
         Game_Data* sending_data = server_program.Encoding();
         server_program.Broadcast_GameData_All(sending_data);
 
@@ -233,18 +240,20 @@ DWORD WINAPI ProcessClient(LPVOID arg)
     server_program.Add_Client_Socket(client_sock, Client_N);
     std::cout << Client_N << "P 클라이언트 연결됨: IP 주소=" << addr << ", 포트 번호=" << ntohs(clientaddr.sin_port) << "\r\n";
 
-    Object* player = new Player();
+    Player* player = new Player();
 
     if (Client_N == 1)
-        server_program.Add_P1(player, P1_CHARACTER);
+        server_program.Add_P1(player);
     else if (Client_N == 2)
-        server_program.Add_P2(player, P2_CHARACTER);
+        server_program.Add_P2(player);
 
 #ifdef Sever_Debug_Mode
-    if (Client_N = 1 && server_program.Get_Player(2) == NULL)
+    if (Client_N == 1 && server_program.Get_Player(2) == NULL)
     {
-        Object* dummy_player = new Player();
-        server_program.Add_P2(dummy_player, DUMMY_CHARACTER);
+        Player* dummy_player = new Player();
+        server_program.Add_P2(dummy_player);
+        dummy_player->game_ready = true;
+        dummy_player->selected_character_type = DUMMY_CHARACTER;
     }
 #endif
 
@@ -268,7 +277,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
         else if (retval > 0)
         {
             // 전달받은 Key_Info 정보 출력
-            std::cout << "Player: " << Client_N 
+            std::cout << "Player: " << keyInfo.player_ID 
                 << ", Received KeyCode: " << keyInfo.key_name 
                 << ", ActionType: " << (keyInfo.key_action == 1 ? "Down" : (keyInfo.key_action == 2 ? "Up" : "Unknown")) 
                 << "\r\n";
@@ -285,6 +294,10 @@ DWORD WINAPI ProcessClient(LPVOID arg)
 
     server_program.Remove_Player(Client_N);
     server_program.Remove_Client_Socket(Client_N);
+
+#ifdef Sever_Debug_Mode
+    server_program.Remove_Player(2);
+#endif
 
     // 동적 할당된 메모리 해제
     delete clientInfo;
