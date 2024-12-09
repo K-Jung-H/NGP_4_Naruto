@@ -90,7 +90,7 @@ public:
 		currentState = State::Idle;
 		sprite_index = 0;
 		pos.x = 500;
-		pos.y = Ground_Y;
+		pos.y = Ground_Y_Min;
 	}
 
 	void start();
@@ -105,7 +105,7 @@ public:
 	Position Get_Pos() { return pos; };
 	int  Get_State();
 	void Set_Draw_Direction();
-
+	void Stage_Area_Check();
 	int Get_SP() { return sp; };
 	void Set_SP(int player_sp) { sp = player_sp; };
 
@@ -132,7 +132,7 @@ public:
 
 		sprite_index = 0;
 		pos.x = 500;
-		pos.y = Ground_Y;
+		pos.y = Ground_Y_Min;
 	}
 
 	void doAction(State state, float Elapsed_time) override;
@@ -151,7 +151,7 @@ public:
 		normal_attack_boundingbox = new BoundingBox();
 		sprite_index = 0;
 		pos.x = 500;
-		pos.y = Ground_Y;
+		pos.y = Ground_Y_Min;
 	}
 
 	void doAction(State state, float Elapsed_time) override;
@@ -169,7 +169,7 @@ public:
 		normal_attack_boundingbox = new BoundingBox();
 		sprite_index = 0;
 		pos.x = 500;
-		pos.y = Ground_Y;
+		pos.y = Ground_Y_Min;
 	}
 
 	void doAction(State state, float Elapsed_time) override;
@@ -269,7 +269,8 @@ public:
 	int attack_type = 0; // 1. 수리검, 2. 스킬 1, 3. 스킬 2
 
 	bool sticked = false;			// 이타치 - 아마테라스
-	
+	int fire_stack = 1;
+
 	Attack(const char player_id[32], int c_t, int a_t, Position p, bool x_dir)
 	{
 		std::copy(player_id, player_id + 32, player_ID);

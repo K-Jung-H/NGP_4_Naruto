@@ -144,7 +144,7 @@ DWORD WINAPI ServerMain(LPVOID arg)
 // 서버 업데이트 스레드
 DWORD WINAPI ServerUpdateThread(LPVOID arg)
 {
-    int target_fps =200;  // 목표 FPS 설정 (60FPS)
+    int target_fps =100;  // 목표 FPS 설정 (60FPS)
     server_program.Set_FrameRate(target_fps);  // 서버 타이머 시작
     
     while (true)
@@ -188,14 +188,14 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
         // float로 경과 시간 받기
         float ElapsedTime = server_program.Get_ElapsedTime();
 
-
-        if(server_program.Get_Server_Mode() ==Server_Mode::Character_Select)    // 캐릭터선택 모드 업데이트
+        if (server_program.Get_Server_Mode() == Server_Mode::Character_Select)    // 캐릭터선택 모드 업데이트
             server_program.Update_Character_Select(ElapsedTime);
-        else if(server_program.Get_Server_Mode() == Server_Mode::Game_Play)     // 게임 실행 모드 업데이트
+        else if (server_program.Get_Server_Mode() == Server_Mode::Game_Play)     // 게임 실행 모드 업데이트
         {
-        server_program.Update_Game_World(ElapsedTime);
-        server_program.Update_Collision(ElapsedTime);
+            server_program.Update_Game_World(ElapsedTime);
+            server_program.Update_Collision(ElapsedTime);
         }
+
         Game_Data* sending_data = server_program.Encoding();
         server_program.Broadcast_GameData_All(sending_data);
 
@@ -248,7 +248,7 @@ DWORD WINAPI ProcessClient(LPVOID arg)
         server_program.Add_P2(player);
 
 #ifdef Sever_Debug_Mode
-    if (Client_N = 1 && server_program.Get_Player(2) == NULL)
+    if (Client_N == 1 && server_program.Get_Player(2) == NULL)
     {
         Player* dummy_player = new Player();
         server_program.Add_P2(dummy_player);

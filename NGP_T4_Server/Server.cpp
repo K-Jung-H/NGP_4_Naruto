@@ -39,7 +39,6 @@ bool Server::Add_Client_Socket(SOCKET clientSocket, int playerNum)
 	return false; 
 }
 
-
 void Server::Remove_Client_Socket(int playerNum) 
 {
 	if (playerNum == 1)
@@ -98,7 +97,7 @@ void Server::Update_Game_World(float elapsed_time)
 {
 	// 시간 업데이트
 	game_time += elapsed_time;
-
+	// std::cout << game_time << "\n";
 	// 플레이어 업데이트
 	if (p1_ptr) 
 		p1_ptr->update(elapsed_time);
@@ -160,18 +159,33 @@ void Server::Update_Collision(float Elapsed_time)
 		bool is_hurt = p1_box->intersects(p2_normal_attack_box);
 		if (is_hurt)
 		{
-			p1_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
-			p1_ptr->hp -= Normal_Damage;
+			if (p2_ptr->Get_StateMachine()->combo_stack <= 3)
+			{
+				p1_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
+				p1_ptr->hp -= Normal_Damage;
+			}
+			else
+			{
+				p1_ptr->Get_StateMachine()->changeState(State::Hit_Hard, EVENT_NONE);
+				p1_ptr->hp -= Normal_Damage * 2;
+			}			
 		}
 	}
-
 	if (p2_box != NULL && p1_normal_attack_box != NULL)
 	{
 		bool is_hurt = p2_box->intersects(p1_normal_attack_box);
 		if (is_hurt)
 		{
-			p2_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
-			p2_ptr->hp -= Normal_Damage;
+			if (p1_ptr->Get_StateMachine()->combo_stack <= 3)
+			{
+				p2_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
+				p2_ptr->hp -= Normal_Damage;
+			}
+			else
+			{
+				p2_ptr->Get_StateMachine()->changeState(State::Hit_Hard, EVENT_NONE);
+				p2_ptr->hp -= Normal_Damage * 2;
+			}
 		}
 	}
 
@@ -190,7 +204,7 @@ void Server::Update_Collision(float Elapsed_time)
 					bool is_hurt = p1_box->intersects(attack_obj_box);
 
 					if (is_hurt && attack_ptr->Has_Target()) // 타겟이 있는 공격 객체 == 아마테라스					
-						p1_ptr->hp -= DOT_Damage * Elapsed_time;
+						p1_ptr->hp -= attack_ptr->fire_stack * DOT_Damage * Elapsed_time;
 					else if (is_hurt && attack_ptr->attack_type == 1) // 수리검
 					{
 						p1_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE); 
@@ -218,7 +232,7 @@ void Server::Update_Collision(float Elapsed_time)
 					bool is_hurt = p2_box->intersects(attack_obj_box);
 
 					if (is_hurt && attack_ptr->Has_Target()) // 타겟이 있는 공격 객체 == 아마테라스					
-						p2_ptr->hp -= DOT_Damage * Elapsed_time;
+						p2_ptr->hp -= attack_ptr->fire_stack * DOT_Damage * Elapsed_time;
 					else if (is_hurt && attack_ptr->attack_type == 1) // 수리검
 					{
 						p2_ptr->Get_StateMachine()->changeState(State::Hit_Easy, EVENT_NONE);
@@ -238,6 +252,39 @@ void Server::Update_Collision(float Elapsed_time)
 
 						p2_ptr->Get_StateMachine()->changeState(State::Hit_Hard, EVENT_NONE);
 						p2_ptr->hp -= Skill_Damage;
+					}
+				}
+			}
+		}
+	}
+
+	// 아마테라스 겹치는 경우 객체 처리
+	for (int i = 0; i < Stage_Attack_Object_List.size(); ++i)
+	{
+		Attack* attack_ptr_1 = Stage_Attack_Object_List[i];
+		if (attack_ptr_1 == NULL)
+			continue;
+		BoundingBox* attack_obj_1_box = attack_ptr_1->Get_Attack_BoundingBox();
+		std::string_view attack_ID_1(attack_ptr_1->player_ID, std::strlen(attack_ptr_1->player_ID));
+
+		// 두 번째 객체
+		for (int j = i + 1; j < Stage_Attack_Object_List.size(); ++j)
+		{
+			Attack* attack_ptr_2 = Stage_Attack_Object_List[j];
+			if (attack_ptr_2 == NULL)
+				continue;
+
+			BoundingBox* attack_obj_2_box = attack_ptr_2->Get_Attack_BoundingBox();
+			std::string_view attack_ID_2(attack_ptr_2->player_ID, std::strlen(attack_ptr_2->player_ID));
+
+			if (attack_ID_1 == attack_ID_2)  // 같은 플레이어의 공격인 경우
+			{
+				if (attack_obj_1_box->intersects(attack_obj_2_box))  // 충돌 검사
+				{
+					if (attack_ptr_1->Has_Target() && attack_ptr_2->Has_Target()) // 둘 다 아마테라스라면
+					{
+						attack_ptr_1->fire_stack += 1;  // 공격 스택 증가
+						attack_ptr_2->life = false;    // 겹쳐진 객체는 제거
 					}
 				}
 			}

@@ -330,6 +330,7 @@ void StateMachine::enterState(State state, int key_event)
 
     case State::Teleport:
         teleport_able = false;
+        attack_action = true;
         break;
 
     case State::Hit_Easy:
@@ -495,6 +496,11 @@ void StateMachine::Set_Draw_Direction()
 
     return;
 }
+void StateMachine::Stage_Area_Check()
+{
+    pos.x = std::clamp(pos.x, float(Ground_X_Min), float(Ground_X_Max));
+    pos.y = std::clamp(pos.y, float(Ground_Y_Min), float(Ground_Y_Max));
+}
 //========================================================
 void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 {
@@ -540,12 +546,12 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
             }
         }
 
-        if (pos.y > Ground_Y)
+        if (pos.y > Ground_Y_Min)
             is_air = true;
-        else if (pos.y <= Ground_Y)
+        else if (pos.y <= Ground_Y_Min)
         {
             is_air = false;
-            pos.y = float(Ground_Y);
+            pos.y = float(Ground_Y_Min);
             sprite_index = 0;
         }
     
@@ -768,7 +774,7 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
 
         pos.y +=  0.3f * RUN_SPEED_PPS * ElapsedTime * (1.0f - (sprite_index * 2));
 
-        if (pos.y > Ground_Y)
+        if (pos.y > Ground_Y_Min)
         {
             if (X_Direction == false) // 왼쪽을 보고 있다면, 오른쪽으로 날아가기
             {
@@ -780,7 +786,7 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
             }
         }
         else
-            pos.y = Ground_Y;
+            pos.y = Ground_Y_Min;
            
 
         if (sprite_index == 4)
@@ -812,7 +818,7 @@ void Naruto_StateMachine::doAction(State state, float ElapsedTime)
             attack_after_time += ElapsedTime;
     }
 
-
+    Stage_Area_Check();
     Set_Draw_Direction();
 }
 
@@ -976,12 +982,12 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
             }
         }
 
-        if (pos.y > Ground_Y)
+        if (pos.y > Ground_Y_Min)
             is_air = true;
-        else if (pos.y <= Ground_Y)
+        else if (pos.y <= Ground_Y_Min)
         {
             is_air = false;
-            pos.y = float(Ground_Y);
+            pos.y = float(Ground_Y_Min);
             sprite_index = 0;
         }
 
@@ -1262,7 +1268,7 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
 
         pos.y += 0.3f * RUN_SPEED_PPS * ElapsedTime * (1.0f - (sprite_index * 2));
 
-        if (pos.y > Ground_Y)
+        if (pos.y > Ground_Y_Min)
         {
             if (X_Direction == false) // 왼쪽을 보고 있다면, 오른쪽으로 날아가기
             {
@@ -1274,7 +1280,7 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
             }
         }
         else
-            pos.y = Ground_Y;
+            pos.y = Ground_Y_Min;
 
         if (sprite_index == 4)
         {
@@ -1305,6 +1311,7 @@ void Sasuke_StateMachine::doAction(State state, float ElapsedTime)
             attack_after_time += ElapsedTime;
     }
 
+    Stage_Area_Check();
     Set_Draw_Direction();
 }
 BoundingBox* Sasuke_StateMachine::Get_Player_BoundingBox()
@@ -1467,12 +1474,12 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
             }
         }
 
-        if (pos.y > Ground_Y)
+        if (pos.y > Ground_Y_Min)
             is_air = true;
-        else if (pos.y <= Ground_Y)
+        else if (pos.y <= Ground_Y_Min)
         {
             is_air = false;
-            pos.y = float(Ground_Y);
+            pos.y = float(Ground_Y_Min);
             sprite_index = 0;
         }
 
@@ -1696,7 +1703,7 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
             skill_2_spawn_pos.x = pos.x + (X_Direction * 2 - 1) * 180.0f;
             skill_2_spawn_pos.y = pos.y;
 
-            Object* skill_2_obj = new Attack(player_ID, CHARACTER_SASUKE, ATTACK_TYPE_SKILL_1, skill_2_spawn_pos, X_Direction);
+            Object* skill_2_obj = new Attack(player_ID, CHARACTER_ITACHI, ATTACK_TYPE_SKILL_1, skill_2_spawn_pos, X_Direction);
             server_ptr->Add_Skill_Object(skill_2_obj);
             skill_2_triggered = true;
         }
@@ -1750,7 +1757,7 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
 
         pos.y += 0.3f * RUN_SPEED_PPS * ElapsedTime * (1.0f - (sprite_index * 2));
 
-        if (pos.y > Ground_Y)
+        if (pos.y > Ground_Y_Min)
         {
             if (X_Direction == false) // 왼쪽을 보고 있다면, 오른쪽으로 날아가기
             {
@@ -1762,7 +1769,7 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
             }
         }
         else
-            pos.y = Ground_Y;
+            pos.y = Ground_Y_Min;
 
         if (sprite_index == 4)
         {
@@ -1792,7 +1799,7 @@ void Itachi_StateMachine::doAction(State state, float ElapsedTime)
             attack_after_time += ElapsedTime;
     }
 
-
+    Stage_Area_Check();
     Set_Draw_Direction();
 }
 BoundingBox* Itachi_StateMachine::Get_Player_BoundingBox()
