@@ -52,6 +52,11 @@ class Map:
                                          self.w - self.cw - 1)
                 self.window_bottom = clamp(0, int(multi_mode.p2.y) - self.ch // 2,
                                            self.h - self.ch - 1)
+            else:
+                self.window_left = clamp(0, int(multi_mode.p1.x) - self.cw // 2,
+                                         self.w - self.cw - 1)
+                self.window_bottom = clamp(0, int(multi_mode.p1.y) - self.ch // 2,
+                                           self.h - self.ch - 1)
 
     def draw(self):
         if mode_choose_mode.mode_choose_result() == '1p':
