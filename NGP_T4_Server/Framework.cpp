@@ -7,7 +7,7 @@
 #define SERVERPORT 9000
 
 
-// #define Sever_Debug_Mode
+//#define Sever_Debug_Mode
 
 #define P1_CHARACTER CHARACTER_SASUKE
 #define P2_CHARACTER CHARACTER_ITACHI
@@ -153,10 +153,11 @@ DWORD WINAPI ServerUpdateThread(LPVOID arg)
         if (server_program.Get_Player(1) == NULL && server_program.Get_Player(2) == NULL)
         {
             // 연결된 플레이어가 없으면 타이머 대기
+            server_program.Set_Server_Mode(Server_Mode::Character_Select);
             server_program.Wait();
+
             continue;
         }
-
         // 큐에 저장된 키 입력 처리
         std::pair<int, Key_Info> keyInfo;
 

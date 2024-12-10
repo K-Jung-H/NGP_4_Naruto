@@ -221,9 +221,14 @@ public:
 	StateMachine* Get_StateMachine() { return state_machine; };
 	void  update(float Elapsed_time) override;
 	void key_update(int key_event, Server_Mode mode);
+	void key_update_Select_Mode(int key_event);
+	void key_update_Game_Play(int key_event);
+
 	void synchronize_state_machine();
 
-	void Print_info();
+	void Print_info(Server_Mode server_mode);
+	void Print_Select_Mode_info();
+	void Print_Game_Play_info();
 	BoundingBox* Get_Player_BoundingBox() 
 	{
 		BoundingBox* ptr = NULL;

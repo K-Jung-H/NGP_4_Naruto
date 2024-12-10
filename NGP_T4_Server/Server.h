@@ -120,5 +120,6 @@ public:
 	void Remove_Player(int Client);
 
 	Server_Mode Get_Server_Mode() { return server_mode; };
+	void Set_Server_Mode(Server_Mode mode) { server_mode = mode; };
 };
 
