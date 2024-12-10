@@ -7,7 +7,7 @@
 #define SERVERPORT 9000
 
 
-// #define Sever_Debug_Mode
+//#define Sever_Debug_Mode
 
 #define P1_CHARACTER CHARACTER_SASUKE
 #define P2_CHARACTER CHARACTER_ITACHI

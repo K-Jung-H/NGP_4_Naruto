@@ -91,6 +91,7 @@ void Server::Update_Character_Select(float elapsed_time)
 			server_mode = Server_Mode::Game_Play;
 		}
 
+
 }
 
 void Server::Update_Game_World(float elapsed_time)
@@ -120,6 +121,22 @@ void Server::Update_Game_World(float elapsed_time)
 		}
 	}
 
+	if (p1_ptr == NULL || p2_ptr == NULL)
+	{
+		server_mode = Server_Mode::Character_Select;
+
+		if (p1_ptr != NULL)
+		{
+			delete p1_ptr;
+			p1_ptr = new Player();
+		}
+
+		if (p2_ptr != NULL)
+		{
+			delete p2_ptr;
+			p2_ptr = new Player();
+		}
+	}
 }
 
 void Server::Update_Collision(float Elapsed_time)
@@ -258,18 +275,18 @@ void Server::Update_Collision(float Elapsed_time)
 		}
 	}
 
-	if (p1_ptr->hp < 0.0f)
+	if (p1_ptr->hp <= 0.0f)
 	{
-		if(p1_ptr->Get_StateMachine()->Get_State() != 13)
+		if(p1_ptr != NULL && p1_ptr->Get_StateMachine()->Get_State() != 13)
 			p1_ptr->Get_StateMachine()->changeState(State::Lose, EVENT_NONE);
-		if (p2_ptr->Get_StateMachine()->Get_State() != 12)
+		if (p2_ptr != NULL && p2_ptr->Get_StateMachine()->Get_State() != 12)
 			p2_ptr->Get_StateMachine()->changeState(State::Win, EVENT_NONE);
 	}
-	else if(p2_ptr->hp < 0.0f)
+	else if(p2_ptr->hp <= 0.0f)
 	{
-		if (p1_ptr->Get_StateMachine()->Get_State() != 12)
+		if (p1_ptr != NULL && p1_ptr->Get_StateMachine()->Get_State() != 12)
 			p1_ptr->Get_StateMachine()->changeState(State::Win, EVENT_NONE);
-		if (p2_ptr->Get_StateMachine()->Get_State() != 13)
+		if (p2_ptr != NULL && p2_ptr->Get_StateMachine()->Get_State() != 13)
 			p2_ptr->Get_StateMachine()->changeState(State::Lose, EVENT_NONE);
 	}
 
@@ -577,12 +594,12 @@ void Server::Broadcast_GameData_All(Game_Data* data)
 			if (p1_ptr)
 			{
 				std::cout << p1_ptr->player_ID << " - ";
-				p1_ptr->Print_info();
+				p1_ptr->Print_info(server_mode);
 			}
 			if (p2_ptr)
 			{
 				std::cout << p2_ptr->player_ID << " - ";
-				p2_ptr->Print_info();
+				p2_ptr->Print_info(server_mode);
 			}
 
 			// 공격 객체 정보 출력
