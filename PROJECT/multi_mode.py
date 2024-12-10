@@ -113,7 +113,8 @@ def handle_multi_play_data(unpacked_data):
     global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time, winner_num, go_result
 
     if not unpacked_data[7] or not unpacked_data[15]:
-        game_framework.change_mode(multi_char_select_mode)
+        # game_framework.change_mode(multi_char_select_mode)
+        game_framework.change_mode(title_mode)
 
     # 플레이어 1 업데이트
     p1.x = unpacked_data[1]
@@ -447,8 +448,7 @@ def draw():
     draw_text(p2_name, 10, 480, 20)
     # print(p1_name, p2_name)
 
-    if p1.hp == 0 or p2.hp == 0:
-
+    if p1_hp <= 0 or p2_hp <= 0:
         ko.clip_composite_draw(0, 0, 473, 228, 0, '', 600, 300, 473, 228)
     update_canvas()
 

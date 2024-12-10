@@ -15,8 +15,6 @@ character_count = 3
 p1_ready = False
 p2_ready = False
 
-image1 = None
-
 def handle_char_select_data(data):
     global p1_choose, p2_choose, p1_ready, p2_ready, p1_name, p2_name
     # 플레이어 1과 2의 상태 확인
