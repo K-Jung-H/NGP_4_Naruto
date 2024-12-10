@@ -60,6 +60,7 @@ class SkillObject:
             22: 5,  # 사스케, 이타치 화둔
             23: 6,  # 사스케 치도리
             31: 4,
+            32: 5,
             33: 7,  # 이타치 아마테라스
             34: 7  # 이타치 아마테라스
         }
@@ -133,6 +134,13 @@ class SkillObject:
         elif self.skill_type == 31:  # 사스케, 이타치 수리검
             sprite_list[0].clip_composite_draw(int(self.sprite_index) * 44, 0, 44, 35, 0, '', self.sx,
                                                self.sy, 44 * 1.5, 35 * 1.5)
+        elif self.skill_type == 32:  # 사스케, 이타치 화둔
+            if self.dir:
+                sprite_list[0].clip_composite_draw(int(self.sprite_index) * 97, 0, 97, 80, 0, '',
+                                                       self.sx, self.sy + 90, 325, 241)
+            else:
+                sprite_list[0].clip_composite_draw(int(self.sprite_index) * 97, 0, 97, 80, 0, 'h',
+                                                       self.sx, self.sy + 90, 325, 241)
         elif self.skill_type == 33:  # 이타치 아마테라스 추적
             if self.dir:
                 sprite_list[0].clip_composite_draw(int(self.sprite_index) * 122, 0, 122, 56, 0, '',

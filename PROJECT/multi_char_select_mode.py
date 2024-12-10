@@ -12,110 +12,22 @@ from network_client import NetworkClient
 
 character_count = 3
 
-# 각 구조체의 포맷 정의
-position_format = "2f"  # Position 구조체
-player_info_format = "32s2f?3i?"  # Player_Info 구조체
-attack_info_format = "2f?2i"  # Attack_Info 구조체
-etc_info_format = "5i"  # ETC_Info 구조체
-game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_format}"  # Game_Data 전체 포맷
+p1_ready = False
+p2_ready = False
 
-# 데이터 크기 계산
-data_size = struct.calcsize(game_data_format)
+image1 = None
 
 def handle_char_select_data(data):
+    global p1_choose, p2_choose, p1_ready, p2_ready, p1_name, p2_name
     # 플레이어 1과 2의 상태 확인
     p1_ready = data[7]
     p2_ready = data[15]
-    p1_selected_char = data[5]
-    p2_selected_char = data[13]
 
-    # 캐릭터 선택 상태 출력
-    print(f"Player 1 Ready: {p1_ready}, Selected Character: {p1_selected_char}")
-    print(f"Player 2 Ready: {p2_ready}, Selected Character: {p2_selected_char}")
+    p1_choose = data[5]
+    p2_choose = data[13]
 
-    # 필요에 따라 추가 로직 작성
-    if p1_ready and p2_ready:
-        print("Both players are ready! Starting the game...")
-
-def receive_game_data(client_socket):
-    global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time
-
-    data = b""
-    while len(data) < data_size:
-        # print(data_size)
-        packet = client_socket.recv(data_size - len(data))
-        if not packet:
-            print("연결이 종료되었습니다.")
-            return None
-        data += packet
-
-    # # 클라이언트의 IPv4 주소 출력
-    # client_ipv4 = network_client.get_ipv4_address()
-    # if client_ipv4:
-    #     print(f"클라이언트의 IPv4 주소: {client_ipv4}")
-    # else:
-    #     print("IPv4 주소를 가져오는 데 실패했습니다.")
-
-    # data += client_socket.recv(data_size)
-    # 데이터 언패킹
-    unpacked_data = struct.unpack(game_data_format, data)
-    # print("Unpacked data:", unpacked_data)  # 디버깅용
-
-    # 플레이어 1 업데이트
-    # p1.x = unpacked_data[1]
-    # p1.y = unpacked_data[2]
-    # p1.dir = unpacked_data[3]
-    # p1_state = unpacked_data[4]
-    # p1.cur_state = state_mapping.get(p1_state, Idle)  # 기본값은 Idle로 설정
-    # p1.frame = unpacked_data[6]
-    #
-    # # extra_state_data에 여러개의 값이 있는 경우를 위한 for?
-    # if p1_state in extra_state_data:
-    #     for key, value in extra_state_data[p1_state].items():
-    #         setattr(p1, key, value)
-    #
-    # print(unpacked_data[0], unpacked_data[8])
-    print("p1 ready : ", unpacked_data[7], "p2 ready : ", unpacked_data[15])
-    # if unpacked_data[8]:
-    #     # 플레이어 2 업데이트
-    #     p2.x = unpacked_data[9]
-    #     p2.y = unpacked_data[10]
-    #     p2.dir = unpacked_data[11]
-    #     p2_state = unpacked_data[12]
-    #     p2.cur_state = state_mapping.get(p2_state, Idle)
-    #     p2.frame = unpacked_data[14]
-    #
-    #     if p2_state in extra_state_data:
-    #         for key, value in extra_state_data[p2_state].items():
-    #             setattr(p2, key, value)
-
-    print("p1 select char : ", unpacked_data[5], "p2 select char : ", unpacked_data[13])
-
-    p1_hp = unpacked_data[-5]
-    p1_chakra = unpacked_data[-4]
-    p2_hp = unpacked_data[-3]
-    p2_chakra = unpacked_data[-2]
-    game_time = unpacked_data[-1]
-
-def receive_game_data_loop(client_socket):
-    """서버로부터 데이터를 계속 수신하고 게임 객체를 업데이트."""
-    count = 0  # 수신 횟수 카운트
-    start_time = time.time()  # 시작 시간
-    while True:
-        # try:
-        #     receive_game_data(client_socket)
-        # except Exception as e:
-        #     print(f"데이터 수신 중 오류 발생: {e}")
-        #     break
-        receive_game_data(client_socket)
-        count += 1
-
-        # 1초가 지났는지 확인
-        elapsed_time = time.time() - start_time
-        if elapsed_time >= 1.0:
-            print(f"초당 수신 횟수: {count}")
-            count = 0  # 카운트 초기화
-            start_time = time.time()  # 시간 초기화
+    p1_name = data[0]
+    p2_name = data[8]
 
 def init():
     global image1, naruto, sasuke, itachi
@@ -123,7 +35,8 @@ def init():
     global vs, press_space
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up
     global duplicate, dup_on, dup_wait_time, dir_image, mode_choose
-    global naruto_back, sasuke_back, itachi_back, naruto_logo, sasuke_logo, itachi_logo
+    global naruto_back, sasuke_back, itachi_back, naruto_logo, sasuke_logo, itachi_logo, ready_logo
+    global p1_name, p2_name
     image1 = load_image('resource/title_main.png')
     naruto = load_image('resource/naruto_idle.png')
     sasuke = load_image('resource/sasuke_idle.png')
@@ -141,6 +54,7 @@ def init():
     naruto_logo = load_image('resource/naruto_logo1.png')
     sasuke_logo = load_image('resource/sasuke_logo.png')
     itachi_logo = load_image('resource/itachi_logo.png')
+    ready_logo = load_image('resource/ready.png')
     p1_x = 900
     p1_y = 360
     p2_x = 300
@@ -158,11 +72,30 @@ def init():
     # if network_client:
     #     print("소켓 재사용")
     game_framework.set_data_handler(handle_char_select_data)
+    # init_data = game_framework.receive_game_data(game_framework.network_client.client_socket)
+
+
     game_framework.reset_stop_event()
     game_framework.start_receiver_thread()
     # receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
     # receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
     # receiver_thread.start()
+
+    data = b""
+    while len(data) < game_framework.data_size:
+        # print(data_size)
+        packet = game_framework.network_client.client_socket.recv(game_framework.data_size - len(data))
+        if not packet:
+            print("연결이 종료되었습니다.")
+            return None
+        data += packet
+    unpacked_data = struct.unpack(game_framework.game_data_format, data)
+    p1_name = unpacked_data[0]
+    p2_name = unpacked_data[8]
+
+    game_framework.start_key_listener()
+    # 이름 업데이트를 위한 센드
+    game_framework.send_key_info('z', 1, game_framework.my_player_name)
     pass
     # else:
     #     print("전역소켓 설정안된듯")
@@ -170,6 +103,8 @@ def init():
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
     del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
+
+
 def handle_events():
     events = get_events()
     global p1_choose, p2_choose, character_count, dup_on, dup_wait_time
@@ -179,28 +114,40 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
-            game_framework.change_mode(multi_mode)
+            # 이게 원래 써야되는 코드
+            # print(game_framework.my_player_name, clean_name(p1_name))
+            # if clean_name(p1_name) == game_framework.my_player_name:
+            #     game_framework.my_player_num = 1
+            #     game_framework.enemy_player_name = clean_name(p2_name)
+            #     print(game_framework.my_player_name, p1_name)
+            # elif clean_name(p2_name) == game_framework.my_player_name:
+            #     game_framework.my_player_num = 2
+            #     game_framework.enemy_player_name = clean_name(p1_name)
+            # 테스트용
+            # game_framework.my_player_num = 1
+            # game_framework.enemy_player_name = clean_name(p2_name)
+            # print(game_framework.my_player_name, game_framework.enemy_player_name)
+            # 필요에 따라 추가 로직 작성
+            # if p1_ready and p2_ready:
+            #     print("Both players are ready! Starting the game...")
+            # if clean_name(p1_name) == game_framework.my_player_name and p2_ready:
+            #     game_framework.my_player_num = 1
+            #     game_framework.enemy_player_name = clean_name(p2_name)
+            #     game_framework.change_mode(multi_mode)
+            # elif clean_name(p2_name) == game_framework.my_player_name and p1_ready:
+            #     game_framework.my_player_num = 2
+            #     game_framework.enemy_player_name = clean_name(p1_name)
+            #     game_framework.change_mode(multi_mode)
+            # print('내 플레이어 번호 : ', game_framework.my_player_num)
+            # print('내 이름 : ', game_framework.my_player_name)
+            # print('적 이름 : ', game_framework.enemy_player_name)
+            # game_framework.change_mode(multi_mode)
             # if p1_choose != p2_choose:
             #     game_framework.change_mode(play_mode)
             # else:
             #     dup_on = True
             #     dup_wait_time = get_time()
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_a:
-            p2_choose = (p2_choose - 1) % character_count
-            if p2_choose == 0:
-                p2_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_d:
-            p2_choose = (p2_choose + 1) % character_count
-            if p2_choose == 0:
-                p2_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_LEFT:
-            p1_choose = (p1_choose - 1) % character_count
-            if p1_choose == 0:
-                p1_choose = character_count
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_RIGHT:
-            p1_choose = (p1_choose + 1) % character_count
-            if p1_choose == 0:
-                p1_choose = character_count
+            pass
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
 
@@ -214,8 +161,8 @@ def draw():
     dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, 'h', 300 - 160, 370, dir_image.w, dir_image.h)
     dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, '', 900 + 160, 370, dir_image.w, dir_image.h)
     dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, 'h', 900 - 160, 370, dir_image.w, dir_image.h)
-    p1_image.clip_composite_draw(0, 0, 64, 32, 0, '', 900, 520, 120, 60)
-    p2_image.clip_composite_draw(0, 0, 64, 32, 0, '', 300, 520, 120, 60)
+    # p1_image.clip_composite_draw(0, 0, 64, 32, 0, '', 900, 520, 120, 60)
+    # p2_image.clip_composite_draw(0, 0, 64, 32, 0, '', 300, 520, 120, 60)
 
     if p1_choose == 1:
         naruto_back.clip_composite_draw(0, 0, naruto_back.w, naruto_back.h, 0, 'h', 900, 330,
@@ -255,6 +202,11 @@ def draw():
         itachi_logo.clip_composite_draw(0, 0, itachi_logo.w, itachi_logo.h, 0, '', 300 - 60, 330 - 90,
                                         itachi_logo.w * 0.1, itachi_logo.h * 0.1)
 
+    if p1_ready:
+        ready_logo.clip_composite_draw(0, 0, ready_logo.w, ready_logo.h, 0, '', 900, 120, ready_logo.w*0.3, ready_logo.h*0.3)
+    if p2_ready:
+        ready_logo.clip_composite_draw(0, 0, ready_logo.w, ready_logo.h, 0, '', 300, 120, ready_logo.w*0.3, ready_logo.h*0.3)
+
     if space_up:
         press_space.clip_composite_draw(0, 0, press_space.w, press_space.h, 0, '', 600, 60 + space_frame,
                                         press_space.w * 0.15, press_space.h * 0.15)
@@ -262,9 +214,28 @@ def draw():
         press_space.clip_composite_draw(0, 0, press_space.w, press_space.h, 0, '', 600, 70 - space_frame,
                                         press_space.w * 0.15, press_space.h * 0.15)
 
+    draw_centered_text(clean_name(p1_name), 900, 520, 50)
+    draw_centered_text(clean_name(p2_name), 300, 520, 50)
+
     if dup_on:
         duplicate.clip_composite_draw(0, 0, 5906, 4135, 0, '', 600, 300, 600, 300)
     update_canvas()
+
+def draw_text(text, x, y, size):
+    # font = load_font("C:/Windows/Fonts/Arial.ttf", size)
+    font = load_font("resource/Arial.ttf", size)
+    font.draw(x, y, text, (0, 0, 0))  # 흰색 텍스트
+
+def draw_centered_text(text, center_x, y, font_size):
+    """중앙 정렬된 텍스트를 렌더링."""
+    text_width = len(text) * font_size * 0.5  # 문자열의 너비 계산
+    # print(len(text))
+    start_x = center_x - (text_width // 2)  # 중앙 정렬 좌표
+    draw_text(text, start_x, y, font_size)
+
+def clean_name(name_bytes):
+    """바이트 문자열에서 깨끗한 문자열 추출"""
+    return name_bytes.decode('utf-8', errors='ignore').rstrip('\x00').strip()
 
 def update():
     global naruto_frame, sasuke_frame, itachi_frame, space_frame, space_up, dup_wait_time, dup_on
@@ -282,6 +253,17 @@ def update():
     if get_time() - dup_wait_time > 1:
         dup_on = False
 
+    if p1_ready and p2_ready:
+        print("Both players are ready! Starting the game...")
+        if clean_name(p1_name) == game_framework.my_player_name:
+            game_framework.my_player_num = 1
+            game_framework.enemy_player_name = clean_name(p2_name)
+            game_framework.my_char_num = p1_choose
+        elif clean_name(p2_name) == game_framework.my_player_name:
+            game_framework.my_player_num = 2
+            game_framework.enemy_player_name = clean_name(p1_name)
+            game_framework.my_char_num = p2_choose
+        game_framework.change_mode(multi_mode)
 
 def p1_choose_result():
     global p1_choose

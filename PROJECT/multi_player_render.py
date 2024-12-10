@@ -187,6 +187,36 @@ class Attack:
 class Skill_motion:
     @staticmethod
     def enter(p1, e):
+        print("스킬 모션 상태")
+        global skill1_s, skill2_s, attack_s_1, skill1_s_e, skill2_s_e
+        if p1.char_name == 'naruto':
+            if p1.skill_num == 'skill1':
+                p1.attack_s_2.play()
+            elif p1.skill_num == 'skill2':
+                p1.skill_s.play()
+                p1.skill_s_e.play()
+            elif p1.skill_num == 'shuriken':
+                p1.attack_s_1.play()
+        elif p1.char_name == 'sasuke':
+            if p1.skill_num == 'skill1':
+                print("사스케 스킬1")
+                p1.skill1_s.play()
+                p1.skill1_s_e.play()
+            elif p1.skill_num == 'skill2':
+                print("사스케 스킬2")
+                p1.skill2_s.play()
+                p1.skill2_s_e.play()
+            elif p1.skill_num == 'shuriken':
+                p1.attack_s_1.play()
+        elif p1.char_name == 'itachi':
+            if p1.skill_num == 'skill1':
+                p1.skill1_s.play()
+                p1.skill1_s_e.play()
+            elif p1.skill_num == 'skill2':
+                p1.skill2_s.play()
+                # p1.skill2_s_e.play()
+            elif p1.skill_num == 'shuriken':
+                p1.attack_s_1.play()
         pass
     @staticmethod
     def exit(p1, e):
@@ -208,6 +238,8 @@ class Skill_motion:
                     p1.skill1.clip_composite_draw(int(p1.frame) * 193, 0, 193, 136, 0, 'h', p1.sx - 60, p1.sy + 70, 543,
                                                   382)
             elif p1.skill_num == 'skill2':
+                # p1.skill_s.play()
+                # p1.skill_s_e.play()
                 if p1.dir:
                     p1.skill2.clip_composite_draw(int(p1.frame) * 83, 0, 83, 50, 0, '', p1.sx + 20, p1.sy - 15, 233,
                                                   140)
@@ -283,6 +315,7 @@ class Skill_motion:
 class Easy_hit:
     @staticmethod
     def enter(p1, e):
+        p1.easy_hit_s.play()
         pass
 
     @staticmethod
@@ -315,6 +348,7 @@ class Easy_hit:
 class Hard_hit:
     @staticmethod
     def enter(p1, e):
+        p1.hard_hit_s.play()
         pass
 
     @staticmethod
@@ -613,6 +647,13 @@ class SASUKE_MULTI:
     def handle_collision(self, group, other):
         pass
 
+    def change_state(self, new_state, e):
+        if self.cur_state:  # 이전 상태가 있으면 exit 호출
+            self.cur_state.exit(self, e)
+        if self.cur_state != new_state:
+            self.cur_state = new_state  # 새로운 상태로 전환
+            self.cur_state.enter(self, e)  # 새로운 상태의 enter 호출
+
 class NARUTO_MULTI:
     global skill_num
     def __init__(self, p_num):
@@ -700,6 +741,13 @@ class NARUTO_MULTI:
 
     def handle_collision(self, group, other):
         pass
+
+    def change_state(self, new_state, e):
+        if self.cur_state:  # 이전 상태가 있으면 exit 호출
+            self.cur_state.exit(self, e)
+        if self.cur_state != new_state:
+            self.cur_state = new_state  # 새로운 상태로 전환
+            self.cur_state.enter(self, e)  # 새로운 상태의 enter 호출
 
 class ITACHI_MULTI:
     global skill_num
@@ -789,3 +837,10 @@ class ITACHI_MULTI:
 
     def handle_collision(self, group, other):
         pass
+
+    def change_state(self, new_state, e):
+        if self.cur_state:  # 이전 상태가 있으면 exit 호출
+            self.cur_state.exit(self, e)
+        if self.cur_state != new_state:
+            self.cur_state = new_state  # 새로운 상태로 전환
+            self.cur_state.enter(self, e)  # 새로운 상태의 enter 호출

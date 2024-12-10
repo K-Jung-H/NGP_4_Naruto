@@ -2,6 +2,7 @@ from pico2d import *
 import play_mode
 import mode_choose_mode
 import multi_mode
+import game_framework
 
 
 class Map:
@@ -12,6 +13,7 @@ class Map:
         self.round3map = load_image('resource/round3.png')
         self.cw = get_canvas_width()
         self.ch = get_canvas_height()
+        self.window_left, self.window_bottom = 0, 0
         if mode_choose_mode.mode_choose_result() == '1p':
             if play_mode.round_num == 1:
                 self.w = self.madahashimap.w
@@ -41,10 +43,21 @@ class Map:
             self.window_bottom = clamp(0, int((play_mode.p1.y + play_mode.p2.y) // 2) - self.ch // 2,
                                        self.h - self.ch - 1)
         elif mode_choose_mode.mode_choose_result() == 'multi':
-            self.window_left = clamp(0, int(multi_mode.p1.x) - self.cw // 2,
-                                     self.w - self.cw - 1)
-            self.window_bottom = clamp(0, int(multi_mode.p1.y) - self.ch // 2,
-                                       self.h - self.ch - 1)
+            if game_framework.my_player_num == 1:
+                self.window_left = clamp(0, int(multi_mode.p1.x) - self.cw // 2,
+                                         self.w - self.cw - 1)
+                self.window_bottom = clamp(0, int(multi_mode.p1.y) - self.ch // 2,
+                                           self.h - self.ch - 1)
+            elif game_framework.my_player_num == 2:
+                self.window_left = clamp(0, int(multi_mode.p2.x) - self.cw // 2,
+                                         self.w - self.cw - 1)
+                self.window_bottom = clamp(0, int(multi_mode.p2.y) - self.ch // 2,
+                                           self.h - self.ch - 1)
+            else:
+                self.window_left = clamp(0, int(multi_mode.p1.x) - self.cw // 2,
+                                         self.w - self.cw - 1)
+                self.window_bottom = clamp(0, int(multi_mode.p1.y) - self.ch // 2,
+                                           self.h - self.ch - 1)
 
     def draw(self):
         if mode_choose_mode.mode_choose_result() == '1p':
