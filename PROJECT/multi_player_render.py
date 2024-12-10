@@ -191,11 +191,10 @@ class Skill_motion:
         global skill1_s, skill2_s, attack_s_1, skill1_s_e, skill2_s_e
         if p1.char_name == 'naruto':
             if p1.skill_num == 'skill1':
-                p1.skill1_s.play()
-                # p1.skill1_s_e.play()
+                p1.attack_s_2.play()
             elif p1.skill_num == 'skill2':
-                p1.skill2_s.play()
-                # p1.skill2_s_e.play()
+                p1.skill_s.play()
+                p1.skill_s_e.play()
             elif p1.skill_num == 'shuriken':
                 p1.attack_s_1.play()
         elif p1.char_name == 'sasuke':
@@ -349,6 +348,7 @@ class Easy_hit:
 class Hard_hit:
     @staticmethod
     def enter(p1, e):
+        p1.hard_hit_s.play()
         pass
 
     @staticmethod
