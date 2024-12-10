@@ -37,9 +37,7 @@ def init():
         l_bgm.set_volume(18)
         l_bgm.repeat_play()
         im_win = False
-    # global network_client
-    # network_client = game_framework.get_socket()
-    # if network_client:
+    # if game_framework.get_socket():
     #     game_framework.network_client.disconnect()
     #     print("소켓 해제")
     #     game_framework.stop_receiver_thread()

@@ -65,18 +65,12 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
-            # if p1_choose != p2_choose:
             if mode_choose == '1p':
                 game_framework.change_mode(single_character_choice_mode)
             elif mode_choose == '2p':
                 game_framework.change_mode(charactor_choose_mode)
             elif mode_choose == 'multi':
-                # game_framework.change_mode(multi_mode)
-                # game_framework.change_mode(multi_room_select_mode)
                 game_framework.change_mode(server_connect)
-            # else:
-            #     dup_on = True
-            #     dup_wait_time = get_time()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_a:
             if mode_choose == '2p':
                 mode_choose = '1p'

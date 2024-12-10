@@ -1,21 +1,15 @@
 import struct
-import threading
-import time
 
 from pico2d import *
 import game_framework
-import play_mode
 import mode_choose_mode
 import title_mode
 import multi_mode
-from network_client import NetworkClient
 
 character_count = 3
 
 p1_ready = False
 p2_ready = False
-
-image1 = None
 
 def handle_char_select_data(data):
     global p1_choose, p2_choose, p1_ready, p2_ready, p1_name, p2_name
@@ -67,19 +61,10 @@ def init():
     dup_on = False
     dup_wait_time = 0
     mode_choose = mode_choose_mode.mode_choose_result()
-    # global network_client
-    # network_client = game_framework.get_socket()
-    # if network_client:
-    #     print("소켓 재사용")
     game_framework.set_data_handler(handle_char_select_data)
-    # init_data = game_framework.receive_game_data(game_framework.network_client.client_socket)
-
 
     game_framework.reset_stop_event()
     game_framework.start_receiver_thread()
-    # receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
-    # receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
-    # receiver_thread.start()
 
     data = b""
     while len(data) < game_framework.data_size:
@@ -101,8 +86,9 @@ def init():
     #     print("전역소켓 설정안된듯")
 
 def finish():
-    global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
-    del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
+    # global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
+    # del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
+    pass
 
 
 def handle_events():
@@ -114,39 +100,6 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
-            # 이게 원래 써야되는 코드
-            # print(game_framework.my_player_name, clean_name(p1_name))
-            # if clean_name(p1_name) == game_framework.my_player_name:
-            #     game_framework.my_player_num = 1
-            #     game_framework.enemy_player_name = clean_name(p2_name)
-            #     print(game_framework.my_player_name, p1_name)
-            # elif clean_name(p2_name) == game_framework.my_player_name:
-            #     game_framework.my_player_num = 2
-            #     game_framework.enemy_player_name = clean_name(p1_name)
-            # 테스트용
-            # game_framework.my_player_num = 1
-            # game_framework.enemy_player_name = clean_name(p2_name)
-            # print(game_framework.my_player_name, game_framework.enemy_player_name)
-            # 필요에 따라 추가 로직 작성
-            # if p1_ready and p2_ready:
-            #     print("Both players are ready! Starting the game...")
-            # if clean_name(p1_name) == game_framework.my_player_name and p2_ready:
-            #     game_framework.my_player_num = 1
-            #     game_framework.enemy_player_name = clean_name(p2_name)
-            #     game_framework.change_mode(multi_mode)
-            # elif clean_name(p2_name) == game_framework.my_player_name and p1_ready:
-            #     game_framework.my_player_num = 2
-            #     game_framework.enemy_player_name = clean_name(p1_name)
-            #     game_framework.change_mode(multi_mode)
-            # print('내 플레이어 번호 : ', game_framework.my_player_num)
-            # print('내 이름 : ', game_framework.my_player_name)
-            # print('적 이름 : ', game_framework.enemy_player_name)
-            # game_framework.change_mode(multi_mode)
-            # if p1_choose != p2_choose:
-            #     game_framework.change_mode(play_mode)
-            # else:
-            #     dup_on = True
-            #     dup_wait_time = get_time()
             pass
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)
@@ -161,8 +114,6 @@ def draw():
     dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, 'h', 300 - 160, 370, dir_image.w, dir_image.h)
     dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, '', 900 + 160, 370, dir_image.w, dir_image.h)
     dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, 'h', 900 - 160, 370, dir_image.w, dir_image.h)
-    # p1_image.clip_composite_draw(0, 0, 64, 32, 0, '', 900, 520, 120, 60)
-    # p2_image.clip_composite_draw(0, 0, 64, 32, 0, '', 300, 520, 120, 60)
 
     if p1_choose == 1:
         naruto_back.clip_composite_draw(0, 0, naruto_back.w, naruto_back.h, 0, 'h', 900, 330,
