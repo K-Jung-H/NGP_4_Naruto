@@ -15,6 +15,8 @@ character_count = 3
 p1_ready = False
 p2_ready = False
 
+image1 = None
+
 def handle_char_select_data(data):
     global p1_choose, p2_choose, p1_ready, p2_ready, p1_name, p2_name
     # 플레이어 1과 2의 상태 확인
@@ -256,9 +258,11 @@ def update():
         if clean_name(p1_name) == game_framework.my_player_name:
             game_framework.my_player_num = 1
             game_framework.enemy_player_name = clean_name(p2_name)
+            game_framework.my_char_num = p1_choose
         elif clean_name(p2_name) == game_framework.my_player_name:
             game_framework.my_player_num = 2
             game_framework.enemy_player_name = clean_name(p1_name)
+            game_framework.my_char_num = p2_choose
         game_framework.change_mode(multi_mode)
 
 def p1_choose_result():

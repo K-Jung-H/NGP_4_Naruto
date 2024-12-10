@@ -19,6 +19,7 @@ my_player_name = None
 enemy_player_name = None
 
 my_player_num = 0
+my_char_num = 0
 
 KEY_DOWN = 1
 KEY_UP = 2

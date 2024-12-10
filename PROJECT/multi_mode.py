@@ -8,6 +8,7 @@ import game_world
 import mode_choose_mode
 import keyboard
 
+import multi_result
 import title_mode
 
 from network_client import NetworkClient
@@ -104,9 +105,15 @@ extra_state_data = {
 p1_name = ''
 p2_name = ''
 
+go_result = False
+winner_num = 0
+
 def handle_multi_play_data(unpacked_data):
     """멀티플레이 모드에서 언패킹된 데이터 처리."""
-    global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time
+    global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time, winner_num, go_result
+
+    if not unpacked_data[7] or not unpacked_data[15]:
+        game_framework.change_mode(multi_char_select_mode)
 
     # 플레이어 1 업데이트
     p1.x = unpacked_data[1]
@@ -166,6 +173,17 @@ def handle_multi_play_data(unpacked_data):
     p2_chakra = unpacked_data[-2]
     game_time = unpacked_data[-1]
 
+    if not go_result:
+        print(p1_hp, p2_hp)
+        if p1_hp <= 0:
+            winner_num = 2
+            go_result = True
+            print(winner_num)
+        elif p2_hp <= 0:
+            winner_num = 1
+            go_result = True
+            print(winner_num)
+
     # # 디버깅 정보 출력
     # print(f"Player 1: HP={p1_hp}, Chakra={p1_chakra}")
     # print(f"Player 2: HP={p2_hp}, Chakra={p2_chakra}")
@@ -181,7 +199,7 @@ def init():
     global skills
     global health_bar, health_hp, naruto_mug, sasuke_mug, itachi_mug, chakra_image, chakra_frame
     global ko, fight, fight_frame, p1_chakra, p2_chakra, p1_hp, p2_hp, p1_mug, p2_mug, receiver_thread, p_bgm
-    global p1_name, p2_name
+    global p1_name, p2_name, result_timer, fo_result, winner_num
 
     health_bar = load_image('resource/health_bar.png')
     health_hp = load_image('resource/health_hp.png')
@@ -195,6 +213,9 @@ def init():
     fight_frame = 0
     p1_chakra, p2_chakra = 0, 0
     p1_hp, p2_hp = 0, 0
+    result_timer = 0
+    fo_result = False
+    winner_num = 0
 
     map = Map()
     game_world.add_object(map, 1)
@@ -441,9 +462,15 @@ def clean_name(name_bytes):
     return name_bytes.decode('utf-8', errors='ignore').rstrip('\x00').strip()
 
 def update():
-    global chakra_frame, fight_frame
+    global chakra_frame, fight_frame, go_result, result_timer
     game_world.update()
     chakra_frame = (chakra_frame + 4 * game_framework.frame_time) % 4
     if fight_frame <= 1500:
         fight_frame += game_framework.frame_time * 800
+
+    if go_result:
+        result_timer += game_framework.frame_time
+        if result_timer > 3:
+            go_result = False
+            game_framework.change_mode(multi_result)
     pass
