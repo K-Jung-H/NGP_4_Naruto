@@ -22,33 +22,6 @@ import time  # 시간 측정을 위해 추가
 from server_connect import server_ip
 import multi_char_select_mode
 
-TEST = True
-LOCAL = False
-
-# 서버 설정
-# if TEST:
-#     if LOCAL:
-#         SERVER_IP = '127.0.0.1'
-#     else:
-#         # SERVER_IP = '127.0.0.1'
-#         # SERVER_IP = '192.168.81.90'
-#         SERVER_IP = server_ip
-# else:
-#     SERVER_IP = "0"
-
-SERVER_PORT = 9000
-
-# 각 구조체의 포맷 정의
-position_format = "2f"  # Position 구조체
-player_info_format = "32s2f?3i?"  # Player_Info 구조체
-attack_info_format = "2f?2i"  # Attack_Info 구조체
-etc_info_format = "5i"  # ETC_Info 구조체
-game_data_format = f"{player_info_format * 2}{attack_info_format * 18}{etc_info_format}"  # Game_Data 전체 포맷
-
-# 데이터 크기 계산
-data_size = struct.calcsize(game_data_format)
-
-
 CHARACTER_NARUTO = 1
 CHARACTER_SASUKE = 2
 CHARACTER_ITACHI = 3
@@ -108,13 +81,18 @@ p2_name = ''
 go_result = False
 winner_num = 0
 
+p1_ready = True
+p2_ready = True
+
+p1_hp = 400
+p2_hp = 400
+
 def handle_multi_play_data(unpacked_data):
     """멀티플레이 모드에서 언패킹된 데이터 처리."""
-    global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time, winner_num, go_result
+    global p1_chakra, p2_chakra, p1_hp, p2_hp, game_time, winner_num, go_result, p1_ready, p2_ready
 
-    if not unpacked_data[7] or not unpacked_data[15]:
-        # game_framework.change_mode(multi_char_select_mode)
-        game_framework.change_mode(title_mode)
+    p1_ready = unpacked_data[7]
+    p2_ready = unpacked_data[15]
 
     # 플레이어 1 업데이트
     p1.x = unpacked_data[1]
@@ -174,16 +152,6 @@ def handle_multi_play_data(unpacked_data):
     p2_chakra = unpacked_data[-2]
     game_time = unpacked_data[-1]
 
-    if not go_result:
-        print(p1_hp, p2_hp)
-        if p1_hp <= 0:
-            winner_num = 2
-            go_result = True
-            print(winner_num)
-        elif p2_hp <= 0:
-            winner_num = 1
-            go_result = True
-            print(winner_num)
 
     # # 디버깅 정보 출력
     # print(f"Player 1: HP={p1_hp}, Chakra={p1_chakra}")
@@ -225,17 +193,6 @@ def init():
     p_bgm.set_volume(8)
     p_bgm.repeat_play()
 
-    # if TEST:
-    global network_client
-    network_client = game_framework.get_socket()
-    if network_client:
-        print("소켓 재사용")
-        pass
-    else:
-        # 네트워크 클라이언트 초기화 및 연결
-        # network_client = NetworkClient(SERVER_IP, SERVER_PORT)
-        # network_client.connect()
-        pass
 
     # 송수신 버퍼 크기 설정
     # new_buf_size = 512
@@ -247,18 +204,6 @@ def init():
     #
     # print(f"수신 버퍼 크기: {recv_buf_size} bytes")
     # print(f"송신 버퍼 크기: {send_buf_size} bytes")
-
-    # game_framework.set_socket(network_client)
-
-    data = b""
-    while len(data) < game_framework.data_size:
-        # print(data_size)
-        packet = game_framework.network_client.client_socket.recv(game_framework.data_size - len(data))
-        if not packet:
-            print("연결이 종료되었습니다.")
-            return None
-        data += packet
-    unpacked_data = struct.unpack(game_data_format, data)
 
     if multi_char_select_mode.p1_choose_result() == 1:
         p1 = NARUTO_MULTI(1)
@@ -276,26 +221,6 @@ def init():
         p2 = ITACHI_MULTI(1)
     game_world.add_object(p2, 1)
 
-    # if unpacked_data[5] == 1:
-    #     p1 = NARUTO_MULTI(1)
-    # elif unpacked_data[5] == 2:
-    #     p1 = SASUKE_MULTI(1)
-    # elif unpacked_data[5] == 3:
-    #     p1 = ITACHI_MULTI(1)
-    # game_world.add_object(p1, 1)
-    #
-    # if unpacked_data[12]:
-    #     if unpacked_data[12] == 1:
-    #         p2 = NARUTO_MULTI(2)
-    #     elif unpacked_data[12] == 2:
-    #         p2 = SASUKE_MULTI(2)
-    #     elif unpacked_data[12] == 3:
-    #         p2 = ITACHI_MULTI(2)
-    #     game_world.add_object(p2, 1)
-    # else:
-    #     p2 = ITACHI_MULTI(2)
-    #     game_world.add_object(p2, 1)
-
     p1_mug = p1.char_name
     p2_mug = p2.char_name
 
@@ -306,11 +231,6 @@ def init():
         skill.set_background(map)
 
     game_framework.set_data_handler(handle_multi_play_data)
-    # receiver_thread = threading.Thread(target=receive_game_data_loop, args=(network_client.client_socket,))
-    # receiver_thread.daemon = True  # 메인 프로그램 종료 시 함께 종료되도록 설정
-    # receiver_thread.start()
-    # receiver_thread = threading.Thread(target=Decoding, args=(network_client.client_socket,))
-    # receiver_thread.start()
 
     p1.x = 1200
     p1.dir = -1
@@ -324,25 +244,6 @@ def init():
     p2.set_background(map)
     # 맵 크기 확인
     print(map.w, map.h)
-    # else:
-    #     # p1 = NARUTO_MULTI(1)
-    #     # p1 = SASUKE_MULTI(1)
-    #     p1 = ITACHI_MULTI(1)
-    #     game_world.add_object(p1, 1)
-    #     # p2 = NARUTO_MULTI(2)
-    #     p2 = SASUKE_MULTI(2)
-    #     game_world.add_object(p2, 1)
-    #
-    #     p1.x = 1200
-    #     p1.dir = -1
-    #     p2.x = 400
-    #     p1.y, p2.y = 400, 400
-    #     p1.frame, p2.frame = 2, 2
-    #
-    #     p1.set_background(map)
-    #     p2.set_background(map)
-
-    # game_framework.start_key_listener()
     if game_framework.my_player_num == 1:
         p1_name = game_framework.my_player_name
         p2_name = game_framework.enemy_player_name
@@ -353,15 +254,6 @@ def init():
 
     pass
 def finish():
-    global network_client, receiver_thread
-    network_client = game_framework.get_socket()
-    if network_client:
-        # network_client.disconnect()
-        pass
-    if TEST:
-        # network_client.disconnect()
-        pass
-    # receiver_thread.join()
     game_world.remove_object(p1)
     game_world.remove_object(p2)
     game_world.remove_object(map)
@@ -388,15 +280,6 @@ def handle_events():
             # p2.x = 100
             pass
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_t):
-            # p1.hit_state = 'hard'
-            # p1.dir = 1
-            # p1.frame = 0
-            # p1.skill_num = 'skill1'
-            # (event.type, event.key) = (SDL_KEYDOWN, SDLK_LEFT)
-            # # p1의 상태를 변경하기 위해 handle_event에 e 전달
-            # p1.handle_event(event)
-            # p1.cur_state = Run
-            p1.cur_state = Jump
             pass
 
 def running():
@@ -462,7 +345,8 @@ def clean_name(name_bytes):
     return name_bytes.decode('utf-8', errors='ignore').rstrip('\x00').strip()
 
 def update():
-    global chakra_frame, fight_frame, go_result, result_timer
+    global chakra_frame, fight_frame, go_result, result_timer, p1_ready, p2_ready, p1_hp, p2_hp
+    global winner_num
     game_world.update()
     chakra_frame = (chakra_frame + 4 * game_framework.frame_time) % 4
     if fight_frame <= 1500:
@@ -473,4 +357,22 @@ def update():
         if result_timer > 3:
             go_result = False
             game_framework.change_mode(multi_result)
+
+    if not p1_ready or not p2_ready:
+        go_result = False
+        result_timer = 0
+        game_framework.change_mode(multi_char_select_mode)
+        # game_framework.change_mode(title_mode)
+
+
+    if not go_result:
+        print(p1_hp, p2_hp)
+        if p1_hp <= 0:
+            winner_num = 2
+            go_result = True
+            print(winner_num)
+        elif p2_hp <= 0:
+            winner_num = 1
+            go_result = True
+            print(winner_num)
     pass

@@ -9,7 +9,6 @@ from network_client import NetworkClient
 
 character_count = 3
 
-SERVER_IP = "127.0.0.1"
 # server_ip = "127.0.0.1"  # 사용자가 입력할 서버 IP
 server_ip = "192.168.81.15"  # 사용자가 입력할 서버 IP
 input_active = True  # 입력 중인지 여부
@@ -69,24 +68,7 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
-            # if p1_choose != p2_choose:
-            #     game_framework.change_mode(play_mode)
-            # else:
-            #     dup_on = True
-            #     dup_wait_time = get_time()
-            # game_framework.change_mode(multi_room_select_mode)
-            pass
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
-            game_framework.change_mode(title_mode)
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_RETURN:
-            # global network_client
-            # network_client = game_framework.get_socket()
             print("서버 커넥트 소켓 유무 테스트 : ", game_framework.get_socket())
-            # print("서버 커넥트 소켓 유무 테스트 : ", network_client)
-            # if network_client:
-            #     print("소켓 재사용 중")
-            #     game_framework.network_client = None
-            # else:
             network_client = NetworkClient(server_ip, SERVER_PORT)
             game_framework.set_socket(network_client)
             game_framework.network_client.connect()
@@ -96,6 +78,11 @@ def handle_events():
                 game_framework.change_mode(mode_choose_mode)
                 break
             game_framework.change_mode(multi_room_select_mode)
+            pass
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
+            game_framework.change_mode(title_mode)
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_RETURN:
+            pass
         elif event.type == SDL_KEYDOWN and event.key == SDLK_BACKSPACE:
             if len(server_ip) > 0:  # 문자열이 비어있지 않을 때만 삭제
                 server_ip = server_ip[:-1]
@@ -124,51 +111,6 @@ def running():
 def draw():
     clear_canvas()
     image1.clip_composite_draw(0, 0, 900, 507, 0, '', 600, 300, 1200, 600)
-    # vs.clip_composite_draw(0, 0, 2500, 2500, 0, '', 600, 300, 200, 200)
-    # dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, '', 300 + 160, 370, dir_image.w, dir_image.h)
-    # dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, 'h', 300 - 160, 370, dir_image.w, dir_image.h)
-    # dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, '', 900 + 160, 370, dir_image.w, dir_image.h)
-    # dir_image.clip_composite_draw(0, 0, dir_image.w, dir_image.h, 0, 'h', 900 - 160, 370, dir_image.w, dir_image.h)
-    # p1_image.clip_composite_draw(0, 0, 64, 32, 0, '', 900, 520, 120, 60)
-    # p2_image.clip_composite_draw(0, 0, 64, 32, 0, '', 300, 520, 120, 60)
-    #
-    # if p1_choose == 1:
-    #     naruto_back.clip_composite_draw(0, 0, naruto_back.w, naruto_back.h, 0, 'h', 900, 330,
-    #                                     naruto_back.w * 3.5, naruto_back.h * 3.5)
-    #     naruto.clip_composite_draw(int(naruto_frame)*32, 0, 32, 48, 0, 'h', p1_x, p1_y, 100, 150)
-    #     naruto_logo.clip_composite_draw(0, 0, naruto_logo.w, naruto_logo.h, 0, 'h', 900 + 70, 330 - 90,
-    #                                     naruto_logo.w * 0.1, naruto_logo.h * 0.1)
-    # elif p1_choose == 2:
-    #     sasuke_back.clip_composite_draw(0, 0, sasuke_back.w, sasuke_back.h, 0, 'h', 900, 330,
-    #                                     sasuke_back.w * 3.5, sasuke_back.h * 3.5)
-    #     sasuke.clip_composite_draw(int(sasuke_frame)*32, 0, 32, 64, 0, 'h', p1_x+10, p1_y, 100, 200)
-    #     sasuke_logo.clip_composite_draw(0, 0, sasuke_logo.w, sasuke_logo.h, 0, 'h', 900 + 70, 330 - 90,
-    #                                     sasuke_logo.w * 0.1, sasuke_logo.h * 0.1)
-    # elif p1_choose == 3:
-    #     itachi_back.clip_composite_draw(0, 0, itachi_back.w, itachi_back.h, 0, 'h', 900, 330,
-    #                                     itachi_back.w * 3.5, itachi_back.h * 3.5)
-    #     itachi.clip_composite_draw(int(itachi_frame)*32, 0, 32, 64, 0, 'h', p1_x, p1_y+15, 100, 200)
-    #     itachi_logo.clip_composite_draw(0, 0, itachi_logo.w, itachi_logo.h, 0, 'h', 900 + 60, 330 - 90,
-    #                                     itachi_logo.w * 0.1, itachi_logo.h * 0.1)
-    #
-    # if p2_choose == 1:
-    #     naruto_back.clip_composite_draw(0, 0, naruto_back.w, naruto_back.h, 0, '', 300, 330,
-    #                                     naruto_back.w * 3.5, naruto_back.h * 3.5)
-    #     naruto.clip_composite_draw(int(naruto_frame)*32, 0, 32, 48, 0, '', p2_x, p2_y, 100, 150)
-    #     naruto_logo.clip_composite_draw(0, 0, naruto_logo.w, naruto_logo.h, 0, '', 300 - 70, 330 - 90,
-    #                                     naruto_logo.w * 0.1, naruto_logo.h * 0.1)
-    # elif p2_choose == 2:
-    #     sasuke_back.clip_composite_draw(0, 0, sasuke_back.w, sasuke_back.h, 0, '', 300, 330,
-    #                                     sasuke_back.w * 3.5, sasuke_back.h * 3.5)
-    #     sasuke.clip_composite_draw(int(sasuke_frame)*32, 0, 32, 64, 0, '', p2_x-10, p2_y, 100, 200)
-    #     sasuke_logo.clip_composite_draw(0, 0, sasuke_logo.w, sasuke_logo.h, 0, '', 300 - 70, 330 - 90,
-    #                                     sasuke_logo.w * 0.1, sasuke_logo.h * 0.1)
-    # elif p2_choose == 3:
-    #     itachi_back.clip_composite_draw(0, 0, itachi_back.w, itachi_back.h, 0, '', 300, 330,
-    #                                     itachi_back.w * 3.5, itachi_back.h * 3.5)
-    #     itachi.clip_composite_draw(int(itachi_frame) * 32, 0, 32, 64, 0, '', p2_x, p2_y+15, 100, 200)
-    #     itachi_logo.clip_composite_draw(0, 0, itachi_logo.w, itachi_logo.h, 0, '', 300 - 60, 330 - 90,
-    #                                     itachi_logo.w * 0.1, itachi_logo.h * 0.1)
 
     draw_text(f"Server IP: {server_ip}", 200, 300, 50)
 
@@ -184,7 +126,6 @@ def draw():
     update_canvas()
 
 def draw_text(text, x, y, size):
-    # font = load_font("C:/Windows/Fonts/Arial.ttf", size)
     font = load_font("resource/Arial.ttf", size)
     font.draw(x, y, text, (0, 0, 0))  # 흰색 텍스트
 

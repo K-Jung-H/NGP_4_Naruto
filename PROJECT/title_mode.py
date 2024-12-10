@@ -7,6 +7,7 @@ import single_character_choice_mode
 import mode_choose_mode
 import multi_mode
 
+image1 = None
 
 def init():
     global image1, image2, naruto, sasuke, title_frame, sasuke_x, naruto_x
