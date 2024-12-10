@@ -126,7 +126,7 @@ struct Player_Info
 	int selected_character = 0;
 	int sprite_index = 0;
 	bool player_ready = false;
-	Player_Info() : player_ID("Unknown_Player"), pos(), X_Direction(false), player_state(0), selected_character(0), sprite_index(0), player_ready(false) {}
+	Player_Info() : player_ID("Waiting_Player"), pos(), X_Direction(false), player_state(0), selected_character(0), sprite_index(0), player_ready(false) {}
 };
 
 

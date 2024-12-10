@@ -57,7 +57,7 @@ void Server::Add_P1(Player* p_ptr)
 {
 	p1_ptr = p_ptr;
 	
-	char player_id[32] = "Server_P1";
+	char player_id[32] = "No Name";
 	std::memcpy(p1_ptr->player_ID, player_id, sizeof(player_id));
 }
 
@@ -65,7 +65,7 @@ void Server::Add_P2(Player* p_ptr)
 {
 	p2_ptr = p_ptr;
 
-	char player_id[32] = "Server_P2";
+	char player_id[32] = "No Name";
 	std::memcpy(p2_ptr->player_ID, player_id, sizeof(player_id));
 }
 
@@ -124,14 +124,12 @@ void Server::Update_Game_World(float elapsed_time)
 	if (p1_ptr == NULL || p2_ptr == NULL)
 	{
 		server_mode = Server_Mode::Character_Select;
-
 		if (p1_ptr != NULL)
 		{
 			delete p1_ptr;
 			p1_ptr = new Player();
 		}
-
-		if (p2_ptr != NULL)
+		else if (p2_ptr != NULL)
 		{
 			delete p2_ptr;
 			p2_ptr = new Player();
@@ -636,14 +634,13 @@ Player* Server::Get_Player(int Client)
 	if (Client == 1)
 	{
 		if (p1_ptr != NULL)
-				return p1_ptr;
+			return p1_ptr;
 	}
 	else if (Client == 2)
 	{
 		if (p2_ptr != NULL)
-				return p2_ptr;
+			return p2_ptr;
 	}
-	
 	return NULL;
 }
 

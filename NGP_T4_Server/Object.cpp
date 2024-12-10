@@ -377,6 +377,7 @@ void StateMachine::exitState(State state, int key_event)
     case State::Attack_Jump:
     case State::Attack_Run:
         attack_collision = false;
+        attack_action = false;
         break;
 
     case State::Attack_Skill_1:
@@ -2080,6 +2081,15 @@ void Player::update(float Elapsed_time)
         state_machine->Set_SP(sp);
 
         state_machine->update(Elapsed_time);
+
+        // 공중에서 공격 맞아서, IDLE 상태로 돌아온 경우, 내려오게 상태 전환
+        if (state_machine->Get_State() == STATE_IDLE && state_machine->pos.y > 120)
+        {
+            state_machine->changeState(State::Jump, EVENT_NONE);
+            state_machine->sprite_frame_value = 2.0f;
+            // state_machine->sprite_index = 2;
+            state_machine->Y_Direction = false;
+        }
         synchronize_state_machine();
     }
 }
@@ -2100,14 +2110,14 @@ void Player::key_update_Select_Mode(int key_event)
             selected_character_type += 1;
         else if (key_event == EVENT_MOVE_LEFT_KEY_DOWN)
             selected_character_type -= 1;
+
     }
 
     selected_character_type = (selected_character_type - 1 + 3) % 3 + 1;
-    
+ 
     if (key_event == EVENT_PLAYER_SELECT_CHARACTER)
     {
-        if ((1 <= selected_character_type && selected_character_type <= 3))
-            game_ready = true;
+        game_ready = !game_ready;
     }
 }
 void Player::key_update_Game_Play(int key_event)
