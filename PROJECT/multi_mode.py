@@ -364,7 +364,6 @@ def update():
         game_framework.change_mode(multi_char_select_mode)
         # game_framework.change_mode(title_mode)
 
-
     if not go_result:
         print(p1_hp, p2_hp)
         if p1_hp <= 0:
