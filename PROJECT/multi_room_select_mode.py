@@ -49,8 +49,9 @@ def init():
 def finish():
     global image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
     del image1, naruto, sasuke, itachi, p1_image, p2_image, character_back, vs, press_space, duplicate, dir_image
-    game_framework.my_player_name = name_made
-    print("내 이름", game_framework.my_player_name, " 로 설정")
+    # game_framework.my_player_name = name_made
+    # print("내 이름", game_framework.my_player_name, " 로 설정")
+
 def handle_events():
     events = get_events()
     global p1_choose, p2_choose, character_count, dup_on, dup_wait_time, name_made
@@ -60,11 +61,8 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
-            # if p1_choose != p2_choose:
-            #     game_framework.change_mode(play_mode)
-            # else:
-            #     dup_on = True
-            #     dup_wait_time = get_time()
+            game_framework.my_player_name = name_made
+            print("내 이름", game_framework.my_player_name, " 로 설정")
             game_framework.change_mode(multi_char_select_mode)
         elif event.type == SDL_KEYDOWN and event.key == SDLK_F1:
             game_framework.change_mode(title_mode)

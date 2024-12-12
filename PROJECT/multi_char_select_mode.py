@@ -22,6 +22,7 @@ def handle_char_select_data(data):
 
     p1_name = data[0]
     p2_name = data[8]
+    # print(clean_name(p1_name), clean_name(p2_name))
 
 def init():
     global image1, naruto, sasuke, itachi

@@ -365,13 +365,13 @@ def update():
         # game_framework.change_mode(title_mode)
 
     if not go_result:
-        print(p1_hp, p2_hp)
+        # print(p1_hp, p2_hp)
         if p1_hp <= 0:
             winner_num = 2
             go_result = True
-            print(winner_num)
+            # print(winner_num)
         elif p2_hp <= 0:
             winner_num = 1
             go_result = True
-            print(winner_num)
+            # print(winner_num)
     pass

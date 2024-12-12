@@ -7,6 +7,7 @@ class NetworkClient:
         # IPv6까지 쓰려면 AF_INET6 로 설정 아직은 테스트 단계니까 일단 이걸로
         # UDP로 설정하려면 SOCK_DGRAM 이걸로
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.is_connected = False
 
     def connect(self):
